@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Ranked Leaderboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for a more polished look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0a09; /* A deeper, richer black */
+            background-image: radial-gradient(circle at top, #1f2937, #0c0a09 80%);
+            min-height: 100vh;
+        }
+
+        /* Custom scrollbar for better aesthetics in dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* bg-gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* bg-gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* bg-gray-500 */
+        }
+
+        /* Style for the toggle switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981; /* emerald-500 */
+            transform: translateX(100%);
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10B981; /* emerald-500 */
+        }
+        
+        /* Animation for the LIVE status indicator */
+        @keyframes pulse-live {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 3px #ef4444, 0 0 5px #ef4444;
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 10px #ef4444, 0 0 15px #ef4444;
+            }
+        }
+        .animate-live-pulse {
+            animation: pulse-live 2.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-gray-300">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header Section -->
+        <div class="mb-6 pb-4 border-b border-gray-700/50">
+            <h1 class="text-2xl sm:text-3xl font-bold text-white">Live Ranked Leaderboard <span class="text-sm font-normal text-gray-400 align-top">Beta</span></h1>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
+            <!-- Search Input -->
+            <div class="relative w-full sm:w-auto sm:flex-grow max-w-xs">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </span>
+                <input type="text" id="searchInput" placeholder="Search players..." class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition">
+            </div>
+
+            <!-- Live Streamers Toggle -->
+            <div class="flex items-center space-x-3">
+                <span class="font-medium text-white">Live Streamers Only</span>
+                <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                    <input type="checkbox" name="toggle" id="liveOnlyToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-600 appearance-none cursor-pointer transition-transform duration-200 ease-in"/>
+                    <label for="liveOnlyToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Table Container -->
+        <div class="overflow-x-auto bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg shadow-2xl shadow-black/30">
+            <table class="w-full min-w-max text-sm text-left text-gray-400">
+                <thead class="text-xs text-gray-300 uppercase bg-gray-700/20">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Rank</th>
+                        <th scope="col" class="px-6 py-3">Player</th>
+                        <th scope="col" class="px-6 py-3">RP</th>
+                        <th scope="col" class="px-6 py-3">24h Change</th>
+                        <th scope="col" class="px-6 py-3">Level</th>
+                        <th scope="col" class="px-6 py-3">Status</th>
+                        <th scope="col" class="px-6 py-3">Stream</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- Initial loading message -->
+                    <tr>
+                        <td colspan="7" class="text-center py-10 text-gray-400">Loading players...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="no-results" class="hidden text-center py-10 text-gray-500">
+                No players found.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GLOBAL STATE ---
+        let allPlayers = []; // This will hold the master list of players from the backend.
+
+        // --- DOM ELEMENTS ---
+        const leaderboardBody = document.getElementById('leaderboard-body');
+        const searchInput = document.getElementById('searchInput');
+        const liveOnlyToggle = document.getElementById('liveOnlyToggle');
+        const noResultsDiv = document.getElementById('no-results');
+
+        // --- RENDER FUNCTIONS ---
+        
+        const getChangeHtml = (change) => {
+            if (change > 0) {
+                return `<span class="flex items-center text-green-400">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                            ${change.toLocaleString()}
+                        </span>`;
+            } else if (change < 0) {
+                return `<span class="flex items-center text-red-400">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            ${Math.abs(change).toLocaleString()}
+                        </span>`;
+            }
+            return `<span class="text-gray-500">${change}</span>`;
+        };
+
+        const getStatusHtml = (status) => {
+            switch (status) {
+                case 'Live':
+                    return `<span class="animate-live-pulse bg-red-600 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full shadow-lg shadow-red-500/50">LIVE</span>`;
+                case 'In-match':
+                    return `<span class="bg-purple-600 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full shadow-md shadow-purple-500/50">IN-MATCH</span>`;
+                default:
+                    return `<span class="text-gray-400">Offline</span>`;
+            }
+        };
+
+        const getStreamHtml = (stream, status) => {
+            if ((status === 'Live' || status === 'In-match') && stream) {
+                return `<div class="flex flex-col">
+                            <span class="font-semibold text-white">${stream.viewers.toLocaleString()} viewers</span>
+                            <span class="text-xs text-gray-400">${stream.game}</span>
+                        </div>`;
+            }
+            return `<span class="text-gray-600">-</span>`;
+        };
+        
+        const renderLeaderboard = (players) => {
+            leaderboardBody.innerHTML = ''; 
+
+            if (players.length === 0) {
+                noResultsDiv.classList.remove('hidden');
+            } else {
+                noResultsDiv.classList.add('hidden');
+            }
+
+            players.forEach(player => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors duration-200';
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-gray-200">#${player.rank}</td>
+                    <td class="px-6 py-4 font-bold text-white">${player.name}</td>
+                    <td class="px-6 py-4 font-semibold text-emerald-400">${player.rp.toLocaleString()}</td>
+                    <td class="px-6 py-4">${getChangeHtml(player.change)}</td>
+                    <td class="px-6 py-4">${player.level.toLocaleString()}</td>
+                    <td class="px-6 py-4">${getStatusHtml(player.status)}</td>
+                    <td class="px-6 py-4">${getStreamHtml(player.stream, player.status)}</td>
+                `;
+                leaderboardBody.appendChild(row);
+            });
+        };
+
+        // --- EVENT HANDLING ---
+        const applyFilters = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const liveOnly = liveOnlyToggle.checked;
+
+            let filteredPlayers = allPlayers;
+
+            if (liveOnly) {
+                filteredPlayers = filteredPlayers.filter(p => p.status === 'Live');
+            }
+
+            if (searchTerm) {
+                filteredPlayers = filteredPlayers.filter(p => p.name.toLowerCase().includes(searchTerm));
+            }
+
+            renderLeaderboard(filteredPlayers);
+        };
+
+        // --- DATA FETCHING & INITIALIZATION ---
+
+        /**
+         * Fetches player data from the backend and initializes the leaderboard.
+         */
+        async function initializeLeaderboard() {
+            // UPDATED: The URL now points to our own backend API within the Vercel project.
+            const backendUrl = '/api/players';
+            try {
+                const response = await fetch(backendUrl);
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.statusText}`);
+                }
+                const players = await response.json();
+                allPlayers = players; // Store the fetched players in our global state
+                renderLeaderboard(allPlayers); // Initial render with all players
+            } catch (error) {
+                console.error('Failed to fetch leaderboard data:', error);
+                // Display an error message to the user inside the table body
+                leaderboardBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-red-400">Failed to load leaderboard data. Please check the backend connection.</td></tr>`;
+            }
+        }
+
+        // Add event listeners
+        searchInput.addEventListener('input', applyFilters);
+        liveOnlyToggle.addEventListener('change', applyFilters);
+
+        // Initial data load when the window is ready
+        window.onload = () => {
+            initializeLeaderboard();
+        };
+    </script>
+
+</body>
+</html>
