@@ -7,11 +7,11 @@ import time
 import os
 
 # Fixed imports for Vercel/api structure:
-from routes.twitch_integration import (
+from scrapers.tracker_proxy import (
     get_twitch_live_status, extract_twitch_username,
     twitch_token_cache, twitch_live_cache
 )
-from routes.apex_scraper import load_twitch_overrides
+from scrapers.apex_scraper import load_twitch_overrides
 from cache_manager import leaderboard_cache
 
 leaderboard_bp = Blueprint('leaderboard', __name__)
