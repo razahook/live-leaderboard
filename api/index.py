@@ -12,14 +12,9 @@ from scrapers.tracker_proxy import tracker_proxy_bp
 # Import your database initializer from the api directory
 from user import init_app as init_db
 
-# This is the single Flask app Vercel will run
 app = Flask(__name__)
 CORS(app)
-
-# Initialize the database connection
 init_db(app)
-
-# Register all of your blueprints on this single app
 app.register_blueprint(user_bp)
 app.register_blueprint(apex_scraper_bp)
 app.register_blueprint(leaderboard_bp)
@@ -27,6 +22,4 @@ app.register_blueprint(twitch_bp)
 app.register_blueprint(twitch_override_bp)
 app.register_blueprint(tracker_proxy_bp)
 
-# This is what Vercel will call
-def handler(request):
-    return app(request.environ, lambda status, headers: None)
+# DO NOT define a handler function! Just expose the app variable.
