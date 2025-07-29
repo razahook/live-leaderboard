@@ -3,7 +3,7 @@ import sys
 from flask import Flask
 from flask_cors import CORS
 
-# Allows this file to find and import code from your 'src' folder
+# CORRECTED: This robustly adds the project root to the path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.routes.twitch_integration import twitch_bp
@@ -13,5 +13,5 @@ app = Flask(__name__)
 CORS(app)
 init_db(app)
 
-# Register the blueprint for Twitch integration
-app.register_blueprint(twitch_bp, url_prefix='/api')
+# CORRECTED: Removed the redundant url_prefix
+app.register_blueprint(twitch_bp)
