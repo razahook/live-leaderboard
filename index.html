@@ -506,7 +506,7 @@
             streamPreviewPlayer.innerHTML = ''; 
             new Twitch.Embed(streamPreviewPlayer, {
                 width: "100%", height: "100%", channel: twitchUser,
-                layout: "video", muted: true, autoplay: true, parent: ["localhost"] 
+                layout: "video", muted: true, autoplay: true, parent: ["localhost", "live-leaderboard-git-main-razahooks-projects.vercel.app"] 
             });
             streamPreview.style.opacity = '1';
             streamPreview.style.transform = 'scale(1)';
@@ -1111,7 +1111,7 @@
 
 
         async function initializeApp() {
-            // UPDATED: These URLs are now relative, pointing to your Vercel backend.
+            // CORRECTED: These URLs now match the Vercel file structure and Flask blueprint routes.
             const leaderboardUrl = `/api/leaderboard/leaderboard/PC`; 
             const predatorThresholdsUrl = `/api/apex_scraper/predator-points`; 
 
