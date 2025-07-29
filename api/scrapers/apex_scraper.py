@@ -6,7 +6,7 @@ import os
 import json
 
 # Correct import path for twitch_integration
-from routes.twitch_integration import get_twitch_live_status, extract_twitch_username, twitch_live_cache
+from scrapers.tracker_proxy import get_twitch_live_status, extract_twitch_username, twitch_live_cache
 
 # Import from cache_manager (no src)
 from cache_manager import leaderboard_cache
