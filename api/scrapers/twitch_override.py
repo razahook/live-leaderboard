@@ -1,11 +1,14 @@
-# src/routes/twitch_override.py
 from flask import Blueprint, jsonify, request
 import json
 import os
 
 twitch_override_bp = Blueprint('twitch_override', __name__)
 
-TWITCH_OVERRIDES_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'twitch_overrides.json')
+# Robust path: places twitch_overrides.json at the project root
+TWITCH_OVERRIDES_FILE = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    'twitch_overrides.json'
+)
 
 @twitch_override_bp.route('/twitch/override', methods=['POST'])
 def add_twitch_override():

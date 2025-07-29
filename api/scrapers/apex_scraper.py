@@ -6,10 +6,10 @@ import os
 import json
 
 # Correct import path for twitch_integration
-from src.routes.twitch_integration import get_twitch_live_status, extract_twitch_username, twitch_live_cache
+from routes.twitch_integration import get_twitch_live_status, extract_twitch_username, twitch_live_cache
 
-# FIXED: Import from separate cache module instead of circular import
-from src.cache_manager import leaderboard_cache
+# Import from cache_manager (no src)
+from cache_manager import leaderboard_cache
 
 apex_scraper_bp = Blueprint('apex_scraper', __name__)
 
@@ -71,11 +71,10 @@ def add_twitch_override():
         twitch_live_cache["data"] = {}
         twitch_live_cache["last_updated"] = None
         
-        # --- FIXED: Clear the main leaderboard cache as well ---
+        # Clear the main leaderboard cache as well
         leaderboard_cache["data"] = None
         leaderboard_cache["last_updated"] = None
         print("Leaderboard cache cleared due to Twitch override.")
-        # --- END FIX ---
 
         return jsonify({"success": True, "message": f"Override for {player_name} added/updated."})
 
@@ -90,11 +89,11 @@ def get_predator_points():
     Includes a fallback to scraping if the API fails for a specific platform.
     """
     try:
-        platforms = ['PC', 'PS4', 'X1', 'SWITCH']  # These platform keys are typically used by the API
+        platforms = ['PC', 'PS4', 'X1', 'SWITCH']
         all_data = {}
         
         api_call_successful = False
-        api_data = {}  # Initialize api_data outside the try/except
+        api_data = {}
         try:
             response = requests.get(
                 f'https://api.mozambiquehe.re/predator?auth={APEX_API_KEY}',
