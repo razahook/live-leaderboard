@@ -1111,8 +1111,9 @@
 
 
         async function initializeApp() {
-            const leaderboardUrl = `/api/leaderboard/PC`; 
-            const predatorThresholdsUrl = `/api/predator-points`; 
+            // UPDATED: These URLs are now relative, pointing to your Vercel backend.
+            const leaderboardUrl = `/api/leaderboard/leaderboard/PC`; 
+            const predatorThresholdsUrl = `/api/apex_scraper/predator-points`; 
 
             try {
                 const [leaderboardResponse, predatorResponse] = await Promise.all([
