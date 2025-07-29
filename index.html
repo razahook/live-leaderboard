@@ -361,7 +361,7 @@
         let currentPage = 1;
         const itemsPerPage = 50; 
         let previewTimeout;
-        const NGROK_BASE_URL = 'https://adapted-cunning-rhino.ngrok-free.app'; 
+        // DELETED: const NGROK_BASE_URL = '...'; 
         const MOZAMBIQUE_API_KEY = '456c01cf240c13399563026f5604d777'; 
         const TRACKER_GG_API_KEY = 'c4cc3d18-adaf-487b-b3da-d47b924585c4'; 
         const GEMINI_API_KEY = "AIzaSyA_sdFUk6nrcC8sK3ZlnFbEexJgCTd8SqU"; 
@@ -727,13 +727,12 @@
                 return;
             }
 
-            const overrideApiUrl = `${NGROK_BASE_URL}/api/twitch/override`;
+            const overrideApiUrl = `/api/twitch_override`;
             try {
                 const response = await fetch(overrideApiUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'ngrok-skip-browser-warning': 'true' 
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ player_name: playerName, twitch_username: twitchUsername })
                 });
@@ -806,12 +805,12 @@
                 let profileResponse, sessionsResponse;
 
                 if (selectedApi === 'tracker') {
-                    const trackerProfileUrl = `${NGROK_BASE_URL}/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=profile`;
-                    const trackerSessionsUrl = `${NGROK_BASE_URL}/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=sessions`;
+                    const trackerProfileUrl = `/api/tracker_proxy?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=profile`;
+                    const trackerSessionsUrl = `/api/tracker_proxy?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=sessions`;
                     
                     [profileResponse, sessionsResponse] = await Promise.all([
-                        fetch(trackerProfileUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } }),
-                        fetch(trackerSessionsUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } })
+                        fetch(trackerProfileUrl),
+                        fetch(trackerSessionsUrl)
                     ]);
 
                     if (!profileResponse.ok) {
@@ -886,7 +885,7 @@
                     <!-- Left Column: Player Info & Rank -->
                     <div class="flex-none lg:w-1/3 space-y-6">
                         <div class="stat-card text-center">
-                            <img src="${player.platformInfo?.avatarUrl || 'https://placehold.co/100x100/1f2937/e5e7eb?text=?'}" alt="Avatar" class="w-24 h-24 rounded-full mx-auto mb-4 border-2 border-emerald-500">
+                            <img src="${player.platformInfo?.avatarUrl}" onerror="this.onerror=null;this.src='https://placehold.co/100x100/1f2937/e5e7eb?text=?';" alt="Avatar" class="w-24 h-24 rounded-full mx-auto mb-4 border-2 border-emerald-500">
                             <h4 class="text-2xl font-bold text-white">${player.platformInfo?.platformUserHandle || 'N/A'}</h4>
                             <p class="text-gray-400">${player.platformInfo?.platformSlug?.toUpperCase() || 'N/A'}</p>
                         </div>
@@ -961,7 +960,7 @@
                     <!-- Left Column: Player Info & Rank -->
                     <div class="flex-none lg:w-1/3 space-y-6">
                         <div class="stat-card text-center">
-                            <img src="${global.avatar || 'https://placehold.co/100x100/1f2937/e5e7eb?text=?'}" alt="Avatar" class="w-24 h-24 rounded-full mx-auto mb-4 border-2 border-emerald-500">
+                            <img src="${global.avatar}" onerror="this.onerror=null;this.src='https://placehold.co/100x100/1f2937/e5e7eb?text=?';" alt="Avatar" class="w-24 h-24 rounded-full mx-auto mb-4 border-2 border-emerald-500">
                             <h4 class="text-2xl font-bold text-white">${global.name || 'N/A'}</h4>
                             <p class="text-gray-400">${global.platform || 'N/A'}</p>
                         </div>
@@ -1112,13 +1111,13 @@
 
 
         async function initializeApp() {
-            const leaderboardUrl = `${NGROK_BASE_URL}/api/leaderboard/PC`; 
-            const predatorThresholdsUrl = `${NGROK_BASE_URL}/api/predator-points`; 
+            const leaderboardUrl = `/api/leaderboard/PC`; 
+            const predatorThresholdsUrl = `/api/predator-points`; 
 
             try {
                 const [leaderboardResponse, predatorResponse] = await Promise.all([
-                    fetch(leaderboardUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } }),
-                    fetch(predatorThresholdsUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } })
+                    fetch(leaderboardUrl),
+                    fetch(predatorThresholdsUrl)
                 ]);
 
                 if (!leaderboardResponse.ok) throw new Error(`Failed to fetch leaderboard: ${leaderboardResponse.statusText}`);

@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-07-26T23:08:02.386674",
+  "data": {
+    "battle_royale": {
+      "playstation": {
+        "predator_threshold": 37616,
+        "change_24h": 465,
+        "masters_and_preds_count": 8498
+      },
+      "xbox": {
+        "predator_threshold": 25692,
+        "change_24h": 222,
+        "masters_and_preds_count": 3253
+      },
+      "switch": {
+        "predator_threshold": 16000,
+        "change_24h": 96,
+        "masters_and_preds_count": 6
+      }
+    },
+    "last_updated": "2025-07-26T23:08:02.384455",
+    "source": "apexlegendsstatus.com"
+  }
+}
