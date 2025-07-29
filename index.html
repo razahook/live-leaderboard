@@ -727,7 +727,7 @@
                 return;
             }
 
-            const overrideApiUrl = `/api/twitch_override`;
+            const overrideApiUrl = `/api/add-twitch-override`;
             try {
                 const response = await fetch(overrideApiUrl, {
                     method: 'POST',
@@ -805,8 +805,8 @@
                 let profileResponse, sessionsResponse;
 
                 if (selectedApi === 'tracker') {
-                    const trackerProfileUrl = `/api/tracker_proxy?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=profile`;
-                    const trackerSessionsUrl = `/api/tracker_proxy?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=sessions`;
+                    const trackerProfileUrl = `/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=profile`;
+                    const trackerSessionsUrl = `/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=sessions`;
                     
                     [profileResponse, sessionsResponse] = await Promise.all([
                         fetch(trackerProfileUrl),
@@ -1111,9 +1111,9 @@
 
 
         async function initializeApp() {
-            // CORRECTED: These URLs now match the Vercel file structure and Flask blueprint routes.
-            const leaderboardUrl = `/api/leaderboard/leaderboard/PC`; 
-            const predatorThresholdsUrl = `/api/apex_scraper/predator-points`; 
+            // CORRECTED: These URLs now point to the single api/index.py endpoint.
+            const leaderboardUrl = `/api/leaderboard/PC`; 
+            const predatorThresholdsUrl = `/api/predator-points`; 
 
             try {
                 const [leaderboardResponse, predatorResponse] = await Promise.all([
