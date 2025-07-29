@@ -5,5 +5,8 @@
     "TestPlayer123": {
         "twitch_link": "https://twitch.tv/teststreamer",
         "display_name": "Test Player"
+    },
+    "TestPlayer": {
+        "twitch_link": "https://twitch.tv/teststreamer"
     }
 }
