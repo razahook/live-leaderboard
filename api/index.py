@@ -214,6 +214,35 @@ def scrape_leaderboard(platform="PC", max_players=500):
                                 break
                         if not player_info_cell:
                             continue
+
+                        # Twitch link extraction (aggressive)
+                        twitch_link = ""
+                        for a in player_info_cell.find_all('a', href=True):
+                            href = a['href']
+                            if 'twitch.tv' in href or 'apexlegendsstatus.com/core/out?type=twitch' in href:
+                                username = extract_twitch_username(href)
+                                if username:
+                                    twitch_link = f"https://twitch.tv/{username}"
+                                    break
+                        if not twitch_link:
+                            twitch_match = re.search(
+                                r'(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)',
+                                player_info_cell.get_text(separator=' ', strip=True)
+                            )
+                            if twitch_match:
+                                username = twitch_match.group(1)
+                                twitch_link = f"https://twitch.tv/{username}"
+                        if not twitch_link:
+                            text_only_username_match = re.search(r'\b([a-zA-Z0-9_]{4,25})\b', player_info_cell.get_text(strip=True))
+                            if (
+                                text_only_username_match and
+                                not re.search(r'\d', text_only_username_match.group(1))
+                            ):
+                                username = text_only_username_match.group(1)
+                                if username and len(username) >= 4:
+                                    twitch_link = f"https://twitch.tv/{username}"
+
+                        # --- Aggressive player name extraction: prefer real name, fallback to Twitch username ---
                         player_name = ""
                         strong_tag = player_info_cell.find('strong')
                         if strong_tag:
@@ -225,40 +254,11 @@ def scrape_leaderboard(platform="PC", max_players=500):
                                 text_content, 1
                             )[0].strip()
                             player_name = re.sub(r'^\W+|\W+$', '', name_part)
+                        # If still no name or generic name, fallback to Twitch username
+                        if (not player_name or player_name.lower().startswith("player")) and twitch_link:
+                            player_name = extract_twitch_username(twitch_link)
                         if not player_name:
                             player_name = f"Player{rank}"
-
-                        # Aggressive Twitch extraction:
-                        twitch_link = ""
-                        # 1. Try anchor tag
-                        twitch_anchor = player_info_cell.find("a", href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id="))
-                        if not twitch_anchor:
-                            twitch_anchor = player_info_cell.find(
-                                "a", class_=lambda x: x and "fa-twitch" in x, href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id=")
-                            )
-                        if twitch_anchor:
-                            extracted_username = extract_twitch_username(twitch_anchor["href"])
-                            if extracted_username:
-                                twitch_link = f"https://twitch.tv/{extracted_username}"
-                        # 2. Try text content for twitch.tv/username
-                        if not twitch_link:
-                            twitch_match = re.search(
-                                r'(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)',
-                                player_info_cell.get_text(separator=' ', strip=True)
-                            )
-                            if twitch_match:
-                                username = twitch_match.group(1)
-                                twitch_link = f"https://twitch.tv/{username}"
-                        # 3. Fallback: find plausible username in text
-                        if not twitch_link:
-                            text_only_username_match = re.search(r'\b([a-zA-Z0-9_]{4,25})\b', player_info_cell.get_text(strip=True))
-                            if (
-                                text_only_username_match and
-                                not re.search(r'\d', text_only_username_match.group(1))
-                            ):
-                                username = text_only_username_match.group(1)
-                                if username and len(username) >= 4:
-                                    twitch_link = f"https://twitch.tv/{username}"
 
                         status = "Unknown"
                         player_text_for_status = player_info_cell.get_text(separator=' ', strip=True)
@@ -707,3 +707,4 @@ def health_check():
 
 # Expose app for Vercel
 # DO NOT define a handler function! Just expose the app variable.
+# Vercel will auto-detect "app"
