@@ -742,6 +742,48 @@ def delete_user(user_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/map-rotation', methods=['GET'])
+def get_map_rotation():
+    try:
+        if not APEX_API_KEY:
+            return jsonify({
+                "success": False,
+                "error": "API key not configured"
+            }), 500
+            
+        response = requests.get(
+            f'https://api.mozambiquehe.re/maprotation?auth={APEX_API_KEY}',
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            if 'Error' in data:
+                return jsonify({
+                    "success": False,
+                    "error": data['Error']
+                }), 400
+            return jsonify({
+                "success": True,
+                "data": data
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": f"API returned status {response.status_code}: {response.text}"
+            }), response.status_code
+    except requests.exceptions.Timeout:
+        return jsonify({
+            "success": False,
+            "error": "Request to Apex Legends API timed out."
+        }), 503
+    except Exception as e:
+        print(f"Server error in get_map_rotation: {e}")
+        return jsonify({
+            "success": False,
+            "error": f"Server error: {str(e)}"
+        }), 500
+
 # Health check
 @app.route('/api/health', methods=['GET'])
 def health_check():

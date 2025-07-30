@@ -165,6 +165,62 @@
         .api-source-radio {
             display: none;
         }
+        /* Map rotation specific styles */
+        .map-card {
+            background-color: #1f2937;
+            border-radius: 0.75rem;
+            border: 1px solid #374151;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+        .map-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .map-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #374151;
+        }
+        .map-card-content {
+            padding: 1.5rem;
+        }
+        .current-map-card {
+            background: linear-gradient(135deg, #1f2937 0%, #2d3748 100%);
+            border: 2px solid #4f46e5;
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+        }
+        .current-map-image {
+            height: 250px;
+        }
+        .countdown-timer {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #4f46e5;
+            text-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+        }
+        .map-mode-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .br-mode {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .arenas-mode {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -179,6 +235,7 @@
         <!-- Tab Navigation -->
         <div class="flex border-b border-gray-700/50 mb-6">
             <button class="tab-button active" onclick="showTab('leaderboardTab')">Leaderboard</button>
+            <button class="tab-button" onclick="showTab('mapRotationTab')">Map Rotation</button>
             <button class="tab-button" onclick="showTab('playerStatsTab')">Player Stats & Match History</button>
         </div>
 
@@ -257,6 +314,50 @@
                 <h2 class="text-2xl font-bold text-white mb-4">Twitch Override Management</h2>
                 <p class="text-gray-300 mb-6">Manually link an in-game player name to a Twitch channel or override an existing link. This is useful for players whose Twitch streams aren't automatically detected.</p>
                 <button onclick="showOverrideModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md">Add/Update Twitch Override</button>
+            </section>
+        </div>
+
+        <!-- Map Rotation Tab Content -->
+        <div id="mapRotationTab" class="tab-content">
+            <section class="mb-10">
+                <h2 class="text-2xl font-bold text-white mb-4">Current Map Rotation</h2>
+                <p class="text-gray-300 mb-6">Live map rotation information for Battle Royale and Arenas modes.</p>
+                
+                <div id="mapRotationLoading" class="text-center py-10">
+                    <div class="spinner"></div>
+                    <p class="text-gray-400 mt-2">Loading map rotation data...</p>
+                </div>
+
+                <div id="mapRotationContent" class="hidden">
+                    <!-- Current Map Section -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-white mb-4">Current Map</h3>
+                        <div id="currentMapCard" class="stat-card">
+                            <!-- Current map content will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Next Map Section -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-white mb-4">Upcoming Maps</h3>
+                        <div id="upcomingMapsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Upcoming maps will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mapRotationError" class="hidden text-center py-10">
+                    <div class="bg-red-900/20 border border-red-500/50 rounded-lg p-6">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-red-400 mb-2">Failed to Load Map Rotation</h3>
+                        <p id="mapRotationErrorMessage" class="text-gray-300"></p>
+                        <button onclick="loadMapRotation()" class="mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+                            Try Again
+                        </button>
+                    </div>
+                </div>
             </section>
         </div>
 
@@ -398,13 +499,275 @@
 
         let rpChart = null;
         let platformChart = null;
+        let countdownIntervals = [];
+
+        // Map rotation variables
+        let mapRotationData = null;
+        let mapRotationUpdateInterval = null;
 
         const showTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
             document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`).classList.add('active');
+            
+            // Load map rotation data when map rotation tab is shown
+            if (tabId === 'mapRotationTab' && !mapRotationData) {
+                loadMapRotation();
+            }
         };
+
+        // Map rotation functions
+        async function loadMapRotation() {
+            const loadingDiv = document.getElementById('mapRotationLoading');
+            const contentDiv = document.getElementById('mapRotationContent');
+            const errorDiv = document.getElementById('mapRotationError');
+            
+            // Show loading, hide others
+            loadingDiv.classList.remove('hidden');
+            contentDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/map-rotation');
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `API returned status ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to fetch map rotation data');
+                }
+                
+                mapRotationData = result.data;
+                renderMapRotation(result.data);
+                
+                // Start countdown timers
+                startCountdownTimers();
+                
+                // Show content, hide loading
+                loadingDiv.classList.add('hidden');
+                contentDiv.classList.remove('hidden');
+                
+                // Set up periodic refresh every 5 minutes
+                if (mapRotationUpdateInterval) {
+                    clearInterval(mapRotationUpdateInterval);
+                }
+                mapRotationUpdateInterval = setInterval(() => {
+                    if (document.getElementById('mapRotationTab').classList.contains('active')) {
+                        loadMapRotation();
+                    }
+                }, 300000); // 5 minutes
+                
+            } catch (error) {
+                console.error('Error loading map rotation:', error);
+                document.getElementById('mapRotationErrorMessage').textContent = error.message;
+                
+                // Show error, hide loading
+                loadingDiv.classList.add('hidden');
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function renderMapRotation(data) {
+            const currentMapCard = document.getElementById('currentMapCard');
+            const upcomingMapsContainer = document.getElementById('upcomingMapsContainer');
+            
+            // Clear existing content
+            currentMapCard.innerHTML = '';
+            upcomingMapsContainer.innerHTML = '';
+            
+            // Render Battle Royale current map
+            if (data.current && data.current.map) {
+                renderCurrentMap(data.current, 'Battle Royale', currentMapCard);
+            }
+            
+            // Render upcoming maps
+            if (data.next && data.next.map) {
+                renderUpcomingMap(data.next, 'Battle Royale', upcomingMapsContainer);
+            }
+            
+            // If there's arenas data, render it too
+            if (data.arenasUnranked) {
+                if (data.arenasUnranked.current && data.arenasUnranked.current.map) {
+                    // Add arenas current map as another upcoming map card
+                    renderUpcomingMap(data.arenasUnranked.current, 'Arenas', upcomingMapsContainer, true);
+                }
+            }
+        }
+
+        function renderCurrentMap(mapData, mode, container) {
+            const mapName = mapData.map || 'Unknown Map';
+            const remainingTimer = mapData.remainingTimer || '00:00:00';
+            const mapImage = getMapImageUrl(mapName);
+            
+            container.className = 'map-card current-map-card';
+            container.innerHTML = `
+                <img src="${mapImage}" alt="${mapName}" class="map-image current-map-image" onerror="this.onerror=null;this.src='https://placehold.co/400x250/1f2937/e5e7eb?text=${encodeURIComponent(mapName)}';">
+                <div class="map-card-content">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 class="text-2xl font-bold text-white mb-2">${mapName}</h4>
+                            <span class="map-mode-badge ${mode.toLowerCase().replace(' ', '-')}-mode">${mode}</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-400 text-sm mb-1">Time Remaining</p>
+                            <div class="countdown-timer" data-remaining="${remainingTimer}" data-map="${mapName}">
+                                ${formatTimeRemaining(remainingTimer)}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center text-sm text-gray-400">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Currently Active
+                        </div>
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderUpcomingMap(mapData, mode, container, isCurrent = false) {
+            const mapName = mapData.map || 'Unknown Map';
+            const remainingTimer = mapData.remainingTimer || mapData.DurationInMinutes ? `${mapData.DurationInMinutes}:00` : '00:00:00';
+            const mapImage = getMapImageUrl(mapName);
+            
+            const mapCard = document.createElement('div');
+            mapCard.className = 'map-card';
+            mapCard.innerHTML = `
+                <img src="${mapImage}" alt="${mapName}" class="map-image" onerror="this.onerror=null;this.src='https://placehold.co/400x200/1f2937/e5e7eb?text=${encodeURIComponent(mapName)}';">
+                <div class="map-card-content">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="text-lg font-bold text-white mb-2">${mapName}</h4>
+                            <span class="map-mode-badge ${mode.toLowerCase().replace(' ', '-')}-mode">${mode}</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-400 text-xs mb-1">${isCurrent ? 'Currently Active' : 'Next Up'}</p>
+                            <div class="text-indigo-400 font-semibold" data-remaining="${remainingTimer}" data-map="${mapName}">
+                                ${isCurrent ? 'Active' : formatTimeRemaining(remainingTimer)}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                        ${isCurrent ? 'Live Now' : 'Coming Up'}
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(mapCard);
+        }
+
+        function getMapImageUrl(mapName) {
+            // Simple placeholder image approach for reliable loading
+            const cleanMapName = mapName.replace(/[^a-zA-Z0-9]/g, '+');
+            
+            // Try to use a more reliable placeholder service with map-themed colors
+            const mapColors = {
+                'Kings Canyon': '8B4513,F4A460',     // Brown/Sandy
+                'World\'s Edge': 'FF4500,FF6347',    // Orange/Red
+                'Olympus': '87CEEB,4169E1',          // Sky Blue
+                'Storm Point': '2E8B57,98FB98',      // Sea Green
+                'Broken Moon': '6A5ACD,9370DB',      // Purple
+                'E-District': '1E90FF,87CEFA',       // Blue
+                'Artillery': '8B0000,FF6347',        // Red
+                'Thermal Station': 'FF8C00,FFD700',  // Orange/Gold
+                'Skull Town': '696969,A9A9A9',       // Gray
+                'Overflow': '4682B4,87CEEB'          // Steel Blue
+            };
+            
+            const colors = mapColors[mapName] || '1f2937,e5e7eb';
+            const [bg, text] = colors.split(',');
+            
+            return `https://placehold.co/400x200/${bg}/${text}?text=${encodeURIComponent(mapName)}&font=roboto`;
+        }
+
+        function formatTimeRemaining(timeString) {
+            if (!timeString || timeString === '00:00:00') return '0m 0s';
+            
+            const parts = timeString.split(':');
+            if (parts.length >= 3) {
+                const hours = parseInt(parts[0]);
+                const minutes = parseInt(parts[1]);
+                const seconds = parseInt(parts[2]);
+                
+                if (hours > 0) {
+                    return `${hours}h ${minutes}m`;
+                } else if (minutes > 0) {
+                    return `${minutes}m ${seconds}s`;
+                } else {
+                    return `${seconds}s`;
+                }
+            }
+            
+            return timeString;
+        }
+
+        function startCountdownTimers() {
+            // Clear existing intervals
+            countdownIntervals.forEach(interval => clearInterval(interval));
+            countdownIntervals = [];
+            
+            const countdownElements = document.querySelectorAll('[data-remaining]');
+            
+            countdownElements.forEach(element => {
+                const timeString = element.getAttribute('data-remaining');
+                if (timeString && timeString !== '00:00:00') {
+                    const interval = setInterval(() => {
+                        updateCountdown(element, timeString);
+                    }, 1000);
+                    countdownIntervals.push(interval);
+                }
+            });
+        }
+
+        function updateCountdown(element, initialTime) {
+            const parts = initialTime.split(':');
+            if (parts.length >= 3) {
+                let totalSeconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+                
+                // Get the current time since page load to calculate remaining time
+                const currentElement = element.getAttribute('data-current-seconds');
+                if (!currentElement) {
+                    element.setAttribute('data-current-seconds', totalSeconds.toString());
+                } else {
+                    totalSeconds = parseInt(currentElement) - 1;
+                    element.setAttribute('data-current-seconds', totalSeconds.toString());
+                }
+                
+                if (totalSeconds <= 0) {
+                    element.textContent = 'Rotating...';
+                    // Reload map rotation data when timer expires
+                    setTimeout(() => {
+                        if (document.getElementById('mapRotationTab').classList.contains('active')) {
+                            loadMapRotation();
+                        }
+                    }, 2000);
+                    return;
+                }
+                
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                
+                if (hours > 0) {
+                    element.textContent = `${hours}h ${minutes}m`;
+                } else if (minutes > 0) {
+                    element.textContent = `${minutes}m ${seconds}s`;
+                } else {
+                    element.textContent = `${seconds}s`;
+                }
+            }
+        }
 
         const showModal = (title, contentHtml) => {
             modalTitle.textContent = title;
@@ -1182,6 +1545,14 @@
         overrideForm.addEventListener('submit', submitTwitchOverride); 
         playerStatsForm.addEventListener('submit', fetchPlayerStats); 
         window.onload = initializeApp;
+        
+        // Clean up intervals on page unload
+        window.addEventListener('beforeunload', () => {
+            countdownIntervals.forEach(interval => clearInterval(interval));
+            if (mapRotationUpdateInterval) {
+                clearInterval(mapRotationUpdateInterval);
+            }
+        });
 
         // Initialize API source selection
         handleApiSourceChange(); // Call on load to set initial state
