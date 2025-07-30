@@ -75,7 +75,11 @@ class LeaderboardCache:
 leaderboard_cache = LeaderboardCache()
 twitch_token_cache = {"access_token": None, "expires_at": None}
 twitch_live_cache = {"data": {}, "last_updated": None, "cache_duration": 120}
-DYNAMIC_TWITCH_OVERRIDES = {}
+
+# Hardcoded Twitch mapping for LG_Naughty
+HARDCODED_TWITCH_MAPPINGS = {
+    "LG_Naughty": "https://www.twitch.tv/Naughty"
+}
 
 def strip_status_suffix(username):
     """
@@ -109,13 +113,17 @@ def extract_twitch_username(twitch_link):
             return username
     return None
 
-def load_twitch_overrides():
-    global DYNAMIC_TWITCH_OVERRIDES
-    return DYNAMIC_TWITCH_OVERRIDES
-
-def save_twitch_overrides(overrides):
-    global DYNAMIC_TWITCH_OVERRIDES
-    DYNAMIC_TWITCH_OVERRIDES = overrides
+def apply_hardcoded_twitch_mappings(leaderboard_data):
+    """Apply hardcoded Twitch mappings for specific players."""
+    if not leaderboard_data or 'players' not in leaderboard_data:
+        return leaderboard_data
+    
+    for player in leaderboard_data['players']:
+        player_name = player.get("player_name")
+        if player_name in HARDCODED_TWITCH_MAPPINGS:
+            player["twitch_link"] = HARDCODED_TWITCH_MAPPINGS[player_name]
+    
+    return leaderboard_data
 
 def get_twitch_access_token():
     if (
@@ -443,15 +451,9 @@ def get_leaderboard(platform):
     try:
         cached_data = leaderboard_cache.get_data()
         if cached_data:
-            dynamic_overrides = load_twitch_overrides()
             leaderboard_data_to_return = cached_data.copy()
             leaderboard_data_to_return['players'] = [player.copy() for player in cached_data['players']]
-            for player in leaderboard_data_to_return['players']:
-                override_info = dynamic_overrides.get(player.get("player_name"))
-                if override_info:
-                    player["twitch_link"] = override_info["twitch_link"]
-                    if "display_name" in override_info:
-                        player["player_name"] = override_info["display_name"]
+            leaderboard_data_to_return = apply_hardcoded_twitch_mappings(leaderboard_data_to_return)
             leaderboard_data_to_return = add_twitch_live_status(leaderboard_data_to_return)
             return jsonify({
                 "success": True,
@@ -462,13 +464,7 @@ def get_leaderboard(platform):
             })
         leaderboard_data = scrape_leaderboard(platform.upper(), 500)
         if leaderboard_data:
-            dynamic_overrides = load_twitch_overrides()
-            for player in leaderboard_data['players']:
-                override_info = dynamic_overrides.get(player.get("player_name"))
-                if override_info:
-                    player["twitch_link"] = override_info["twitch_link"]
-                    if "display_name" in override_info:
-                        player["player_name"] = override_info["display_name"]
+            leaderboard_data = apply_hardcoded_twitch_mappings(leaderboard_data)
             leaderboard_data = add_twitch_live_status(leaderboard_data)
             leaderboard_cache.set_data(leaderboard_data)
             return jsonify({
@@ -490,33 +486,6 @@ def get_leaderboard(platform):
             "error": f"Server error: {str(e)}"
         }), 500
 
-@app.route('/api/add-twitch-override', methods=['POST'])
-def add_twitch_override():
-    try:
-        data = request.get_json()
-        player_name = data.get("player_name")
-        twitch_username = data.get("twitch_username")
-        twitch_link = data.get("twitch_link")
-        display_name = data.get("display_name")
-        if not player_name:
-            return jsonify({"success": False, "error": "Missing player_name"}), 400
-        if not twitch_link and not twitch_username:
-            return jsonify({"success": False, "error": "Missing twitch_link or twitch_username"}), 400
-        current_overrides = load_twitch_overrides()
-        final_twitch_link = twitch_link or f"https://twitch.tv/{twitch_username}"
-        override_info = {"twitch_link": final_twitch_link}
-        if display_name:
-            override_info["display_name"] = display_name
-        current_overrides[player_name] = override_info
-        save_twitch_overrides(current_overrides)
-        twitch_live_cache["data"] = {}
-        twitch_live_cache["last_updated"] = None
-        leaderboard_cache.data = None
-        leaderboard_cache.last_updated = None
-        return jsonify({"success": True, "message": f"Override for {player_name} added/updated."})
-    except Exception as e:
-        print(f"Error adding Twitch override: {e}")
-        return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 @app.route('/api/predator-points', methods=['GET'])
 def get_predator_points():

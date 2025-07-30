@@ -252,12 +252,6 @@
                     </div>
                 </div>
             </section>
-
-            <section id="twitch-override-management" class="mb-10">
-                <h2 class="text-2xl font-bold text-white mb-4">Twitch Override Management</h2>
-                <p class="text-gray-300 mb-6">Manually link an in-game player name to a Twitch channel or override an existing link. This is useful for players whose Twitch streams aren't automatically detected.</p>
-                <button onclick="showOverrideModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md">Add/Update Twitch Override</button>
-            </section>
         </div>
 
         <!-- Player Stats & Match History Tab Content -->
@@ -335,26 +329,6 @@
         </div>
     </div>
 
-    <!-- Twitch Override Modal -->
-    <div id="overrideModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" onclick="hideOverrideModal()">&times;</span>
-            <h2 class="text-xl font-bold text-white mb-4">Manage Twitch Override</h2>
-            <form id="overrideForm" class="space-y-4">
-                <div>
-                    <label for="overridePlayerName" class="block text-gray-300 text-sm font-bold mb-2">Player Name (in-game):</label>
-                    <input type="text" id="overridePlayerName" class="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-800 text-white leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500" placeholder="e.g., Shroud" required>
-                </div>
-                <div>
-                    <label for="overrideTwitchUsername" class="block text-gray-300 text-sm font-bold mb-2">Twitch Username:</label>
-                    <input type="text" id="overrideTwitchUsername" class="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-800 text-white leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500" placeholder="e.g., shroud" required>
-                </div>
-                <div id="overrideMessage" class="text-sm font-medium"></div>
-                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-colors duration-200">Submit Override</button>
-            </form>
-        </div>
-    </div>
-
     <script>
         let allPlayers = [];
         let filteredAndSortedPlayers = []; 
@@ -378,12 +352,6 @@
         const analysisModal = document.getElementById('analysisModal');
         const modalTitle = document.getElementById('modalTitle');
         const modalContent = document.getElementById('modalContent');
-
-        const overrideModal = document.getElementById('overrideModal');
-        const overrideForm = document.getElementById('overrideForm');
-        const overridePlayerNameInput = document.getElementById('overridePlayerName');
-        const overrideTwitchUsernameInput = document.getElementById('overrideTwitchUsername');
-        const overrideMessageDiv = document.getElementById('overrideMessage');
 
         const prevPageBtn = document.getElementById('prevPage');
         const nextPageBtn = document.getElementById('nextPage');
@@ -420,20 +388,8 @@
             modalContent.innerHTML = '<div class="spinner"></div><p class="text-center mt-2">Generating analysis...</p>';
         };
 
-        const showOverrideModal = () => {
-            overrideModal.classList.add('show');
-            overrideMessageDiv.textContent = ''; 
-            overridePlayerNameInput.value = ''; 
-            overrideTwitchUsernameInput.value = '';
-        };
-
-        const hideOverrideModal = () => {
-            overrideModal.classList.remove('show');
-        };
-
         window.onclick = (event) => {
             if (event.target == analysisModal) hideModal();
-            if (event.target == overrideModal) hideOverrideModal(); 
         };
 
         const getChangeHtml = (change) => {
@@ -809,48 +765,7 @@
         }
 
 
-        async function submitTwitchOverride(event) {
-            event.preventDefault(); 
-            overrideMessageDiv.textContent = 'Submitting...';
-            overrideMessageDiv.className = 'text-sm font-medium text-gray-400';
 
-            const playerName = overridePlayerNameInput.value.trim();
-            const twitchUsername = overrideTwitchUsernameInput.value.trim();
-
-            if (!playerName || !twitchUsername) {
-                overrideMessageDiv.textContent = 'Player Name and Twitch Username are required.';
-                overrideMessageDiv.className = 'text-sm font-medium text-red-500';
-                return;
-            }
-
-            const overrideApiUrl = `${API_BASE_URL}/api/add-twitch-override`;
-            try {
-                const response = await fetch(overrideApiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ player_name: playerName, twitch_username: twitchUsername })
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.success) {
-                    overrideMessageDiv.textContent = `Override for ${playerName} added/updated successfully!`;
-                    overrideMessageDiv.className = 'text-sm font-medium text-green-500';
-                    setTimeout(() => {
-                        hideOverrideModal();
-                        initializeApp(); 
-                    }, 1500);
-                } else {
-                    throw new Error(result.message || 'Failed to submit override.');
-                }
-            } catch (error) {
-                overrideMessageDiv.textContent = `Error: ${error.message}`;
-                overrideMessageDiv.className = 'text-sm font-medium text-red-500';
-                console.error('Error submitting Twitch override:', error);
-            }
-        }
 
         // Function to handle API source change (Tracker.gg vs MozambiqueHe.re)
         const handleApiSourceChange = () => {
@@ -1306,8 +1221,7 @@
 
         searchInput.addEventListener('input', applyFilters);
         liveOnlyToggle.addEventListener('change', applyFilters);
-        overrideForm.addEventListener('submit', submitTwitchOverride); 
-        playerStatsForm.addEventListener('submit', fetchPlayerStats); 
+        playerStatsForm.addEventListener('submit', fetchPlayerStats);
         window.onload = initializeApp;
 
         // Initialize API source selection
