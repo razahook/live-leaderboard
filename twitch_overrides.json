@@ -1,7 +1,7 @@
 {
     "LG_Naughty": {
         "twitch_link": "https://twitch.tv/Naughty",
-        "display_name": "LG Naughty (Verified)"
+        "display_name": "LG_Naughty"
     },
     "TestPlayer123": {
         "twitch_link": "https://twitch.tv/teststreamer",
@@ -17,5 +17,15 @@
     "TestPersistence123": {
         "twitch_link": "https://twitch.tv/persisttest",
         "display_name": "Persistence Test"
+    },
+    "ValidPlayer": {
+        "twitch_link": "https://twitch.tv/validstream"
+    },
+    "TestOverridePlayer": {
+        "twitch_link": "https://twitch.tv/testoverride",
+        "display_name": "Test Override Player"
+    },
+    "FinalTest": {
+        "twitch_link": "https://twitch.tv/finaltest"
     }
 }
