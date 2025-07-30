@@ -8,7 +8,13 @@ tracker_proxy_bp = Blueprint('tracker_proxy', __name__)
 # IMPORTANT: Get your Tracker.gg API key from an environment variable for security
 # For local testing, you can hardcode it here, but for deployment, use environment variables.
 # Example: os.environ.get("TRACKER_GG_API_KEY", "YOUR_TRACKER_GG_API_KEY_HERE")
-TRACKER_GG_API_KEY = "c4cc3d18-adaf-487b-b3da-d47b924585c4" # Hardcoded for now as per user's request
+# SECURITY FIX: never hard-code API keys. Read from the environment instead.
+# A helpful error message is logged if the variable is missing so developers
+# know why requests are failing.
+TRACKER_GG_API_KEY = os.getenv("TRACKER_GG_API_KEY", "")
+
+if not TRACKER_GG_API_KEY:
+    print("[WARNING] TRACKER_GG_API_KEY is not set. Requests to tracker.gg will fail with 401 errors.")
 
 @tracker_proxy_bp.route('/tracker-stats', methods=['GET'])
 def get_tracker_stats():

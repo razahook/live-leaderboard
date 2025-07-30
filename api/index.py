@@ -9,8 +9,24 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
 # ----- HARDCODED TWITCH ENV -----
-TWITCH_CLIENT_ID = "1nd45y861ah5uh84jh4e68gjvjshl1"
-TWITCH_CLIENT_SECRET = "zv6enoibg0g05qx9kbos20h57twvvw"
+# ---------------------------------------------------------------------------
+# SECURITY FIX: never keep credentials in source control. Retrieve them from
+# environment variables instead.  This allows different environments (local,
+# CI, production) to inject the appropriate secrets without code changes and
+# ensures secrets aren't leaked if the repository is shared publicly.
+# ---------------------------------------------------------------------------
+
+# Fail-secure default: empty string if not provided so that downstream API
+# calls that rely on these values fail gracefully (and visibly) rather than
+# using invalid credentials.
+TWITCH_CLIENT_ID = os.getenv("TWITCH_CLIENT_ID", "")
+TWITCH_CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET", "")
+
+# Developers frequently forget to set the variables when running locally.  A
+# clear warning in the logs helps diagnose why Twitch calls might fail.
+if not TWITCH_CLIENT_ID or not TWITCH_CLIENT_SECRET:
+    print("[WARNING] Twitch credentials are not configured. Set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET to enable live-status look-ups.")
+
 APEX_API_KEY = os.environ.get("APEX_API_KEY") or ""
 
 # Create Flask app
