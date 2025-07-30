@@ -2,12 +2,11 @@ from flask import Blueprint, jsonify, request
 import requests
 from bs4 import BeautifulSoup
 import re
-from datetime import datetime, timedelta
-import time
+from datetime import datetime
 import os
 from src.routes.twitch_integration import get_twitch_live_status, extract_twitch_username, twitch_token_cache, twitch_live_cache
 from src.routes.apex_scraper import load_twitch_overrides
-from src.cache_manager import leaderboard_cache 
+from src.cache_manager import leaderboard_cache
 
 leaderboard_bp = Blueprint('leaderboard', __name__)
 
@@ -19,31 +18,28 @@ def extract_player_name(cell, twitch_link=""):
         if name and not name.lower().startswith("player") and not name.lower().startswith("predator"):
             return name
 
-    # 2. Try first <a> that's not a twitch link
-    a_tags = cell.find_all('a')
-    for a in a_tags:
+    # 2. Try all <a> tags, ignore twitch links
+    for a in cell.find_all('a'):
         href = a.get('href', '')
         if 'twitch.tv' not in href and 'apexlegendsstatus.com/core/out?type=twitch' not in href:
             name = a.get_text(strip=True)
             if name and not name.lower().startswith("player") and not name.lower().startswith("predator"):
                 return name
 
-    # 3. Remove status and twitch from the text
-    cleaned = cell.get_text(separator=' ', strip=True)
-    cleaned = re.sub(r'https?://[^\s]+', '', cleaned)
-    cleaned = re.sub(
-        r'(In\s+(lobby|match)|Offline|Playing|History|Performance|Lvl\s*\d+|\d+\s*RP\s+away|twitch\.tv|IN-MATCH|IN LOBBY|OFFLINE)',
-        '', cleaned, flags=re.IGNORECASE)
-    cleaned = cleaned.strip()
-    cleaned = re.sub(r'\s+', ' ', cleaned)
-    # Remove any leading/trailing symbols left
-    cleaned = re.sub(r'^[^\w]+|[^\w]+$', '', cleaned)
-    # Remove pure numbers
-    cleaned = re.sub(r'^\d+$', '', cleaned)
-    if cleaned and not cleaned.lower().startswith("player") and not cleaned.lower().startswith("predator"):
-        return cleaned
+    # 3. Try <span> or <div>
+    for tag in cell.find_all(['span', 'div']):
+        name = tag.get_text(strip=True)
+        if name and not name.lower().startswith("player") and not name.lower().startswith("predator"):
+            return name
 
-    # 4. If twitch link is valid, return username as player name
+    # 4. Try any text node (skip known status/extra text)
+    texts = [t for t in cell.stripped_strings if t]
+    for t in texts:
+        if not re.match(r'^(In\s+(lobby|match)|Offline|Playing|History|Performance|Lvl\s*\d+|\d+\s*RP\s+away|twitch\.tv|IN-MATCH|IN LOBBY|OFFLINE)', t, re.IGNORECASE):
+            if not t.lower().startswith("player") and not t.lower().startswith("predator"):
+                return t
+
+    # 5. If we have a valid twitch link, use its username
     if twitch_link:
         username = extract_twitch_username(twitch_link)
         if username:
@@ -100,7 +96,7 @@ def get_leaderboard(platform):
                 if player["player_name"] == "Player2" or (player.get("twitch_live", {}).get("stream_data", {}).get("user_name") == "anayaunni" and player.get("player_name") == "Player2"):
                     player["rp"] = 214956
                     print(f"Manually updated RP for Player2/anayaunni to {player['rp']}")
-                    break 
+                    break
             print("Adding Twitch live status to leaderboard data.")
             leaderboard_data = add_twitch_live_status(leaderboard_data)
             leaderboard_cache.set_data(leaderboard_data)
@@ -173,27 +169,13 @@ def scrape_leaderboard(platform="PC", max_players=500):
                         if not player_info_cell:
                             continue
                         twitch_link = ""
-                        twitch_anchor = player_info_cell.find("a", href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id="))
-                        if not twitch_anchor:
-                            twitch_anchor = player_info_cell.find("a", class_=lambda x: x and "fa-twitch" in x, href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id="))
-                        if twitch_anchor:
-                            extracted_username = extract_twitch_username(twitch_anchor["href"])
-                            if extracted_username:
-                                twitch_link = f"https://twitch.tv/{extracted_username}"
-                        else:
-                            twitch_match = re.search(r'(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)', player_info_cell.get_text(separator=' ', strip=True))
-                            if twitch_match:
-                                username = twitch_match.group(1)
-                                username = re.sub(r'(In|Offline|match|lobby)$', '', username, flags=re.IGNORECASE)
+                        for a in player_info_cell.find_all('a', href=True):
+                            href = a['href']
+                            if 'twitch.tv' in href or 'apexlegendsstatus.com/core/out?type=twitch' in href:
+                                username = extract_twitch_username(href)
                                 if username:
                                     twitch_link = f"https://twitch.tv/{username}"
-                            else:
-                                text_only_username_match = re.search(r'\b([a-zA-Z0-9_]{4,25})\b', player_info_cell.get_text(strip=True))
-                                if text_only_username_match and not re.search(r'\d', text_only_username_match.group(1)):
-                                    username = text_only_username_match.group(1)
-                                    username = re.sub(r'(In|Offline|match|lobby)$', '', username, flags=re.IGNORECASE)
-                                    if username and len(username) >= 4:
-                                        twitch_link = f"https://twitch.tv/{username}"
+                                    break
                         player_name = extract_player_name(player_info_cell, twitch_link)
                         if not player_name:
                             if twitch_link:

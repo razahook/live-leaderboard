@@ -1,4 +1,3 @@
-import os
 from flask import Flask
 from flask_cors import CORS
 
@@ -11,16 +10,13 @@ from src.routes.user import user_bp
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
-
-    # Register all blueprints at the /api/ path
+    CORS(app)  # Enable CORS for all routes
     app.register_blueprint(leaderboard_bp, url_prefix='/api')
     app.register_blueprint(apex_scraper_bp, url_prefix='/api')
     app.register_blueprint(tracker_proxy_bp, url_prefix='/api')
     app.register_blueprint(twitch_bp, url_prefix='/api')
     app.register_blueprint(twitch_override_bp, url_prefix='/api')
     app.register_blueprint(user_bp, url_prefix='/api')
-
     @app.route('/api/health', methods=['GET'])
     def health():
         from datetime import datetime
@@ -29,8 +25,6 @@ def create_app():
             "timestamp": datetime.now().isoformat(),
             "version": "1.0.0"
         }
-
     return app
 
-# This is required for Vercel: expose the app variable
 app = create_app()
