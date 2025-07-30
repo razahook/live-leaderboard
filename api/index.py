@@ -77,7 +77,21 @@ twitch_token_cache = {"access_token": None, "expires_at": None}
 twitch_live_cache = {"data": {}, "last_updated": None, "cache_duration": 120}
 DYNAMIC_TWITCH_OVERRIDES = {}
 
-# Utility
+# Aggressive Twitch extraction and scraping
+def extract_twitch_username(twitch_link):
+    if not twitch_link:
+        return None
+    patterns = [
+        r"apexlegendsstatus\.com/core/out\?type=twitch&id=([a-zA-Z0-9_]+)",
+        r"(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)",
+        r"^([a-zA-Z0-9_]+)$"
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, twitch_link.strip())
+        if match:
+            return match.group(1).lower()
+    return None
+
 def load_twitch_overrides():
     global DYNAMIC_TWITCH_OVERRIDES
     return DYNAMIC_TWITCH_OVERRIDES
@@ -159,20 +173,6 @@ def get_twitch_live_status(channels):
         print(f"Error getting Twitch live status: {e}")
         return None
 
-def extract_twitch_username(twitch_link):
-    if not twitch_link:
-        return None
-    patterns = [
-        r"apexlegendsstatus\.com/core/out\?type=twitch&id=([a-zA-Z0-9_]+)",
-        r"(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)",
-        r"^([a-zA-Z0-9_]+)$"
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, twitch_link.strip())
-        if match:
-            return match.group(1).lower()
-    return None
-
 def scrape_leaderboard(platform="PC", max_players=500):
     base_url = f"https://apexlegendsstatus.com/live-ranked-leaderboards/Battle_Royale/{platform}"
     headers = {
@@ -227,7 +227,10 @@ def scrape_leaderboard(platform="PC", max_players=500):
                             player_name = re.sub(r'^\W+|\W+$', '', name_part)
                         if not player_name:
                             player_name = f"Player{rank}"
+
+                        # Aggressive Twitch extraction:
                         twitch_link = ""
+                        # 1. Try anchor tag
                         twitch_anchor = player_info_cell.find("a", href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id="))
                         if not twitch_anchor:
                             twitch_anchor = player_info_cell.find(
@@ -237,16 +240,26 @@ def scrape_leaderboard(platform="PC", max_players=500):
                             extracted_username = extract_twitch_username(twitch_anchor["href"])
                             if extracted_username:
                                 twitch_link = f"https://twitch.tv/{extracted_username}"
-                        else:
+                        # 2. Try text content for twitch.tv/username
+                        if not twitch_link:
                             twitch_match = re.search(
                                 r'(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)',
                                 player_info_cell.get_text(separator=' ', strip=True)
                             )
                             if twitch_match:
                                 username = twitch_match.group(1)
-                                username = re.sub(r'(In|Offline|match|lobby)$', '', username, flags=re.IGNORECASE)
-                                if username:
+                                twitch_link = f"https://twitch.tv/{username}"
+                        # 3. Fallback: find plausible username in text
+                        if not twitch_link:
+                            text_only_username_match = re.search(r'\b([a-zA-Z0-9_]{4,25})\b', player_info_cell.get_text(strip=True))
+                            if (
+                                text_only_username_match and
+                                not re.search(r'\d', text_only_username_match.group(1))
+                            ):
+                                username = text_only_username_match.group(1)
+                                if username and len(username) >= 4:
                                     twitch_link = f"https://twitch.tv/{username}"
+
                         status = "Unknown"
                         player_text_for_status = player_info_cell.get_text(separator=' ', strip=True)
                         if "In lobby" in player_text_for_status:
