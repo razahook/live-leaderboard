@@ -8,10 +8,14 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
-# ----- HARDCODED TWITCH ENV -----
-TWITCH_CLIENT_ID = "1nd45y861ah5uh84jh4e68gjvjshl1"
-TWITCH_CLIENT_SECRET = "zv6enoibg0g05qx9kbos20h57twvvw"
+# ----- TWITCH API CONFIGURATION -----
+TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID")
+TWITCH_CLIENT_SECRET = os.environ.get("TWITCH_CLIENT_SECRET")
 APEX_API_KEY = os.environ.get("APEX_API_KEY") or ""
+
+# Validate required environment variables
+if not TWITCH_CLIENT_ID or not TWITCH_CLIENT_SECRET:
+    print("WARNING: TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET environment variables are required for Twitch integration")
 
 # Create Flask app
 app = Flask(__name__)
@@ -124,6 +128,12 @@ def get_twitch_access_token():
         and datetime.now() < twitch_token_cache["expires_at"]
     ):
         return twitch_token_cache["access_token"]
+    
+    # Check if credentials are available
+    if not TWITCH_CLIENT_ID or not TWITCH_CLIENT_SECRET:
+        print("ERROR: Twitch credentials not configured. Please set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET environment variables.")
+        return None
+        
     try:
         response = requests.post(
             "https://id.twitch.tv/oauth2/token",
@@ -321,22 +331,11 @@ def scrape_leaderboard(platform="PC", max_players=500):
                             })
                     except Exception:
                         continue
-        if len(all_players) < max_players:
-            existing_ranks = {player['rank'] for player in all_players}
-            for rank in range(1, max_players + 1):
-                if rank not in existing_ranks:
-                    base_rp = 300000
-                    rp = max(10000, base_rp - (rank * 500))
-                    all_players.append({
-                        "rank": rank,
-                        "player_name": f"Predator{rank}",
-                        "rp": rp,
-                        "rp_change_24h": max(0, 10000 - (rank * 15)),
-                        "twitch_link": f"https://twitch.tv/predator{rank}" if rank % 10 == 0 else "",
-                        "level": max(100, 3000 - (rank * 3)),
-                        "status": "In lobby" if rank % 3 == 0 else ("In match" if rank % 3 == 1 else "Offline")
-                    })
+        # Sort players by rank and limit to max_players
         all_players = sorted(all_players, key=lambda x: x['rank'])[:max_players]
+        
+        # Log scraping results for monitoring
+        print(f"Scraped {len(all_players)} players for {platform} platform")
         return {
             "platform": platform,
             "players": all_players,
@@ -344,8 +343,15 @@ def scrape_leaderboard(platform="PC", max_players=500):
             "last_updated": datetime.now().isoformat()
         }
     except Exception as e:
-        print(f"Error scraping leaderboard: {e}")
-        return None
+        print(f"Error scraping leaderboard for {platform}: {e}")
+        # Return empty leaderboard instead of None to prevent downstream errors
+        return {
+            "platform": platform,
+            "players": [],
+            "total_players": 0,
+            "last_updated": datetime.now().isoformat(),
+            "error": "Failed to scrape leaderboard data"
+        }
 
 def add_twitch_live_status(leaderboard_data):
     try:
@@ -461,7 +467,7 @@ def get_leaderboard(platform):
                 "source": "apexlegendsstatus.com"
             })
         leaderboard_data = scrape_leaderboard(platform.upper(), 500)
-        if leaderboard_data:
+        if leaderboard_data and not leaderboard_data.get('error'):
             dynamic_overrides = load_twitch_overrides()
             for player in leaderboard_data['players']:
                 override_info = dynamic_overrides.get(player.get("player_name"))
@@ -479,9 +485,10 @@ def get_leaderboard(platform):
                 "source": "apexlegendsstatus.com"
             })
         else:
+            error_msg = leaderboard_data.get('error', 'Failed to scrape leaderboard data') if leaderboard_data else 'Failed to scrape leaderboard data'
             return jsonify({
                 "success": False,
-                "error": "Failed to scrape leaderboard data"
+                "error": error_msg
             }), 500
     except Exception as e:
         print(f"Server error in get_leaderboard: {str(e)}")
@@ -705,12 +712,39 @@ def get_users():
 def create_user():
     try:
         data = request.json
-        user = User(username=data['username'], email=data['email'])
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        # Validate required fields
+        username = data.get('username', '').strip()
+        email = data.get('email', '').strip()
+        
+        if not username or not email:
+            return jsonify({"error": "Username and email are required"}), 400
+        
+        # Validate email format
+        import re
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            return jsonify({"error": "Invalid email format"}), 400
+        
+        # Check for existing user
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            return jsonify({"error": "Username already exists"}), 409
+        
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
+            return jsonify({"error": "Email already exists"}), 409
+        
+        # Create user with validated data
+        user = User(username=username, email=email)
         db.session.add(user)
         db.session.commit()
         return jsonify(user.to_dict()), 201
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        db.session.rollback()
+        return jsonify({"error": "Failed to create user"}), 500
 
 @app.route('/api/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
@@ -725,12 +759,40 @@ def update_user(user_id):
     try:
         user = User.query.get_or_404(user_id)
         data = request.json
-        user.username = data.get('username', user.username)
-        user.email = data.get('email', user.email)
+        
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        # Validate and sanitize input
+        username = data.get('username', '').strip()
+        email = data.get('email', '').strip()
+        
+        # Only update if new values are provided and valid
+        if username:
+            # Check if username is already taken by another user
+            existing_user = User.query.filter_by(username=username).first()
+            if existing_user and existing_user.id != user_id:
+                return jsonify({"error": "Username already exists"}), 409
+            user.username = username
+        
+        if email:
+            # Validate email format
+            import re
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_pattern, email):
+                return jsonify({"error": "Invalid email format"}), 400
+            
+            # Check if email is already taken by another user
+            existing_email = User.query.filter_by(email=email).first()
+            if existing_email and existing_email.id != user_id:
+                return jsonify({"error": "Email already exists"}), 409
+            user.email = email
+        
         db.session.commit()
         return jsonify(user.to_dict())
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        db.session.rollback()
+        return jsonify({"error": "Failed to update user"}), 500
 
 @app.route('/api/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
@@ -740,7 +802,8 @@ def delete_user(user_id):
         db.session.commit()
         return '', 204
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        db.session.rollback()
+        return jsonify({"error": "Failed to delete user"}), 500
 
 # Health check
 @app.route('/api/health', methods=['GET'])
