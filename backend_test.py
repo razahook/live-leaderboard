@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 
 # Test configuration
-BASE_URL = "http://localhost:8001"  # Will be updated based on actual deployment
+BASE_URL = "http://localhost:8001"  # Local Flask server
 API_BASE = f"{BASE_URL}/api"
 
 class APITester:
