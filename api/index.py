@@ -310,6 +310,10 @@ def scrape_leaderboard(platform="PC", max_players=500):
                                         rp_change_24h = max(numbers_without_rp)
                                     break
                         if player_name and rp > 0:
+                            # Hardcode Twitch link for LG_Naughty
+                            if player_name == 'LG_Naughty':
+                                twitch_link = 'https://www.twitch.tv/Naughty'
+                            
                             all_players.append({
                                 "rank": rank,
                                 "player_name": player_name,
