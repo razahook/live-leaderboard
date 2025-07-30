@@ -2,6 +2,8 @@
 from flask import Blueprint, jsonify, request
 import json
 import os
+from src.routes.twitch_integration import get_twitch_live_status, extract_twitch_username, twitch_live_cache
+from src.cache_manager import leaderboard_cache
 
 twitch_override_bp = Blueprint('twitch_override', __name__)
 
@@ -30,12 +32,51 @@ def add_twitch_override():
             print(f"Error loading twitch_overrides.json: {e}")
             return jsonify({"success": False, "message": "Server error loading overrides"}), 500
 
-    overrides[player_name] = {"twitch_link": f"https://twitch.tv/{twitch_username}"}
+    # Create the Twitch link - handle both username and full URL formats
+    if twitch_username.startswith('http'):
+        twitch_link = twitch_username
+    else:
+        twitch_link = f"https://twitch.tv/{twitch_username}"
+    
+    overrides[player_name] = {"twitch_link": twitch_link}
 
     try:
         with open(TWITCH_OVERRIDES_FILE, 'w', encoding='utf-8') as f:
             json.dump(overrides, f, indent=4)
-        return jsonify({"success": True, "message": "Twitch override saved successfully"}), 200
+        
+        # Clear caches to force refresh with new override
+        twitch_live_cache["data"] = {}
+        twitch_live_cache["last_updated"] = None
+        leaderboard_cache.clear()
+        
+        # Immediately attempt to fetch live status for the new override
+        username = extract_twitch_username(twitch_link)
+        live_status_result = None
+        if username:
+            print(f"Immediately fetching live status for new override: {username}")
+            try:
+                live_status = get_twitch_live_status([username])
+                if live_status and username in live_status:
+                    live_status_result = live_status[username]
+                    print(f"Live status for {username}: {live_status_result}")
+                else:
+                    print(f"No live status returned for {username}")
+            except Exception as e:
+                print(f"Error fetching immediate live status for {username}: {e}")
+        
+        response_data = {
+            "success": True, 
+            "message": "Twitch override saved successfully",
+            "player_name": player_name,
+            "twitch_link": twitch_link
+        }
+        
+        # Include live status in response if available
+        if live_status_result is not None:
+            response_data["live_status"] = live_status_result
+            
+        return jsonify(response_data), 200
+        
     except Exception as e:
         print(f"Error saving twitch_overrides.json: {e}")
         return jsonify({"success": False, "message": "Server error saving override"}), 500

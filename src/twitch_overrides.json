@@ -1,0 +1,11 @@
+{
+    "TestOverride": {
+        "twitch_link": "https://twitch.tv/testuser"
+    },
+    "LG_Naughty": {
+        "twitch_link": "https://twitch.tv/Naughty"
+    },
+    "NewStreamPlayer": {
+        "twitch_link": "https://twitch.tv/coolstreamer"
+    }
+}

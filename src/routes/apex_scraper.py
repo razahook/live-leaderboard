@@ -72,8 +72,7 @@ def add_twitch_override():
         twitch_live_cache["last_updated"] = None
         
         # --- FIXED: Clear the main leaderboard cache as well ---
-        leaderboard_cache["data"] = None
-        leaderboard_cache["last_updated"] = None
+        leaderboard_cache.clear()
         print("Leaderboard cache cleared due to Twitch override.")
         # --- END FIX ---
 
