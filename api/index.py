@@ -8,9 +8,9 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
-# ----- HARDCODED TWITCH ENV -----
-TWITCH_CLIENT_ID = "1nd45y861ah5uh84jh4e68gjvjshl1"
-TWITCH_CLIENT_SECRET = "zv6enoibg0g05qx9kbos20h57twvvw"
+# ----- SECURITY FIX: GET CREDENTIALS FROM ENVIRONMENT -----
+TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID") or ""
+TWITCH_CLIENT_SECRET = os.environ.get("TWITCH_CLIENT_SECRET") or ""
 APEX_API_KEY = os.environ.get("APEX_API_KEY") or ""
 
 # Create Flask app

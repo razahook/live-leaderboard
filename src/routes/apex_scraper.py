@@ -13,7 +13,8 @@ from src.cache_manager import leaderboard_cache
 
 apex_scraper_bp = Blueprint('apex_scraper', __name__)
 
-APEX_API_KEY = "456c01cf240c13399563026f5604d777"
+# SECURITY FIX: Use environment variable instead of hardcoded API key
+APEX_API_KEY = os.environ.get("APEX_API_KEY") or ""
 
 # Define the path for the JSON file to store Twitch overrides
 OVERRIDE_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'twitch_overrides.json')
@@ -71,9 +72,8 @@ def add_twitch_override():
         twitch_live_cache["data"] = {}
         twitch_live_cache["last_updated"] = None
         
-        # --- FIXED: Clear the main leaderboard cache as well ---
-        leaderboard_cache["data"] = None
-        leaderboard_cache["last_updated"] = None
+        # --- CACHE CONSISTENCY FIX: Use proper cache clear method ---
+        leaderboard_cache.clear()
         print("Leaderboard cache cleared due to Twitch override.")
         # --- END FIX ---
 
