@@ -1,0 +1,23 @@
+# Ignore source directory (since we only need api/index.py)
+src/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore test files
+test_*
+*_test.py
+
+# Ignore development files
+*.log
+.git/
+.gitconfig
+
+# Ignore database files (should use external DB in production)
+database/
+
+# Ignore assets that are served statically
+assets/

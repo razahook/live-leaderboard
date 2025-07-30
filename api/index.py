@@ -751,5 +751,12 @@ def health_check():
         "version": "1.0.0"
     })
 
-# Expose app for Vercel
-app
+# Initialize database when module is imported
+init_db(app)
+
+# Expose app for Vercel (this makes the app available to Vercel)
+if __name__ == '__main__':
+    app.run(debug=True)
+else:
+    # For Vercel deployment
+    application = app

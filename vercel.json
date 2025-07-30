@@ -14,5 +14,15 @@
     "api/index.py": {
       "maxDuration": 30
     }
-  }
+  },
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ]
 }
