@@ -255,49 +255,56 @@ def add_twitch_live_status(leaderboard_data):
     try:
         if not leaderboard_data or 'players' not in leaderboard_data:
             return leaderboard_data
+        
+        # Build a mapping of players to their Twitch usernames
+        player_twitch_mapping = []  # List of (player_index, username) tuples
         twitch_channels = []
-        for player in leaderboard_data['players']:
+        
+        for i, player in enumerate(leaderboard_data['players']):
             if player.get('twitch_link'):
                 username = extract_twitch_username(player['twitch_link'])
                 if username:
-                    twitch_channels.append(username)
-        if not twitch_channels:
-            for player in leaderboard_data['players']:
-                player['twitch_live'] = {
-                    "is_live": False,
-                    "stream_data": None
-                }
-                player['stream'] = None
-            return leaderboard_data
-        live_status = get_twitch_live_status(twitch_channels)
+                    player_twitch_mapping.append((i, username))
+                    if username not in twitch_channels:  # Avoid duplicate API calls
+                        twitch_channels.append(username)
+        
+        # Initialize all players with no live status
         for player in leaderboard_data['players']:
-            if player.get('twitch_link'):
-                username = extract_twitch_username(player['twitch_link'])
-                if username and live_status and username in live_status:
-                    player['twitch_live'] = live_status[username]
-                    if live_status[username]["is_live"]:
-                        player['stream'] = {
-                            "viewers": live_status[username]["stream_data"].get("viewer_count", 0),
-                            "game": live_status[username]["stream_data"].get("game_name", "Streaming"),
-                            "twitchUser": live_status[username]["stream_data"].get("user_name", username)
-                        }
-                    else:
-                        player['stream'] = None
-                else:
-                    player['twitch_live'] = {
-                        "is_live": False,
-                        "stream_data": None
+            player['twitch_live'] = {
+                "is_live": False,
+                "stream_data": None
+            }
+            player['stream'] = None
+        
+        if not twitch_channels:
+            return leaderboard_data
+        
+        # Get live status for all unique channels
+        live_status = get_twitch_live_status(twitch_channels)
+        
+        if not live_status:
+            return leaderboard_data
+        
+        # Apply live status to the correct players
+        for player_index, username in player_twitch_mapping:
+            player = leaderboard_data['players'][player_index]
+            
+            if username in live_status:
+                player['twitch_live'] = live_status[username]
+                if live_status[username]["is_live"]:
+                    stream_data = live_status[username]["stream_data"]
+                    player['stream'] = {
+                        "viewers": stream_data.get("viewer_count", 0),
+                        "game": stream_data.get("game_name", "Streaming"),
+                        "twitchUser": stream_data.get("user_name", username)
                     }
+                else:
                     player['stream'] = None
-            else:
-                player['twitch_live'] = {
-                    "is_live": False,
-                    "stream_data": None
-                }
-                player['stream'] = None
+        
         return leaderboard_data
     except Exception as e:
         print(f"Error adding Twitch live status: {e}")
+        # Ensure all players have default live status on error
         for player in leaderboard_data.get('players', []):
             player['twitch_live'] = {
                 "is_live": False,

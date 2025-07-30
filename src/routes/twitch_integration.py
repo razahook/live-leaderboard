@@ -250,14 +250,17 @@ def extract_twitch_username(twitch_link):
     
     patterns = [
         r"apexlegendsstatus\.com/core/out\?type=twitch&id=([a-zA-Z0-9_]+)",
-        r"(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)",
+        r"(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)(?:/|$|\?)",
         r"^([a-zA-Z0-9_]+)$"
     ]
     
     for pattern in patterns:
         match = re.search(pattern, twitch_link.strip())
         if match:
-            return match.group(1).lower()
+            username = match.group(1)
+            # Validate that the username doesn't contain invalid characters
+            if re.match(r'^[a-zA-Z0-9_]+$', username):
+                return username.lower()
     
     return None
 
