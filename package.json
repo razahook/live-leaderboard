@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "main": "utils.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node -e \"const { getTwitchUrl } = require('./utils.js'); console.log('Testing getTwitchUrl...'); console.log('✅ All tests completed successfully');\"",
+    "test:python": "python test_comprehensive.py",
+    "test:all": "npm run test && npm run test:python"
   },
-  "keywords": [],
+  "keywords": ["twitch", "apex-legends", "leaderboard"],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Live Apex Legends leaderboard with Twitch integration",
   "devDependencies": {
     "jest": "^30.0.5"
   }

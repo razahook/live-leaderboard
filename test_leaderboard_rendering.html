@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch Link Rendering Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: #fff; }
+        .test-section { margin: 20px 0; padding: 15px; background: #333; border-radius: 8px; }
+        .player-row { margin: 10px 0; padding: 10px; background: #444; border-radius: 5px; }
+        .live-badge { background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+        .twitch-link { color: #4CAF50; text-decoration: none; }
+        .twitch-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Twitch Link Rendering Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Scenario: Leaderboard with Mixed Twitch Link Formats</h2>
+        <div id="leaderboard-test"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Scenario: Status HTML with Twitch Links</h2>
+        <div id="status-test"></div>
+    </div>
+
+    <script>
+        /**
+         * Utility function to normalize Twitch links (copied from our main implementation)
+         */
+        function getTwitchUrl(input) {
+            if (!input || typeof input !== 'string') {
+                return '';
+            }
+            
+            const trimmed = input.trim();
+            if (!trimmed) {
+                return '';
+            }
+            
+            // If it's already a full URL (contains protocol and domain), return as-is
+            if (trimmed.match(/^https?:\/\/(www\.)?twitch\.tv\//i)) {
+                return trimmed;
+            }
+            
+            // If it contains twitch.tv but no protocol, add https://
+            if (trimmed.match(/^(www\.)?twitch\.tv\//i)) {
+                return `https://${trimmed}`;
+            }
+            
+            // If it's just a username, prefix with https://twitch.tv/
+            // Remove any leading slashes
+            const username = trimmed.replace(/^\/+/, '');
+            return `https://twitch.tv/${username}`;
+        }
+
+        /**
+         * Simulate the getStatusHtml function from the main app
+         */
+        function getStatusHtml(status, twitchLink) {
+            const s = String(status).toLowerCase();
+            const normalizedTwitchLink = getTwitchUrl(twitchLink);
+            if (s.includes('live')) return `<a href="${normalizedTwitchLink}" target="_blank" class="live-badge">LIVE</a>`;
+            if (s.includes('match')) return `<span class="live-badge" style="background: #8b5cf6;">IN-MATCH</span>`;
+            let html = `<span style="color: #9ca3af;">${status || 'Offline'}</span>`;
+            if (normalizedTwitchLink) html += ` <a href="${normalizedTwitchLink}" target="_blank" class="twitch-link" title="Visit Twitch channel">🎮</a>`;
+            return html;
+        }
+
+        // Test data with different Twitch link formats
+        const testPlayers = [
+            {
+                rank: 1,
+                name: 'LG_Naughty',
+                rp: 234567,
+                status: 'Live',
+                twitchLink: 'https://www.twitch.tv/Naughty' // Full URL with www
+            },
+            {
+                rank: 2,
+                name: 'Shroud',
+                rp: 223456,
+                status: 'Live',
+                twitchLink: 'https://twitch.tv/shroud' // Full URL without www
+            },
+            {
+                rank: 3,
+                name: 'TestUser',
+                rp: 212345,
+                status: 'Offline',
+                twitchLink: 'testuser' // Just username
+            },
+            {
+                rank: 4,
+                name: 'Player123',
+                rp: 201234,
+                status: 'In Match',
+                twitchLink: 'www.twitch.tv/player123' // URL without protocol
+            },
+            {
+                rank: 5,
+                name: 'NoTwitch',
+                rp: 198765,
+                status: 'Offline',
+                twitchLink: '' // No Twitch link
+            }
+        ];
+
+        // Render leaderboard test
+        const leaderboardDiv = document.getElementById('leaderboard-test');
+        testPlayers.forEach(player => {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-row';
+            
+            const normalizedLink = getTwitchUrl(player.twitchLink);
+            const playerNameHtml = normalizedLink ? 
+                `<a href="${normalizedLink}" target="_blank" class="twitch-link">${player.name}</a>` : 
+                player.name;
+            
+            playerDiv.innerHTML = `
+                <strong>#${player.rank}</strong> 
+                ${playerNameHtml} 
+                <span style="color: #10B981;">${player.rp.toLocaleString()} RP</span> 
+                ${getStatusHtml(player.status, player.twitchLink)}
+                <br>
+                <small style="color: #6b7280;">Original link: "${player.twitchLink}" → Normalized: "${normalizedLink}"</small>
+            `;
+            leaderboardDiv.appendChild(playerDiv);
+        });
+
+        // Render status test
+        const statusDiv = document.getElementById('status-test');
+        const statusTests = [
+            { status: 'Live', link: 'https://www.twitch.tv/Naughty' },
+            { status: 'Live', link: 'shroud' },
+            { status: 'Offline', link: 'www.twitch.tv/testuser' },
+            { status: 'In Match', link: '/username' },
+            { status: 'Offline', link: '' }
+        ];
+
+        statusTests.forEach((test, index) => {
+            const testDiv = document.createElement('div');
+            testDiv.className = 'player-row';
+            testDiv.innerHTML = `
+                <strong>Status Test ${index + 1}:</strong> 
+                ${getStatusHtml(test.status, test.link)}
+                <br>
+                <small style="color: #6b7280;">Input: "${test.link}" → Normalized: "${getTwitchUrl(test.link)}"</small>
+            `;
+            statusDiv.appendChild(testDiv);
+        });
+
+        console.log('Twitch link rendering test completed successfully!');
+    </script>
+</body>
+</html>
