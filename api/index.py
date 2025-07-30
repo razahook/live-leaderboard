@@ -742,6 +742,145 @@ def delete_user(user_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Map rotation endpoint
+@app.route('/api/map-rotation', methods=['GET'])
+def get_map_rotation():
+    """
+    Get current map rotation information from the Apex Legends API.
+    """
+    try:
+        response = requests.get(
+            f'https://api.mozambiquehe.re/maprotation?auth={APEX_API_KEY}',
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return jsonify({
+                "success": True,
+                "data": data
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": f"API error: {response.status_code}"
+            }), response.status_code
+            
+    except Exception as e:
+        print(f"Error getting map rotation: {e}")
+        return jsonify({
+            "success": False,
+            "message": f"Server error: {str(e)}"
+        }), 500
+
+# Twitch live status endpoint
+@app.route('/api/twitch/live-status', methods=['POST'])
+def check_live_status():
+    """
+    Check live status for multiple Twitch channels.
+    Expects JSON body with: {"channels": ["channel1", "channel2", ...]}
+    """
+    try:
+        data = request.get_json()
+        channels = data.get('channels', [])
+        
+        if not channels:
+            return jsonify({
+                "success": False,
+                "message": "No channels provided"
+            }), 400
+            
+        live_status = get_twitch_live_status(channels)
+        
+        return jsonify({
+            "success": True,
+            "data": live_status
+        })
+        
+    except Exception as e:
+        print(f"Error checking live status: {e}")
+        return jsonify({
+            "success": False,
+            "message": f"Server error: {str(e)}"
+        }), 500
+
+# Twitch override endpoint
+@app.route('/api/twitch/override', methods=['POST'])
+def add_twitch_override_alt():
+    """
+    Alternative endpoint for adding Twitch overrides.
+    Expects JSON body with: {"player_name": "...", "twitch_link": "...", "display_name": "..." (optional)}
+    """
+    try:
+        data = request.get_json()
+        player_name = data.get("player_name")
+        twitch_link = data.get("twitch_link")
+        display_name = data.get("display_name")  # Optional
+
+        if not player_name or not twitch_link:
+            return jsonify({"success": False, "error": "Missing player_name or twitch_link"}), 400
+
+        current_overrides = load_twitch_overrides()
+        
+        override_info = {"twitch_link": twitch_link}
+        if display_name:
+            override_info["display_name"] = display_name
+            
+        current_overrides[player_name] = override_info
+        
+        save_twitch_overrides(current_overrides)
+
+        # Clear caches to ensure new data is fetched
+        global twitch_live_cache, leaderboard_cache
+        twitch_live_cache["data"] = {}
+        twitch_live_cache["last_updated"] = None
+        leaderboard_cache.set_data(None)
+        
+        return jsonify({"success": True, "message": f"Override for {player_name} added/updated."})
+
+    except Exception as e:
+        print(f"Error adding Twitch override: {e}")
+        return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
+
+# Twitch config endpoint
+@app.route('/api/twitch/config', methods=['POST'])
+def set_twitch_config():
+    """
+    Set Twitch configuration (client ID and secret).
+    Expects JSON body with: {"client_id": "...", "client_secret": "..."}
+    """
+    try:
+        data = request.get_json()
+        client_id = data.get('client_id')
+        client_secret = data.get('client_secret')
+        
+        if not client_id or not client_secret:
+            return jsonify({
+                "success": False,
+                "message": "Client ID and client secret are required"
+            }), 400
+            
+        # Update global variables (in a real app, you'd want to store these securely)
+        global TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET
+        TWITCH_CLIENT_ID = client_id
+        TWITCH_CLIENT_SECRET = client_secret
+        
+        # Clear token cache to force refresh
+        global twitch_token_cache
+        twitch_token_cache = {"access_token": None, "expires_at": None}
+        
+        return jsonify({
+            "success": True,
+            "message": "Twitch configuration updated"
+        })
+        
+    except Exception as e:
+        print(f"Error setting Twitch config: {e}")
+        return jsonify({
+            "success": False,
+            "message": f"Server error: {str(e)}"
+        }), 500
+
 # Health check
 @app.route('/api/health', methods=['GET'])
 def health_check():

@@ -1,0 +1,38 @@
+# Exclude src/routes directory from being treated as serverless functions
+src/
+api/__pycache__/
+api/scrapers/
+__pycache__/
+
+# Exclude test and development files
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Exclude database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Exclude other files that shouldn't be functions
+test_results_detailed.json
+twitch_overrides.json

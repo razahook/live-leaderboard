@@ -14,5 +14,8 @@
     "api/index.py": {
       "maxDuration": 30
     }
-  }
+  },
+  "ignoreCommand": "echo 'Skipping build step'",
+  "buildCommand": "echo 'No build step needed'",
+  "outputDirectory": "."
 }
