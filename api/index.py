@@ -402,7 +402,345 @@ def add_twitch_live_status(leaderboard_data):
             player['stream'] = None
         return leaderboard_data
 
-# ... (rest of your code unchanged: user CRUD, health check, predator points, etc.)
+def scrape_predator_points_fallback(platform):
+    try:
+        url = "https://apexlegendsstatus.com/points-for-predator"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        }
+        response = requests.get(url, headers=headers, timeout=15)
+        response.raise_for_status()
+        content = response.text
+        platform_map = {
+            'PC': 'PC',
+            'PS4': 'PlayStation',
+            'X1': 'Xbox',
+            'SWITCH': 'Switch'
+        }
+        platform_name_for_scrape = platform_map.get(platform, platform)
+        pattern = rf'{re.escape(platform_name_for_scrape)}.*?(\d{{1,3}}(?:,\d{{3}})*)\s*RP.*?(\d{{1,3}}(?:,\d{{3}})*)\s*Masters? & Preds?'
+        match = re.search(pattern, content, re.IGNORECASE | re.DOTALL)
+        if match:
+            predator_rp = int(match.group(1).replace(',', ''))
+            masters_count = int(match.group(2).replace(',', ''))
+            return {
+                'predator_rp': predator_rp,
+                'masters_count': masters_count,
+                'rp_change_24h': 0,
+                'last_updated': datetime.now().isoformat(),
+                'source': 'apexlegendsstatus.com'
+            }
+        else:
+            print(f"No match found for {platform} in predator points scraping")
+            return None
+    except Exception as e:
+        print(f"Error scraping predator points for {platform}: {e}")
+        return None
+
+# Routes
+@app.route('/api/leaderboard/<platform>', methods=['GET'])
+def get_leaderboard(platform):
+    try:
+        cached_data = leaderboard_cache.get_data()
+        if cached_data:
+            dynamic_overrides = load_twitch_overrides()
+            leaderboard_data_to_return = cached_data.copy()
+            leaderboard_data_to_return['players'] = [player.copy() for player in cached_data['players']]
+            for player in leaderboard_data_to_return['players']:
+                override_info = dynamic_overrides.get(player.get("player_name"))
+                if override_info:
+                    player["twitch_link"] = override_info["twitch_link"]
+                    if "display_name" in override_info:
+                        player["player_name"] = override_info["display_name"]
+            leaderboard_data_to_return = add_twitch_live_status(leaderboard_data_to_return)
+            return jsonify({
+                "success": True,
+                "cached": True,
+                "data": leaderboard_data_to_return,
+                "last_updated": leaderboard_cache.last_updated.isoformat(),
+                "source": "apexlegendsstatus.com"
+            })
+        leaderboard_data = scrape_leaderboard(platform.upper(), 500)
+        if leaderboard_data:
+            dynamic_overrides = load_twitch_overrides()
+            for player in leaderboard_data['players']:
+                override_info = dynamic_overrides.get(player.get("player_name"))
+                if override_info:
+                    player["twitch_link"] = override_info["twitch_link"]
+                    if "display_name" in override_info:
+                        player["player_name"] = override_info["display_name"]
+            leaderboard_data = add_twitch_live_status(leaderboard_data)
+            leaderboard_cache.set_data(leaderboard_data)
+            return jsonify({
+                "success": True,
+                "cached": False,
+                "data": leaderboard_data,
+                "last_updated": leaderboard_cache.last_updated.isoformat(),
+                "source": "apexlegendsstatus.com"
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Failed to scrape leaderboard data"
+            }), 500
+    except Exception as e:
+        print(f"Server error in get_leaderboard: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": f"Server error: {str(e)}"
+        }), 500
+
+@app.route('/api/add-twitch-override', methods=['POST'])
+def add_twitch_override():
+    try:
+        data = request.get_json()
+        player_name = data.get("player_name")
+        twitch_username = data.get("twitch_username")
+        twitch_link = data.get("twitch_link")
+        display_name = data.get("display_name")
+        if not player_name:
+            return jsonify({"success": False, "error": "Missing player_name"}), 400
+        if not twitch_link and not twitch_username:
+            return jsonify({"success": False, "error": "Missing twitch_link or twitch_username"}), 400
+        current_overrides = load_twitch_overrides()
+        final_twitch_link = twitch_link or f"https://twitch.tv/{twitch_username}"
+        override_info = {"twitch_link": final_twitch_link}
+        if display_name:
+            override_info["display_name"] = display_name
+        current_overrides[player_name] = override_info
+        save_twitch_overrides(current_overrides)
+        twitch_live_cache["data"] = {}
+        twitch_live_cache["last_updated"] = None
+        leaderboard_cache.data = None
+        leaderboard_cache.last_updated = None
+        return jsonify({"success": True, "message": f"Override for {player_name} added/updated."})
+    except Exception as e:
+        print(f"Error adding Twitch override: {e}")
+        return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
+
+@app.route('/api/predator-points', methods=['GET'])
+def get_predator_points():
+    try:
+        platforms = ['PC', 'PS4', 'X1', 'SWITCH']
+        all_data = {}
+        api_call_successful = False
+        api_data = {}
+        
+        # Try API first
+        if APEX_API_KEY:
+            try:
+                print(f"Trying API call with key: {APEX_API_KEY[:10]}...")
+                response = requests.get(
+                    f'https://api.mozambiquehe.re/predator?auth={APEX_API_KEY}',
+                    timeout=15
+                )
+                print(f"API response status: {response.status_code}")
+                if response.status_code == 200:
+                    api_response_root = response.json()
+                    print(f"API response: {api_response_root}")
+                    api_data = api_response_root.get('RP', {})
+                    if api_data:
+                        api_call_successful = True
+                        print("API call successful")
+                else:
+                    print(f"API call failed with status {response.status_code}: {response.text}")
+            except Exception as e:
+                print(f"API call error: {e}")
+        else:
+            print("No APEX_API_KEY provided, skipping API call")
+        
+        for platform in platforms:
+            platform_data = {}
+            print(f"Processing platform: {platform}")
+            
+            if api_call_successful and platform in api_data:
+                platform_api_data = api_data.get(platform)
+                print(f"API data for {platform}: {platform_api_data}")
+                if platform_api_data:
+                    predator_rp = platform_api_data.get('val', 0)
+                    masters_count = platform_api_data.get('totalMastersAndPreds', 0)
+                    platform_data = {
+                        'predator_rp': predator_rp,
+                        'masters_count': masters_count,
+                        'rp_change_24h': 0,
+                        'last_updated': datetime.now().isoformat(),
+                        'source': 'api.mozambiquehe.re'
+                    }
+                    print(f"Using API data for {platform}")
+                else:
+                    print(f"API data empty for {platform}, falling back to scraping")
+                    scraped_data = scrape_predator_points_fallback(platform)
+                    if scraped_data:
+                        platform_data = scraped_data
+                    else:
+                        platform_data = {
+                            'error': 'API data missing and scraping failed to retrieve data',
+                            'last_updated': datetime.now().isoformat()
+                        }
+            else:
+                print(f"No API data for {platform}, using scraping fallback")
+                scraped_data = scrape_predator_points_fallback(platform)
+                if scraped_data:
+                    platform_data = scraped_data
+                else:
+                    platform_data = {
+                        'error': 'API failed and scraping failed to retrieve data',
+                        'last_updated': datetime.now().isoformat()
+                    }
+            
+            all_data[platform] = platform_data
+        
+        source_list = set(data.get('source', 'unknown') for data in all_data.values())
+        overall_source = "mixed" if len(source_list) > 1 else list(source_list)[0] if source_list else "unknown"
+        
+        print(f"Final predator points data: {all_data}")
+        return jsonify({
+            "success": True,
+            "data": all_data,
+            "overall_source": overall_source
+        })
+    except Exception as e:
+        print(f"Server error in get_predator_points: {e}")
+        return jsonify({
+            "success": False,
+            "error": f"Server error: {str(e)}"
+        }), 500
+
+@app.route('/api/player/<platform>/<player_name>', methods=['GET'])
+def get_player_stats(platform, player_name):
+    try:
+        valid_platforms = ['PC', 'PS4', 'X1', 'SWITCH']
+        if platform.upper() not in valid_platforms:
+            return jsonify({
+                "success": False,
+                "error": f"Invalid platform: {platform}. Must be one of {', '.join(valid_platforms)}."
+            }), 400
+        response = requests.get(
+            f'https://api.mozambiquehe.re/bridge?auth={APEX_API_KEY}&player={player_name}&platform={platform.upper()}',
+            timeout=10
+        )
+        if response.status_code == 200:
+            data = response.json()
+            if 'Error' in data:
+                return jsonify({
+                    "success": False,
+                    "error": data['Error']
+                }), 404
+            return jsonify({
+                "success": True,
+                "data": data
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": f"API returned status {response.status_code}: {response.text}"
+            }), response.status_code
+    except requests.exceptions.Timeout:
+        return jsonify({
+            "success": False,
+            "error": "Request to Apex Legends API timed out."
+        }), 503
+    except Exception as e:
+        print(f"Server error in get_player_stats for {player_name}: {e}")
+        return jsonify({
+            "success": False,
+            "error": f"Server error: {str(e)}"
+        }), 500
+
+@app.route('/api/tracker-stats', methods=['GET'])
+def get_tracker_stats():
+    try:
+        platform = request.args.get('platform')
+        identifier = request.args.get('identifier')
+        stat_type = request.args.get('type', 'profile')
+        if not platform or not identifier:
+            return jsonify({
+                "success": False,
+                "message": "Platform and identifier are required"
+            }), 400
+        TRACKER_GG_API_KEY = os.environ.get("TRACKER_GG_API_KEY") or ""
+        platform_map = {'origin': 'origin', 'psn': 'psn', 'xbl': 'xbl'}
+        tracker_platform = platform_map.get(platform, platform)
+        if stat_type == 'sessions':
+            url = f"https://public-api.tracker.gg/v2/apex/standard/profile/{tracker_platform}/{identifier}/sessions"
+        else:
+            url = f"https://public-api.tracker.gg/v2/apex/standard/profile/{tracker_platform}/{identifier}"
+        headers = {
+            'TRN-Api-Key': TRACKER_GG_API_KEY,
+            'User-Agent': 'ApexLeaderboard/1.0'
+        }
+        response = requests.get(url, headers=headers, timeout=15)
+        if response.status_code == 200:
+            return jsonify({
+                "success": True,
+                "data": response.json()
+            })
+        else:
+            error_data = {}
+            try:
+                error_data = response.json()
+            except:
+                error_data = {"message": response.text}
+            return jsonify({
+                "success": False,
+                "message": error_data.get("message", f"Tracker.gg API error: {response.status_code}")
+            }), response.status_code
+    except Exception as e:
+        print(f"Error in tracker-stats proxy: {e}")
+        return jsonify({
+            "success": False,
+            "message": f"Server error: {str(e)}"
+        }), 500
+
+# User CRUD
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    try:
+        users = User.query.all()
+        return jsonify([user.to_dict() for user in users])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/users', methods=['POST'])
+def create_user():
+    try:
+        data = request.json
+        user = User(username=data['username'], email=data['email'])
+        db.session.add(user)
+        db.session.commit()
+        return jsonify(user.to_dict()), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/users/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    try:
+        user = User.query.get_or_404(user_id)
+        return jsonify(user.to_dict())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/users/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
+    try:
+        user = User.query.get_or_404(user_id)
+        data = request.json
+        user.username = data.get('username', user.username)
+        user.email = data.get('email', user.email)
+        db.session.commit()
+        return jsonify(user.to_dict())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    try:
+        user = User.query.get_or_404(user_id)
+        db.session.delete(user)
+        db.session.commit()
+        return '', 204
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Health check
 @app.route('/api/health', methods=['GET'])
@@ -414,5 +752,4 @@ def health_check():
     })
 
 # Expose app for Vercel
-# DO NOT define a handler function! Just expose the app variable.
-# Vercel will auto-detect "app"
+app
