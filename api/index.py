@@ -77,7 +77,21 @@ twitch_token_cache = {"access_token": None, "expires_at": None}
 twitch_live_cache = {"data": {}, "last_updated": None, "cache_duration": 120}
 DYNAMIC_TWITCH_OVERRIDES = {}
 
-# Aggressive Twitch extraction and scraping
+def strip_status_suffix(username):
+    """
+    Removes common status suffixes from Twitch usernames.
+    E.g., 'RogueOffline' -> 'Rogue', 'ZeekoTV_In' -> 'ZeekoTV_'
+    Works for any username ending with status words, with or without underscores.
+    """
+    status_suffixes = [
+        "InMatch", "InLobby", "Offline", "Lobby", "In", "Match", "Playing", "History", "Performance"
+    ]
+    for status in status_suffixes:
+        # Remove if username ends with status, optionally preceded by an underscore
+        regex = re.compile(rf"(_)?{status}$", re.IGNORECASE)
+        username = regex.sub('', username)
+    return username
+
 def extract_twitch_username(twitch_link):
     if not twitch_link:
         return None
@@ -90,8 +104,7 @@ def extract_twitch_username(twitch_link):
         match = re.search(pattern, twitch_link.strip())
         if match:
             username = match.group(1)
-            # Remove status words and trailing underscores
-            username = re.sub(r'(In|Offline|Lobby|Match|Playing|History|Performance|Lvl\d*)$', '', username, flags=re.IGNORECASE)
+            username = strip_status_suffix(username)
             username = username.rstrip('_')
             return username
     return None
@@ -146,6 +159,8 @@ def get_twitch_live_status(channels):
                     username = channel
                 username = username.split("/")[0].split("?")[0]
                 if username:
+                    username = strip_status_suffix(username)
+                    username = username.rstrip('_')
                     clean_channels.append(username.lower())
         if not clean_channels:
             return {}
@@ -235,8 +250,7 @@ def scrape_leaderboard(platform="PC", max_players=500):
                             )
                             if twitch_match:
                                 username = twitch_match.group(1)
-                                # Remove trailing status
-                                username = re.sub(r'(In|Offline|Lobby|Match|Playing|History|Performance|Lvl\d*)$', '', username, flags=re.IGNORECASE)
+                                username = strip_status_suffix(username)
                                 username = username.rstrip('_')
                                 twitch_link = f"https://twitch.tv/{username}"
                         if not twitch_link:
@@ -246,7 +260,7 @@ def scrape_leaderboard(platform="PC", max_players=500):
                                 not re.search(r'\d', text_only_username_match.group(1))
                             ):
                                 username = text_only_username_match.group(1)
-                                username = re.sub(r'(In|Offline|Lobby|Match|Playing|History|Performance|Lvl\d*)$', '', username, flags=re.IGNORECASE)
+                                username = strip_status_suffix(username)
                                 username = username.rstrip('_')
                                 if username and len(username) >= 4:
                                     twitch_link = f"https://twitch.tv/{username}"
@@ -388,4 +402,17 @@ def add_twitch_live_status(leaderboard_data):
             player['stream'] = None
         return leaderboard_data
 
-# (Rest of your code: users CRUD, health check, stats, etc. unchanged -- see previous examples)
+# ... (rest of your code unchanged: user CRUD, health check, predator points, etc.)
+
+# Health check
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "version": "1.0.0"
+    })
+
+# Expose app for Vercel
+# DO NOT define a handler function! Just expose the app variable.
+# Vercel will auto-detect "app"
