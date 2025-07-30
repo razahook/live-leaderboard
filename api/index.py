@@ -502,6 +502,8 @@ def add_twitch_override():
             return jsonify({"success": False, "error": "Missing player_name"}), 400
         if not twitch_link and not twitch_username:
             return jsonify({"success": False, "error": "Missing twitch_link or twitch_username"}), 400
+        
+        # Step 1: Update the override mapping
         current_overrides = load_twitch_overrides()
         final_twitch_link = twitch_link or f"https://twitch.tv/{twitch_username}"
         override_info = {"twitch_link": final_twitch_link}
@@ -509,11 +511,33 @@ def add_twitch_override():
             override_info["display_name"] = display_name
         current_overrides[player_name] = override_info
         save_twitch_overrides(current_overrides)
+        
+        # Step 2: Fetch the latest Twitch data for that channel
+        extracted_username = extract_twitch_username(final_twitch_link)
+        twitch_data = None
+        if extracted_username:
+            live_status = get_twitch_live_status([extracted_username])
+            if live_status and extracted_username in live_status:
+                twitch_data = live_status[extracted_username]
+        
+        # Step 3: Clear caches to ensure fresh data on next leaderboard fetch
         twitch_live_cache["data"] = {}
         twitch_live_cache["last_updated"] = None
         leaderboard_cache.data = None
         leaderboard_cache.last_updated = None
-        return jsonify({"success": True, "message": f"Override for {player_name} added/updated."})
+        
+        # Step 4: Return response with Twitch data included
+        response_data = {
+            "success": True, 
+            "message": f"Override for {player_name} added/updated.",
+            "player_name": player_name,
+            "twitch_link": final_twitch_link,
+            "twitch_data": twitch_data
+        }
+        if display_name:
+            response_data["display_name"] = display_name
+            
+        return jsonify(response_data)
     except Exception as e:
         print(f"Error adding Twitch override: {e}")
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
