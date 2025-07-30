@@ -19,9 +19,9 @@ twitch_live_cache = {
     "cache_duration": 120  # 2 minutes
 }
 
-# Directly embed client ID and secret for testing
-TWITCH_CLIENT_ID = "1nd45y861ah5uh84jh4e68gjvjshl1"
-TWITCH_CLIENT_SECRET = "zv6enoibg0g05qx9kbos20h57twvvw"
+# Get Twitch credentials from environment variables
+TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID") or ""
+TWITCH_CLIENT_SECRET = os.environ.get("TWITCH_CLIENT_SECRET") or ""
 
 @twitch_bp.route("/api/twitch/live-status", methods=["POST"])
 def check_live_status():

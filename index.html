@@ -362,12 +362,19 @@
         const itemsPerPage = 50; 
         let previewTimeout;
         // DELETED: const NGROK_BASE_URL = '...'; 
-        const MOZAMBIQUE_API_KEY = '456c01cf240c13399563026f5604d777'; 
-        const TRACKER_GG_API_KEY = 'c4cc3d18-adaf-487b-b3da-d47b924585c4'; 
-        const GEMINI_API_KEY = "AIzaSyA_sdFUk6nrcC8sK3ZlnFbEexJgCTd8SqU";
+                // API keys should be provided by the backend or environment variables
+        // These are now handled server-side for security
         
         // API base URL - use Flask server for development, relative URLs for production
         const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+        
+        // Utility function to escape HTML to prevent XSS
+        function escapeHtml(text) {
+            if (typeof text !== 'string') return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
         
         const leaderboardBody = document.getElementById('leaderboard-body');
         const searchInput = document.getElementById('searchInput');
@@ -479,16 +486,16 @@
                     stream: player.stream || null
                 };
                 
-                const playerNameHtml = safePlayer.twitchLink ? `<a href="${safePlayer.twitchLink}" target="_blank" class="hover:text-emerald-400 transition-colors">${safePlayer.name}</a>` : safePlayer.name;
+                const playerNameHtml = safePlayer.twitchLink ? `<a href="${escapeHtml(safePlayer.twitchLink)}" target="_blank" class="hover:text-emerald-400 transition-colors">${escapeHtml(safePlayer.name)}</a>` : escapeHtml(safePlayer.name);
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-gray-200">#${safePlayer.rank}</td>
+                    <td class="px-6 py-4 font-medium text-gray-200">#${escapeHtml(safePlayer.rank.toString())}</td>
                     <td class="px-6 py-4 font-bold text-white">${playerNameHtml}</td>
-                    <td class="px-6 py-4 font-semibold text-emerald-400">${safePlayer.rp.toLocaleString()}</td>
+                    <td class="px-6 py-4 font-semibold text-emerald-400">${escapeHtml(safePlayer.rp.toLocaleString())}</td>
                     <td class="px-6 py-4">${getChangeHtml(safePlayer.change)}</td>
-                    <td class="px-6 py-4">${safePlayer.level.toLocaleString()}</td>
+                    <td class="px-6 py-4">${escapeHtml(safePlayer.level.toLocaleString())}</td>
                     <td class="px-6 py-4">${getStatusHtml(safePlayer.status, safePlayer.twitchLink)}</td>
                     <td class="px-6 py-4">${getStreamHtml(safePlayer.stream)}</td>
-                    <td class="px-6 py-4"><button onclick="analyzePlayerPerformance('${safePlayer.name}', ${safePlayer.rp}, ${safePlayer.change}, ${safePlayer.level})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200">Analyze ✨</button></td>
+                    <td class="px-6 py-4"><button onclick="analyzePlayerPerformance('${escapeHtml(safePlayer.name)}', ${safePlayer.rp}, ${safePlayer.change}, ${safePlayer.level})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200">Analyze ✨</button></td>
                 `;
                 row.addEventListener('mouseenter', (event) => handleMouseEnter(event, safePlayer));
                 row.addEventListener('mouseleave', handleMouseLeave);
@@ -758,8 +765,8 @@
             showModal(`Analyzing ${playerName}'s Performance`, '<div class="spinner"></div><p class="text-center mt-2">Generating analysis...</p>');
             const prompt = `As an Apex Legends coach, provide **3-4 concise, actionable bullet points** of feedback for player ${playerName}. Their current RP is ${playerRp}, 24-hour RP change: ${rpChange24h}, Level: ${playerLevel}. Focus on clear strengths and 1-2 key areas for improvement. Use a direct, encouraging tone. Very brief, max 70 words.`;
             
-            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+            const payload = { prompt: prompt };
+            const apiUrl = `${API_BASE_URL}/api/ai-analysis`;
 
             try {
                 const response = await fetch(apiUrl, {
@@ -771,12 +778,12 @@
                 
                 const result = await response.json();
                 if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                    modalContent.innerHTML = `<p class="text-gray-300">${result.candidates[0].content.parts[0].text}</p>`;
+                    modalContent.innerHTML = `<p class="text-gray-300">${escapeHtml(result.candidates[0].content.parts[0].text)}</p>`;
                 } else {
                     throw new Error("Invalid response structure from AI.");
                 }
             } catch (error) {
-                modalContent.innerHTML = `<p class="text-red-500">Error generating analysis: ${error.message}</p>`;
+                modalContent.innerHTML = `<p class="text-red-500">Error generating analysis: ${escapeHtml(error.message)}</p>`;
                 console.error("Error calling Gemini API:", error);
             }
         }
@@ -785,8 +792,8 @@
             showModal(`Insights for ${legendName} ✨`, '<div class="spinner"></div><p class="text-center mt-2">Fetching legend insights...</p>');
             const prompt = `Give me a **very brief lore bite** for ${legendName} from Apex Legends, then **3-4 super concise tactical tips** (bullet points) on using their abilities effectively. Max 60 words. Think quick, actionable advice.`;
             
-            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+            const payload = { prompt: prompt };
+            const apiUrl = `${API_BASE_URL}/api/ai-analysis`;
 
             try {
                 const response = await fetch(apiUrl, {
@@ -798,12 +805,12 @@
                 
                 const result = await response.json();
                 if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                    modalContent.innerHTML = `<p class="text-gray-300">${result.candidates[0].content.parts[0].text}</p>`;
+                    modalContent.innerHTML = `<p class="text-gray-300">${escapeHtml(result.candidates[0].content.parts[0].text)}</p>`;
                 } else {
                     throw new Error("Invalid response structure from AI.");
                 }
             } catch (error) {
-                modalContent.innerHTML = `<p class="text-red-500">Error fetching legend insights: ${error.message}</p>`;
+                modalContent.innerHTML = `<p class="text-red-500">Error fetching legend insights: ${escapeHtml(error.message)}</p>`;
                 console.error("Error calling Gemini API for legend tips:", error);
             }
         }

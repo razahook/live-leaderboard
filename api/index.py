@@ -8,9 +8,9 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
-# ----- HARDCODED TWITCH ENV -----
-TWITCH_CLIENT_ID = "1nd45y861ah5uh84jh4e68gjvjshl1"
-TWITCH_CLIENT_SECRET = "zv6enoibg0g05qx9kbos20h57twvvw"
+# ----- TWITCH ENV -----
+TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID") or ""
+TWITCH_CLIENT_SECRET = os.environ.get("TWITCH_CLIENT_SECRET") or ""
 APEX_API_KEY = os.environ.get("APEX_API_KEY") or ""
 
 # Create Flask app
@@ -705,11 +705,34 @@ def get_users():
 def create_user():
     try:
         data = request.json
-        user = User(username=data['username'], email=data['email'])
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        username = data.get('username', '').strip()
+        email = data.get('email', '').strip()
+        
+        # Input validation
+        if not username or len(username) < 3 or len(username) > 80:
+            return jsonify({"error": "Username must be between 3 and 80 characters"}), 400
+        
+        if not email or '@' not in email or len(email) > 120:
+            return jsonify({"error": "Valid email address required (max 120 characters)"}), 400
+        
+        # Check if user already exists
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            return jsonify({"error": "Username already exists"}), 409
+        
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
+            return jsonify({"error": "Email already exists"}), 409
+        
+        user = User(username=username, email=email)
         db.session.add(user)
         db.session.commit()
         return jsonify(user.to_dict()), 201
     except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/users/<int:user_id>', methods=['GET'])
@@ -725,11 +748,40 @@ def update_user(user_id):
     try:
         user = User.query.get_or_404(user_id)
         data = request.json
-        user.username = data.get('username', user.username)
-        user.email = data.get('email', user.email)
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        username = data.get('username', '').strip()
+        email = data.get('email', '').strip()
+        
+        # Input validation
+        if username and (len(username) < 3 or len(username) > 80):
+            return jsonify({"error": "Username must be between 3 and 80 characters"}), 400
+        
+        if email and ('@' not in email or len(email) > 120):
+            return jsonify({"error": "Valid email address required (max 120 characters)"}), 400
+        
+        # Check for conflicts if updating
+        if username and username != user.username:
+            existing_user = User.query.filter_by(username=username).first()
+            if existing_user:
+                return jsonify({"error": "Username already exists"}), 409
+        
+        if email and email != user.email:
+            existing_email = User.query.filter_by(email=email).first()
+            if existing_email:
+                return jsonify({"error": "Email already exists"}), 409
+        
+        # Update fields
+        if username:
+            user.username = username
+        if email:
+            user.email = email
+        
         db.session.commit()
         return jsonify(user.to_dict())
     except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/users/<int:user_id>', methods=['DELETE'])
@@ -739,6 +791,28 @@ def delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
         return '', 204
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# AI Analysis endpoints
+@app.route('/api/ai-analysis', methods=['POST'])
+def ai_analysis():
+    try:
+        data = request.json
+        prompt = data.get('prompt')
+        if not prompt:
+            return jsonify({"error": "Prompt is required"}), 400
+        
+        GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+        if not GEMINI_API_KEY:
+            return jsonify({"error": "Gemini API key not configured"}), 500
+        
+        api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+        payload = {"contents": [{"role": "user", "parts": [{"text": prompt}]}]}
+        
+        response = requests.post(api_url, json=payload, timeout=30)
+        response.raise_for_status()
+        return jsonify(response.json())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
