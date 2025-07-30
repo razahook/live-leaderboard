@@ -51,7 +51,7 @@ def init_db(app):
 # Initialize database
 init_db(app)
 
-# Caching
+# Cache
 class LeaderboardCache:
     def __init__(self, cache_duration=300):
         self.data = None
@@ -77,19 +77,13 @@ twitch_token_cache = {"access_token": None, "expires_at": None}
 twitch_live_cache = {"data": {}, "last_updated": None, "cache_duration": 120}
 DYNAMIC_TWITCH_OVERRIDES = {}
 
-# Aggressive Twitch extraction and scraping
 def extract_twitch_username(twitch_link):
+    # Always trust the scraped (anchor) link, just extract username
     if not twitch_link:
         return None
-    patterns = [
-        r"apexlegendsstatus\.com/core/out\?type=twitch&id=([a-zA-Z0-9_]+)",
-        r"(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)",
-        r"^([a-zA-Z0-9_]+)$"
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, twitch_link.strip())
-        if match:
-            return match.group(1).lower()
+    m = re.search(r"(?:twitch\.tv/|id=)([a-zA-Z0-9_]+)", twitch_link)
+    if m:
+        return m.group(1)
     return None
 
 def load_twitch_overrides():
@@ -228,37 +222,14 @@ def scrape_leaderboard(platform="PC", max_players=500):
                         if not player_name:
                             player_name = f"Player{rank}"
 
-                        # Aggressive Twitch extraction:
+                        # Twitch: ONLY use the anchor tag if present, do not guess from plain text
                         twitch_link = ""
-                        # 1. Try anchor tag
-                        twitch_anchor = player_info_cell.find("a", href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id="))
-                        if not twitch_anchor:
-                            twitch_anchor = player_info_cell.find(
-                                "a", class_=lambda x: x and "fa-twitch" in x, href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id=")
-                            )
+                        twitch_anchor = player_info_cell.find("a", href=re.compile(r"(twitch\.tv|apexlegendsstatus\.com/core/out\?type=twitch)"))
                         if twitch_anchor:
-                            extracted_username = extract_twitch_username(twitch_anchor["href"])
+                            twitch_href = twitch_anchor["href"]
+                            extracted_username = extract_twitch_username(twitch_href)
                             if extracted_username:
                                 twitch_link = f"https://twitch.tv/{extracted_username}"
-                        # 2. Try text content for twitch.tv/username
-                        if not twitch_link:
-                            twitch_match = re.search(
-                                r'(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)',
-                                player_info_cell.get_text(separator=' ', strip=True)
-                            )
-                            if twitch_match:
-                                username = twitch_match.group(1)
-                                twitch_link = f"https://twitch.tv/{username}"
-                        # 3. Fallback: find plausible username in text
-                        if not twitch_link:
-                            text_only_username_match = re.search(r'\b([a-zA-Z0-9_]{4,25})\b', player_info_cell.get_text(strip=True))
-                            if (
-                                text_only_username_match and
-                                not re.search(r'\d', text_only_username_match.group(1))
-                            ):
-                                username = text_only_username_match.group(1)
-                                if username and len(username) >= 4:
-                                    twitch_link = f"https://twitch.tv/{username}"
 
                         status = "Unknown"
                         player_text_for_status = player_info_cell.get_text(separator=' ', strip=True)
@@ -646,7 +617,6 @@ def get_tracker_stats():
             "message": f"Server error: {str(e)}"
         }), 500
 
-# User CRUD
 @app.route('/api/users', methods=['GET'])
 def get_users():
     try:
@@ -696,7 +666,6 @@ def delete_user(user_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Health check
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({
@@ -704,6 +673,3 @@ def health_check():
         "timestamp": datetime.now().isoformat(),
         "version": "1.0.0"
     })
-
-# Expose app for Vercel
-# DO NOT define a handler function! Just expose the app variable.
