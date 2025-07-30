@@ -34,7 +34,12 @@ def add_twitch_override():
 
     # Create the Twitch link - handle both username and full URL formats
     if twitch_username.startswith('http'):
-        twitch_link = twitch_username
+        # Extract username from URL and normalize
+        username = extract_twitch_username(twitch_username)
+        if username:
+            twitch_link = f"https://twitch.tv/{username}"
+        else:
+            twitch_link = twitch_username  # Fallback to original
     else:
         twitch_link = f"https://twitch.tv/{twitch_username}"
     

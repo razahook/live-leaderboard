@@ -7,5 +7,17 @@
     },
     "NewStreamPlayer": {
         "twitch_link": "https://twitch.tv/coolstreamer"
+    },
+    "TestURL1": {
+        "twitch_link": "https://twitch.tv/testuser"
+    },
+    "TestURL2": {
+        "twitch_link": "https://twitch.tv/testuser2"
+    },
+    "TestURL3": {
+        "twitch_link": "https://twitch.tv/testuser3"
+    },
+    "TestOverridePlayer": {
+        "twitch_link": "https://twitch.tv/naughty"
     }
 }

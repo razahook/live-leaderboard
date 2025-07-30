@@ -47,7 +47,7 @@ def extract_player_name(cell, twitch_link=""):
 
     return None
 
-@leaderboard_bp.route('/leaderboard/<platform>', methods=['GET'])
+@leaderboard_bp.route('/api/leaderboard/<platform>', methods=['GET'])
 def get_leaderboard(platform):
     """
     Get live ranked leaderboard for specified platform with Twitch live status

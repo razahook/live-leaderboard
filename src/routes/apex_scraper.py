@@ -41,7 +41,7 @@ def save_twitch_overrides(overrides):
         print(f"Error saving Twitch overrides file: {e}")
 
 # --- MODIFIED ROUTE: Clear leaderboard cache after override ---
-@apex_scraper_bp.route('/add-twitch-override', methods=['POST'])
+@apex_scraper_bp.route('/api/add-twitch-override', methods=['POST'])
 def add_twitch_override():
     """
     Adds or updates a Twitch link override for a player.
@@ -82,7 +82,7 @@ def add_twitch_override():
         print(f"Error adding Twitch override: {e}")
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
-@apex_scraper_bp.route('/predator-points', methods=['GET'])
+@apex_scraper_bp.route('/api/predator-points', methods=['GET'])
 def get_predator_points():
     """
     Get predator points for all platforms using the correct Mozambiquehe.re API.
