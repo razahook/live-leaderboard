@@ -309,6 +309,7 @@ def scrape_leaderboard_optimized(platform="PC", max_players=500, timeout=25):
                     if len(text) > 3 and not text.isdigit():
                         # Clean up the text
                         clean_name = re.sub(r'\s+(In|Offline|match|lobby|Lvl).*', '', text, flags=re.IGNORECASE)
+                        clean_name = re.sub(r'(In|Offline|match|lobby)$', '', clean_name, flags=re.IGNORECASE)
                         clean_name = re.sub(r'[^\w\s_-]', '', clean_name).strip()
                         if clean_name and len(clean_name) > 3:
                             player_name = clean_name[:20]  # Limit length
