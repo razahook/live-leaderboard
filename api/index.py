@@ -224,7 +224,7 @@ def extract_twitch_username(twitch_link):
 
     return None
 
-def scrape_leaderboard(platform="PC", max_players=50):
+def scrape_leaderboard(platform="PC", max_players=500):
     base_url = f"https://apexlegendsstatus.com/live-ranked-leaderboards/Battle_Royale/{platform}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -507,7 +507,7 @@ def get_leaderboard(platform):
             })
 
         print(f"Scraping fresh leaderboard data for platform: {platform}")
-        leaderboard_data = scrape_leaderboard(platform.upper())
+        leaderboard_data = scrape_leaderboard(platform.upper(), 500)
         if leaderboard_data:
             try:
                 dynamic_overrides = load_twitch_overrides()
