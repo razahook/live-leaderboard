@@ -4,7 +4,8 @@ import requests
 import re
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
+import os
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
@@ -750,39 +751,91 @@ def get_map_rotation():
                 "success": False,
                 "error": "API key not configured"
             }), 500
-            
-        response = requests.get(
-            f'https://api.mozambiquehe.re/maprotation?auth={APEX_API_KEY}',
-            timeout=10
-        )
         
-        if response.status_code == 200:
-            data = response.json()
-            if 'Error' in data:
+        # Try external API first
+        try:
+            response = requests.get(
+                f'https://api.mozambiquehe.re/maprotation?auth={APEX_API_KEY}',
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'Error' in data:
+                    raise Exception(data['Error'])
+                return jsonify({
+                    "success": True,
+                    "data": data
+                })
+            else:
+                raise Exception(f"API returned status {response.status_code}")
+                
+        except Exception as api_error:
+            print(f"External API failed: {api_error}")
+            
+            # In development, provide mock data as fallback
+            # In production, this would just return the error
+            if os.environ.get('FLASK_ENV') == 'development' or not os.environ.get('VERCEL'):
+                print("Using mock data for development")
+                mock_data = {
+                    "current": {
+                        "readableDate_start": "2025-01-01 00:00:00",
+                        "readableDate_end": "2025-01-01 01:30:00", 
+                        "map": "World's Edge",
+                        "code": "worlds_edge",
+                        "DurationInSecs": 5400,
+                        "DurationInMinutes": 90,
+                        "remainingTimer": "01:23:45"
+                    },
+                    "next": {
+                        "readableDate_start": "2025-01-01 01:30:00",
+                        "readableDate_end": "2025-01-01 03:00:00",
+                        "map": "Kings Canyon", 
+                        "code": "kings_canyon",
+                        "DurationInSecs": 5400,
+                        "DurationInMinutes": 90,
+                        "remainingTimer": "02:53:45"
+                    },
+                    "arenasUnranked": {
+                        "current": {
+                            "readableDate_start": "2025-01-01 00:00:00",
+                            "readableDate_end": "2025-01-01 01:00:00",
+                            "map": "Artillery",
+                            "code": "artillery",
+                            "DurationInSecs": 3600,
+                            "DurationInMinutes": 60,
+                            "remainingTimer": "00:37:22"
+                        }
+                    }
+                }
+                
+                return jsonify({
+                    "success": True,
+                    "data": mock_data,
+                    "note": "Using demo data - external API unavailable"
+                })
+            else:
+                # In production, return the actual error
                 return jsonify({
                     "success": False,
-                    "error": data['Error']
-                }), 400
-            return jsonify({
-                "success": True,
-                "data": data
-            })
-        else:
-            return jsonify({
-                "success": False,
-                "error": f"API returned status {response.status_code}: {response.text}"
-            }), response.status_code
-    except requests.exceptions.Timeout:
-        return jsonify({
-            "success": False,
-            "error": "Request to Apex Legends API timed out."
-        }), 503
+                    "error": f"Failed to fetch map rotation data: {str(api_error)}"
+                }), 503
+            
     except Exception as e:
         print(f"Server error in get_map_rotation: {e}")
         return jsonify({
             "success": False,
             "error": f"Server error: {str(e)}"
         }), 500
+
+# Static file serving for development
+@app.route('/')
+def serve_index():
+    return send_from_directory(os.path.dirname(os.path.dirname(__file__)), 'index.html')
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    return send_from_directory(os.path.dirname(os.path.dirname(__file__)), filename)
 
 # Health check
 @app.route('/api/health', methods=['GET'])
