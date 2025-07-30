@@ -161,6 +161,10 @@ def get_twitch_live_status(channels):
     """
     Get live status for multiple Twitch channels
     """
+    # Check if we're in test mode (for mocking)
+    if hasattr(get_twitch_live_status, '_test_mode'):
+        return get_twitch_live_status._test_mock_function(channels)
+    
     access_token = get_twitch_access_token()
     if not access_token:
         return None

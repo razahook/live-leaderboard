@@ -1,12 +1,5 @@
 {
     "LG_Naughty": {
         "twitch_link": "https://www.twitch.tv/Naughty"
-    },
-    "TestPlayer123": {
-        "twitch_link": "https://twitch.tv/teststreamer",
-        "display_name": "Test Player"
-    },
-    "TestPlayer": {
-        "twitch_link": "https://twitch.tv/teststreamer"
     }
 }
