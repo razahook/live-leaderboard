@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+import traceback
 
 # ----- HARDCODED TWITCH ENV -----
 TWITCH_CLIENT_ID = "1nd45y861ah5uh84jh4e68gjvjshl1"
@@ -107,19 +108,19 @@ def save_twitch_overrides(overrides):
     DYNAMIC_TWITCH_OVERRIDES = overrides
 
 def get_twitch_access_token():
-    if (twitch_token_cache["access_token"] and
-        twitch_token_cache["expires_at"] and
-        datetime.now() < twitch_token_cache["expires_at"]):
-        return twitch_token_cache["access_token"]
-
-    client_id = TWITCH_CLIENT_ID
-    client_secret = TWITCH_CLIENT_SECRET
-
-    if not client_id or not client_secret:
-        print("Twitch Client ID or Secret not configured")
-        return None
-
     try:
+        if (twitch_token_cache["access_token"] and
+            twitch_token_cache["expires_at"] and
+            datetime.now() < twitch_token_cache["expires_at"]):
+            return twitch_token_cache["access_token"]
+
+        client_id = TWITCH_CLIENT_ID
+        client_secret = TWITCH_CLIENT_SECRET
+
+        if not client_id or not client_secret:
+            print("Twitch Client ID or Secret not configured")
+            return None
+
         response = requests.post("https://id.twitch.tv/oauth2/token", data={
             "client_id": client_id,
             "client_secret": client_secret,
@@ -137,20 +138,21 @@ def get_twitch_access_token():
 
     except Exception as e:
         print(f"Error getting Twitch access token: {e}")
+        traceback.print_exc()
         return None
 
 def get_twitch_live_status(channels):
-    access_token = get_twitch_access_token()
-    if not access_token:
-        print("No Twitch access token")
-        return None
-
-    client_id = TWITCH_CLIENT_ID
-    if not client_id:
-        print("No Twitch client ID")
-        return None
-
     try:
+        access_token = get_twitch_access_token()
+        if not access_token:
+            print("No Twitch access token")
+            return None
+
+        client_id = TWITCH_CLIENT_ID
+        if not client_id:
+            print("No Twitch client ID")
+            return None
+
         clean_channels = []
         for channel in channels:
             if isinstance(channel, str):
@@ -204,6 +206,7 @@ def get_twitch_live_status(channels):
 
     except Exception as e:
         print(f"Error getting Twitch live status: {e}")
+        traceback.print_exc()
         return None
 
 def extract_twitch_username(twitch_link):
@@ -353,8 +356,9 @@ def scrape_leaderboard(platform="PC", max_players=500):
                             })
                             if len(all_players) % 50 == 0:
                                 print(f"Extracted {len(all_players)} players so far...")
-                    except (ValueError, IndexError, AttributeError) as e:
+                    except Exception as e:
                         print(f"Error parsing row {i}: {e}")
+                        traceback.print_exc()
                         continue
         print(f"Successfully extracted {len(all_players)} real players")
         if len(all_players) < max_players:
@@ -382,7 +386,12 @@ def scrape_leaderboard(platform="PC", max_players=500):
         }
     except Exception as e:
         print(f"Error scraping leaderboard: {e}")
-        return None
+        traceback.print_exc()
+        return {
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+            "stage": "scrape_leaderboard"
+        }
 
 def add_twitch_live_status(leaderboard_data):
     try:
@@ -431,13 +440,112 @@ def add_twitch_live_status(leaderboard_data):
         return leaderboard_data
     except Exception as e:
         print(f"Error adding Twitch live status: {e}")
+        traceback.print_exc()
         for player in leaderboard_data.get('players', []):
             player['twitch_live'] = {
                 "is_live": False,
                 "stream_data": None
             }
             player['stream'] = None
+        leaderboard_data["error"] = str(e)
+        leaderboard_data["traceback"] = traceback.format_exc()
+        leaderboard_data["stage"] = "add_twitch_live_status"
         return leaderboard_data
 
+@app.route('/api/leaderboard/<platform>', methods=['GET'])
+def get_leaderboard(platform):
+    print(f"Entering get_leaderboard function for platform: {platform}")
+    try:
+        cached_data = leaderboard_cache.get_data()
+        if cached_data:
+            print("Serving leaderboard from cache, but re-applying latest Twitch overrides and live status.")
+            dynamic_overrides = load_twitch_overrides()
+            leaderboard_data_to_return = cached_data.copy()
+            leaderboard_data_to_return['players'] = [player.copy() for player in cached_data['players']]
+            for player in leaderboard_data_to_return['players']:
+                override_info = dynamic_overrides.get(player.get("player_name"))
+                if override_info:
+                    player["twitch_link"] = override_info["twitch_link"]
+                    if "display_name" in override_info:
+                        player["player_name"] = override_info["display_name"]
+            leaderboard_data_to_return = add_twitch_live_status(leaderboard_data_to_return)
+            return jsonify({
+                "success": True,
+                "cached": True,
+                "data": leaderboard_data_to_return,
+                "last_updated": leaderboard_cache.last_updated.isoformat() if leaderboard_cache.last_updated else None,
+                "source": "apexlegendsstatus.com"
+            })
+
+        print(f"Scraping fresh leaderboard data for platform: {platform}")
+        leaderboard_data = scrape_leaderboard(platform.upper(), 500)
+        # Enhanced error reporting
+        if leaderboard_data is None:
+            return jsonify({
+                "success": False,
+                "error": "Failed to scrape leaderboard data (None returned)",
+                "stage": "scrape_leaderboard"
+            }), 500
+        if isinstance(leaderboard_data, dict) and leaderboard_data.get("error"):
+            return jsonify({
+                "success": False,
+                "error": leaderboard_data.get("error"),
+                "traceback": leaderboard_data.get("traceback"),
+                "stage": leaderboard_data.get("stage", "scrape_leaderboard")
+            }), 500
+
+        try:
+            dynamic_overrides = load_twitch_overrides()
+            print(f"Loaded dynamic Twitch overrides: {dynamic_overrides}")
+        except Exception as e:
+            print(f"Warning: Could not load Twitch overrides in get_leaderboard: {e}. Proceeding without overrides.")
+            dynamic_overrides = {}
+
+        for player in leaderboard_data['players']:
+            override_info = dynamic_overrides.get(player.get("player_name"))
+            if override_info:
+                player["twitch_link"] = override_info["twitch_link"]
+                if "display_name" in override_info:
+                    player["player_name"] = override_info["display_name"]
+
+        for player in leaderboard_data['players']:
+            if player["player_name"] == "Player2" or (
+                player.get("twitch_live", {}).get("stream_data", {}).get("user_name") == "anayaunni"
+                and player.get("player_name") == "Player2"
+            ):
+                player["rp"] = 214956
+                print(f"Manually updated RP for Player2/anayaunni to {player['rp']}")
+                break
+
+        print("Adding Twitch live status to leaderboard data.")
+        leaderboard_data = add_twitch_live_status(leaderboard_data)
+        # Enhanced error reporting for add_twitch_live_status
+        if isinstance(leaderboard_data, dict) and leaderboard_data.get("error"):
+            return jsonify({
+                "success": False,
+                "error": leaderboard_data.get("error"),
+                "traceback": leaderboard_data.get("traceback"),
+                "stage": leaderboard_data.get("stage", "add_twitch_live_status")
+            }), 500
+
+        leaderboard_cache.set_data(leaderboard_data)
+        print("Returning fresh leaderboard data")
+        return jsonify({
+            "success": True,
+            "cached": False,
+            "data": leaderboard_data,
+            "last_updated": leaderboard_cache.last_updated.isoformat() if leaderboard_cache.last_updated else None,
+            "source": "apexlegendsstatus.com"
+        })
+    except Exception as e:
+        print(f"Server error in get_leaderboard: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "error": f"Server error: {str(e)}",
+            "traceback": traceback.format_exc(),
+            "stage": "get_leaderboard"
+        }), 500
+
 # ... (rest of your endpoints remain unchanged)
-# Please let me know if you want the rest of the code included as well.
+# Let me know if you'd like the full code for the remaining endpoints with similar error handling.
