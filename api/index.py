@@ -12,7 +12,7 @@ import traceback
 # ----- HARDCODED TWITCH ENV -----
 TWITCH_CLIENT_ID = "1nd45y861ah5uh84jh4e68gjvjshl1"
 TWITCH_CLIENT_SECRET = "zv6enoibg0g05qx9kbos20h57twvvw"
-APEX_API_KEY = os.environ.get("APEX_API_KEY") or ""  # Still use env for other secrets
+APEX_API_KEY = os.environ.get("APEX_API_KEY") or ""  # Use env if available
 
 # Create Flask app
 app = Flask(__name__)
@@ -39,17 +39,14 @@ class User(db.Model):
 def init_db(app):
     """Initializes the database connection and creates tables."""
     postgres_url = os.environ.get('POSTGRES_URL')
-
     if postgres_url:
         app.config['SQLALCHEMY_DATABASE_URI'] = postgres_url.replace("postgres://", "postgresql://")
     else:
         db_path = os.path.join(os.path.dirname(__file__), '..', 'database', 'app.db')
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
         app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
-
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
-
     with app.app_context():
         db.create_all()
 
@@ -77,33 +74,26 @@ class LeaderboardCache:
         self.data = data
         self.last_updated = datetime.now()
 
-# Global cache instances
 leaderboard_cache = LeaderboardCache()
-
-# Twitch configuration and caches
 
 twitch_token_cache = {
     "access_token": None,
     "expires_at": None
 }
-
 twitch_live_cache = {
     "data": {},
     "last_updated": None,
     "cache_duration": 120
 }
 
-# --- IN-MEMORY TWITCH OVERRIDES (FOR SERVERLESS) ---
 DYNAMIC_TWITCH_OVERRIDES = {}
 
 # Utility functions
 def load_twitch_overrides():
-    # In-memory only for serverless compatibility
     global DYNAMIC_TWITCH_OVERRIDES
     return DYNAMIC_TWITCH_OVERRIDES
 
 def save_twitch_overrides(overrides):
-    # In-memory only for serverless compatibility
     global DYNAMIC_TWITCH_OVERRIDES
     DYNAMIC_TWITCH_OVERRIDES = overrides
 
@@ -126,16 +116,12 @@ def get_twitch_access_token():
             "client_secret": client_secret,
             "grant_type": "client_credentials"
         }, timeout=10)
-
         response.raise_for_status()
         token_data = response.json()
-
         twitch_token_cache["access_token"] = token_data["access_token"]
         expires_in = token_data.get("expires_in", 3600) - 60
         twitch_token_cache["expires_at"] = datetime.now() + timedelta(seconds=expires_in)
-
         return token_data["access_token"]
-
     except Exception as e:
         print(f"Error getting Twitch access token: {e}")
         traceback.print_exc()
@@ -152,7 +138,6 @@ def get_twitch_live_status(channels):
         if not client_id:
             print("No Twitch client ID")
             return None
-
         clean_channels = []
         for channel in channels:
             if isinstance(channel, str):
@@ -163,7 +148,6 @@ def get_twitch_live_status(channels):
                 username = username.split("/")[0].split("?")[0]
                 if username:
                     clean_channels.append(username.lower())
-
         if not clean_channels:
             return {}
 
@@ -174,20 +158,15 @@ def get_twitch_live_status(channels):
             "Authorization": f"Bearer {access_token}",
             "Client-Id": client_id
         }
-
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
-
         streams_data = response.json()
-
         live_status = {}
-
         for channel in clean_channels:
             live_status[channel] = {
                 "is_live": False,
                 "stream_data": None
             }
-
         for stream in streams_data.get("data", []):
             username = stream["user_login"].lower()
             live_status[username] = {
@@ -201,9 +180,7 @@ def get_twitch_live_status(channels):
                     "user_name": stream.get("user_name", username)
                 }
             }
-
         return live_status
-
     except Exception as e:
         print(f"Error getting Twitch live status: {e}")
         traceback.print_exc()
@@ -212,18 +189,15 @@ def get_twitch_live_status(channels):
 def extract_twitch_username(twitch_link):
     if not twitch_link:
         return None
-
     patterns = [
         r"apexlegendsstatus\.com/core/out\?type=twitch&id=([a-zA-Z0-9_]+)",
         r"(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)",
         r"^([a-zA-Z0-9_]+)$"
     ]
-
     for pattern in patterns:
         match = re.search(pattern, twitch_link.strip())
         if match:
             return match.group(1).lower()
-
     return None
 
 def scrape_leaderboard(platform="PC", max_players=500):
@@ -547,5 +521,14 @@ def get_leaderboard(platform):
             "stage": "get_leaderboard"
         }), 500
 
-# ... (rest of your endpoints remain unchanged)
-# Let me know if you'd like the full code for the remaining endpoints with similar error handling.
+# --- Simple health check route ---
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({"success": True, "status": "ok"})
+
+# --- Root route for debugging ---
+@app.route('/')
+def index():
+    return "Apex Live Leaderboard API is running."
+
+# ---- Add any other required endpoints below (player stats, thresholds, etc.) ----
