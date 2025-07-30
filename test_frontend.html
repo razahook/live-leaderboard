@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test getTwitchUrl Function</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: #fff; }
+        .test-case { margin: 10px 0; padding: 10px; background: #333; border-radius: 5px; }
+        .result { color: #4CAF50; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <h1>Test getTwitchUrl Function</h1>
+    <div id="test-results"></div>
+
+    <script>
+        /**
+         * Utility function to normalize Twitch links
+         */
+        function getTwitchUrl(input) {
+            if (!input || typeof input !== 'string') {
+                return '';
+            }
+            
+            const trimmed = input.trim();
+            if (!trimmed) {
+                return '';
+            }
+            
+            // If it's already a full URL (contains protocol and domain), return as-is
+            if (trimmed.match(/^https?:\/\/(www\.)?twitch\.tv\//i)) {
+                return trimmed;
+            }
+            
+            // If it contains twitch.tv but no protocol, add https://
+            if (trimmed.match(/^(www\.)?twitch\.tv\//i)) {
+                return `https://${trimmed}`;
+            }
+            
+            // If it's just a username, prefix with https://twitch.tv/
+            // Remove any leading slashes
+            const username = trimmed.replace(/^\/+/, '');
+            return `https://twitch.tv/${username}`;
+        }
+
+        // Test cases
+        const testCases = [
+            { input: 'https://www.twitch.tv/Naughty', expected: 'https://www.twitch.tv/Naughty' },
+            { input: 'https://twitch.tv/shroud', expected: 'https://twitch.tv/shroud' },
+            { input: 'Naughty', expected: 'https://twitch.tv/Naughty' },
+            { input: 'www.twitch.tv/testuser', expected: 'https://www.twitch.tv/testuser' },
+            { input: 'twitch.tv/player123', expected: 'https://twitch.tv/player123' },
+            { input: '/username', expected: 'https://twitch.tv/username' },
+            { input: '', expected: '' },
+            { input: null, expected: '' },
+            { input: '  Naughty  ', expected: 'https://twitch.tv/Naughty' }
+        ];
+
+        // Run tests
+        const resultsDiv = document.getElementById('test-results');
+        let allPassed = true;
+
+        testCases.forEach((testCase, index) => {
+            const result = getTwitchUrl(testCase.input);
+            const passed = result === testCase.expected;
+            if (!passed) allPassed = false;
+
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test-case';
+            testDiv.innerHTML = `
+                <strong>Test ${index + 1}:</strong> ${passed ? '✅ PASS' : '❌ FAIL'}<br>
+                Input: "${testCase.input}"<br>
+                Expected: "${testCase.expected}"<br>
+                Result: <span class="${passed ? 'result' : 'error'}">"${result}"</span>
+            `;
+            resultsDiv.appendChild(testDiv);
+        });
+
+        // Summary
+        const summaryDiv = document.createElement('div');
+        summaryDiv.className = 'test-case';
+        summaryDiv.innerHTML = `<h2>${allPassed ? '✅ All Tests Passed!' : '❌ Some Tests Failed'}</h2>`;
+        resultsDiv.appendChild(summaryDiv);
+
+        // Test link rendering
+        const linkTestDiv = document.createElement('div');
+        linkTestDiv.className = 'test-case';
+        linkTestDiv.innerHTML = `
+            <h3>Link Rendering Test:</h3>
+            <p>Full URL: <a href="${getTwitchUrl('https://www.twitch.tv/Naughty')}" target="_blank" style="color: #4CAF50;">https://www.twitch.tv/Naughty</a></p>
+            <p>Username: <a href="${getTwitchUrl('shroud')}" target="_blank" style="color: #4CAF50;">shroud (normalized)</a></p>
+        `;
+        resultsDiv.appendChild(linkTestDiv);
+    </script>
+</body>
+</html>

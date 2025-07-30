@@ -30,7 +30,16 @@ def add_twitch_override():
             print(f"Error loading twitch_overrides.json: {e}")
             return jsonify({"success": False, "message": "Server error loading overrides"}), 500
 
-    overrides[player_name] = {"twitch_link": f"https://twitch.tv/{twitch_username}"}
+    # Normalize the Twitch link - don't prefix if it's already a full URL
+    if twitch_username.startswith(('http://', 'https://')):
+        twitch_link = twitch_username
+    elif twitch_username.startswith(('www.twitch.tv/', 'twitch.tv/')):
+        twitch_link = f"https://{twitch_username}"
+    else:
+        # It's just a username, prefix with full Twitch URL
+        twitch_link = f"https://twitch.tv/{twitch_username.lstrip('/')}"
+    
+    overrides[player_name] = {"twitch_link": twitch_link}
 
     try:
         with open(TWITCH_OVERRIDES_FILE, 'w', encoding='utf-8') as f:

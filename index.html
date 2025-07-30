@@ -356,8 +356,39 @@
     </div>
 
     <script>
+        /**
+         * Utility function to normalize Twitch links
+         * @param {string} input - Either a full Twitch URL or just a username
+         * @returns {string} - Normalized Twitch URL with https://twitch.tv/ prefix
+         */
+        function getTwitchUrl(input) {
+            if (!input || typeof input !== 'string') {
+                return '';
+            }
+            
+            const trimmed = input.trim();
+            if (!trimmed) {
+                return '';
+            }
+            
+            // If it's already a full URL (contains protocol and domain), return as-is
+            if (trimmed.match(/^https?:\/\/(www\.)?twitch\.tv\//i)) {
+                return trimmed;
+            }
+            
+            // If it contains twitch.tv but no protocol, add https://
+            if (trimmed.match(/^(www\.)?twitch\.tv\//i)) {
+                return `https://${trimmed}`;
+            }
+            
+            // If it's just a username, prefix with https://twitch.tv/
+            // Remove any leading slashes
+            const username = trimmed.replace(/^\/+/, '');
+            return `https://twitch.tv/${username}`;
+        }
+
         let allPlayers = [];
-        let filteredAndSortedPlayers = []; 
+        let filteredAndSortedPlayers = [];
         let currentPage = 1;
         const itemsPerPage = 50; 
         let previewTimeout;
@@ -445,10 +476,11 @@
 
         const getStatusHtml = (status, twitchLink) => {
             const s = String(status).toLowerCase();
-            if (s.includes('live')) return `<a href="${twitchLink}" target="_blank" class="animate-live-pulse bg-red-600 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">LIVE</a>`;
+            const normalizedTwitchLink = getTwitchUrl(twitchLink);
+            if (s.includes('live')) return `<a href="${normalizedTwitchLink}" target="_blank" class="animate-live-pulse bg-red-600 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">LIVE</a>`;
             if (s.includes('match')) return `<span class="bg-purple-600 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">IN-MATCH</span>`;
             let html = `<span class="text-gray-400">${status || 'Offline'}</span>`;
-            if (twitchLink) html += `<a href="${twitchLink}" target="_blank" class="inline-block ml-2 text-gray-500 hover:text-purple-400 transition-colors" title="Visit Twitch channel"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.714 0h1.715v5.143h-1.715zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0H6zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714v9.429z"/></svg></a>`;
+            if (normalizedTwitchLink) html += `<a href="${normalizedTwitchLink}" target="_blank" class="inline-block ml-2 text-gray-500 hover:text-purple-400 transition-colors" title="Visit Twitch channel"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.714 0h1.715v5.143h-1.715zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0H6zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714v9.429z"/></svg></a>`;
             return `<div class="flex items-center">${html}</div>`;
         };
         
@@ -479,7 +511,7 @@
                     stream: player.stream || null
                 };
                 
-                const playerNameHtml = safePlayer.twitchLink ? `<a href="${safePlayer.twitchLink}" target="_blank" class="hover:text-emerald-400 transition-colors">${safePlayer.name}</a>` : safePlayer.name;
+                const playerNameHtml = safePlayer.twitchLink ? `<a href="${getTwitchUrl(safePlayer.twitchLink)}" target="_blank" class="hover:text-emerald-400 transition-colors">${safePlayer.name}</a>` : safePlayer.name;
                 row.innerHTML = `
                     <td class="px-6 py-4 font-medium text-gray-200">#${safePlayer.rank}</td>
                     <td class="px-6 py-4 font-bold text-white">${playerNameHtml}</td>
