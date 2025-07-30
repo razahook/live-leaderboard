@@ -75,7 +75,6 @@ class LeaderboardCache:
 leaderboard_cache = LeaderboardCache()
 twitch_token_cache = {"access_token": None, "expires_at": None}
 twitch_live_cache = {"data": {}, "last_updated": None, "cache_duration": 120}
-DYNAMIC_TWITCH_OVERRIDES = {}
 
 def strip_status_suffix(username):
     """
@@ -110,12 +109,28 @@ def extract_twitch_username(twitch_link):
     return None
 
 def load_twitch_overrides():
-    global DYNAMIC_TWITCH_OVERRIDES
-    return DYNAMIC_TWITCH_OVERRIDES
+    """Load Twitch overrides from JSON file."""
+    override_file_path = os.path.join(os.path.dirname(__file__), '..', 'twitch_overrides.json')
+    if not os.path.exists(override_file_path):
+        return {}
+    try:
+        with open(override_file_path, 'r') as f:
+            return json.load(f)
+    except json.JSONDecodeError:
+        print(f"Error decoding JSON from {override_file_path}. Returning empty overrides.")
+        return {}
+    except Exception as e:
+        print(f"Error loading Twitch overrides file: {e}")
+        return {}
 
 def save_twitch_overrides(overrides):
-    global DYNAMIC_TWITCH_OVERRIDES
-    DYNAMIC_TWITCH_OVERRIDES = overrides
+    """Save Twitch overrides to JSON file."""
+    override_file_path = os.path.join(os.path.dirname(__file__), '..', 'twitch_overrides.json')
+    try:
+        with open(override_file_path, 'w') as f:
+            json.dump(overrides, f, indent=4)
+    except Exception as e:
+        print(f"Error saving Twitch overrides file: {e}")
 
 def get_twitch_access_token():
     if (
@@ -369,13 +384,13 @@ def add_twitch_live_status(leaderboard_data):
         for player in leaderboard_data['players']:
             if player.get('twitch_link'):
                 username = extract_twitch_username(player['twitch_link'])
-                if username and live_status and username in live_status:
-                    player['twitch_live'] = live_status[username]
-                    if live_status[username]["is_live"]:
+                if username and live_status and username.lower() in live_status:
+                    player['twitch_live'] = live_status[username.lower()]
+                    if live_status[username.lower()]["is_live"]:
                         player['stream'] = {
-                            "viewers": live_status[username]["stream_data"].get("viewer_count", 0),
-                            "game": live_status[username]["stream_data"].get("game_name", "Streaming"),
-                            "twitchUser": live_status[username]["stream_data"].get("user_name", username)
+                            "viewers": live_status[username.lower()]["stream_data"].get("viewer_count", 0),
+                            "game": live_status[username.lower()]["stream_data"].get("game_name", "Streaming"),
+                            "twitchUser": live_status[username.lower()]["stream_data"].get("user_name", username)
                         }
                     else:
                         player['stream'] = None
