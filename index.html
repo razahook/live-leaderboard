@@ -364,7 +364,10 @@
         // DELETED: const NGROK_BASE_URL = '...'; 
         const MOZAMBIQUE_API_KEY = '456c01cf240c13399563026f5604d777'; 
         const TRACKER_GG_API_KEY = 'c4cc3d18-adaf-487b-b3da-d47b924585c4'; 
-        const GEMINI_API_KEY = "AIzaSyA_sdFUk6nrcC8sK3ZlnFbEexJgCTd8SqU"; 
+        const GEMINI_API_KEY = "AIzaSyA_sdFUk6nrcC8sK3ZlnFbEexJgCTd8SqU";
+        
+        // API base URL - use Flask server for development, relative URLs for production
+        const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
         
         const leaderboardBody = document.getElementById('leaderboard-body');
         const searchInput = document.getElementById('searchInput');
@@ -463,18 +466,31 @@
             playersToRender.forEach(player => {
                 const row = document.createElement('tr');
                 row.className = 'border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors duration-200';
-                const playerNameHtml = player.twitchLink ? `<a href="${player.twitchLink}" target="_blank" class="hover:text-emerald-400 transition-colors">${player.name}</a>` : player.name;
+                
+                // Safe access with fallbacks for undefined values
+                const safePlayer = {
+                    rank: player.rank || 0,
+                    name: player.name || 'Unknown Player',
+                    rp: player.rp || 0,
+                    change: player.change || 0,
+                    level: player.level || 0,
+                    status: player.status || 'Unknown',
+                    twitchLink: player.twitchLink || null,
+                    stream: player.stream || null
+                };
+                
+                const playerNameHtml = safePlayer.twitchLink ? `<a href="${safePlayer.twitchLink}" target="_blank" class="hover:text-emerald-400 transition-colors">${safePlayer.name}</a>` : safePlayer.name;
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-gray-200">#${player.rank}</td>
+                    <td class="px-6 py-4 font-medium text-gray-200">#${safePlayer.rank}</td>
                     <td class="px-6 py-4 font-bold text-white">${playerNameHtml}</td>
-                    <td class="px-6 py-4 font-semibold text-emerald-400">${player.rp.toLocaleString()}</td>
-                    <td class="px-6 py-4">${getChangeHtml(player.change)}</td>
-                    <td class="px-6 py-4">${player.level.toLocaleString()}</td>
-                    <td class="px-6 py-4">${getStatusHtml(player.status, player.twitchLink)}</td>
-                    <td class="px-6 py-4">${getStreamHtml(player.stream)}</td>
-                    <td class="px-6 py-4"><button onclick="analyzePlayerPerformance('${player.name}', ${player.rp}, ${player.change}, ${player.level})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200">Analyze ✨</button></td>
+                    <td class="px-6 py-4 font-semibold text-emerald-400">${safePlayer.rp.toLocaleString()}</td>
+                    <td class="px-6 py-4">${getChangeHtml(safePlayer.change)}</td>
+                    <td class="px-6 py-4">${safePlayer.level.toLocaleString()}</td>
+                    <td class="px-6 py-4">${getStatusHtml(safePlayer.status, safePlayer.twitchLink)}</td>
+                    <td class="px-6 py-4">${getStreamHtml(safePlayer.stream)}</td>
+                    <td class="px-6 py-4"><button onclick="analyzePlayerPerformance('${safePlayer.name}', ${safePlayer.rp}, ${safePlayer.change}, ${safePlayer.level})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200">Analyze ✨</button></td>
                 `;
-                row.addEventListener('mouseenter', (event) => handleMouseEnter(event, player));
+                row.addEventListener('mouseenter', (event) => handleMouseEnter(event, safePlayer));
                 row.addEventListener('mouseleave', handleMouseLeave);
                 row.addEventListener('mousemove', handleMouseMove);
                 leaderboardBody.appendChild(row);
@@ -540,24 +556,35 @@
             };
 
             for (const key in platformOrder) {
-                const platformData = data[key];
+                const platformData = data && data[key];
                 const card = document.createElement('div');
                 card.className = `p-5 rounded-xl shadow-2xl shadow-black/30 border ${platformColors[key] || 'border-gray-700/50'} bg-gray-800/50 backdrop-blur-sm`;
-                if (platformData) {
-                    let mastersCount = platformData.masters_count;
+                
+                // Check if platform data exists and has valid structure (not just error)
+                if (platformData && !platformData.error && platformData.predator_rp !== undefined && platformData.masters_count !== undefined) {
+                    let mastersCount = platformData.masters_count || 0;
                     let predsCount = Math.min(mastersCount, 750);
-                    let mastersDisplay = (mastersCount - predsCount).toLocaleString();
+                    let mastersDisplay = Math.max(0, mastersCount - predsCount).toLocaleString();
                     let mastersPredsDisplay = `${predsCount.toLocaleString()} Preds & ${mastersDisplay} Masters`;
 
                     card.innerHTML = `
                         <h3 class="font-semibold text-gray-300">${platformOrder[key]}</h3>
-                        <p class="text-3xl font-bold text-white my-1">${platformData.predator_rp.toLocaleString()} RP</p>
+                        <p class="text-3xl font-bold text-white my-1">${(platformData.predator_rp || 0).toLocaleString()} RP</p>
                         <p class="text-xs text-gray-400">Predator Threshold</p>
-                        <div class="text-sm mt-2 font-medium">${getChangeHtml(platformData.rp_change_24h)} in 24h</div>
+                        <div class="text-sm mt-2 font-medium">${getChangeHtml(platformData.rp_change_24h || 0)} in 24h</div>
                         <p class="text-sm text-gray-400 mt-1">${mastersPredsDisplay}</p>
                     `;
                 } else {
-                    card.innerHTML = `<h3 class="font-semibold text-gray-300">${platformOrder[key]}</h3><p class="text-sm mt-2">Data not available</p>`;
+                    // Show error message or fallback
+                    let errorMessage = "Data not available";
+                    if (platformData && platformData.error) {
+                        errorMessage = "Service temporarily unavailable";
+                    }
+                    card.innerHTML = `
+                        <h3 class="font-semibold text-gray-300">${platformOrder[key]}</h3>
+                        <p class="text-sm mt-2 text-red-400">${errorMessage}</p>
+                        <p class="text-xs text-gray-500 mt-1">Please try again later</p>
+                    `;
                 }
                 predatorThresholdsDiv.appendChild(card);
             }
@@ -565,6 +592,30 @@
 
         function renderRpDistributionChart(players) {
             const ctx = document.getElementById('rpDistributionChart').getContext('2d');
+            
+            // Check if Chart.js is available
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not available, displaying text fallback');
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Chart.js library not loaded', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+            
+            // Safety check for players array
+            if (!Array.isArray(players) || players.length === 0) {
+                if (rpChart) rpChart.destroy();
+                // Display a message instead of an empty chart
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('No player data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+            
             const topPlayers = players.slice(0, 20);
             
             if (rpChart) rpChart.destroy();
@@ -572,10 +623,10 @@
             rpChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: topPlayers.map(p => p.name),
+                    labels: topPlayers.map(p => p.name || 'Unknown'),
                     datasets: [{
                         label: 'Player RP',
-                        data: topPlayers.map(p => p.rp),
+                        data: topPlayers.map(p => p.rp || 0),
                         backgroundColor: 'rgba(52, 211, 153, 0.6)', 
                         borderColor: 'rgba(5, 150, 105, 1)', 
                         borderWidth: 1
@@ -620,9 +671,54 @@
 
         function renderPlatformDistributionChart(data) {
             const ctx = document.getElementById('platformDistributionChart').getContext('2d');
-            const platformData = Object.values(data).filter(p => p.masters_count);
+            
+            // Check if Chart.js is available
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not available, displaying text fallback');
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Chart.js library not loaded', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+            
+            // Safety check for data
+            if (!data || typeof data !== 'object') {
+                if (platformChart) platformChart.destroy();
+                // Display a message instead of an empty chart
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('No platform data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+            
+            const platformData = Object.values(data).filter(p => p && p.masters_count && !p.error);
             
             if (platformChart) platformChart.destroy();
+
+            // Use safe access with fallbacks
+            const chartData = [
+                (data.PC && !data.PC.error) ? (data.PC.masters_count || 0) : 0,
+                (data.PS4 && !data.PS4.error) ? (data.PS4.masters_count || 0) : 0,
+                (data.X1 && !data.X1.error) ? (data.X1.masters_count || 0) : 0,
+                (data.SWITCH && !data.SWITCH.error) ? (data.SWITCH.masters_count || 0) : 0
+            ];
+
+            // Check if we have any valid data
+            const hasValidData = chartData.some(count => count > 0);
+            
+            if (!hasValidData) {
+                // Display a message instead of an empty chart
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Platform data temporarily unavailable', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
 
             platformChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -630,7 +726,7 @@
                     labels: ['PC', 'PlayStation', 'Xbox', 'Switch'],
                     datasets: [{
                         label: 'Masters & Predators',
-                        data: [data.PC?.masters_count || 0, data.PS4?.masters_count || 0, data.X1?.masters_count || 0, data.SWITCH?.masters_count || 0],
+                        data: chartData,
                         backgroundColor: ['#3b82f6', '#2563eb', '#1e813a', '#ef4444'], 
                         hoverOffset: 4
                     }]
@@ -727,7 +823,7 @@
                 return;
             }
 
-            const overrideApiUrl = `/api/add-twitch-override`;
+            const overrideApiUrl = `${API_BASE_URL}/api/add-twitch-override`;
             try {
                 const response = await fetch(overrideApiUrl, {
                     method: 'POST',
@@ -805,8 +901,8 @@
                 let profileResponse, sessionsResponse;
 
                 if (selectedApi === 'tracker') {
-                    const trackerProfileUrl = `/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=profile`;
-                    const trackerSessionsUrl = `/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=sessions`;
+                    const trackerProfileUrl = `${API_BASE_URL}/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=profile`;
+                    const trackerSessionsUrl = `${API_BASE_URL}/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=sessions`;
                     
                     [profileResponse, sessionsResponse] = await Promise.all([
                         fetch(trackerProfileUrl),
@@ -1111,9 +1207,9 @@
 
 
         async function initializeApp() {
-            // CORRECTED: These URLs now point to the single api/index.py endpoint.
-            const leaderboardUrl = `/api/leaderboard/PC`; 
-            const predatorThresholdsUrl = `/api/predator-points`; 
+            // API URLs - using global API_BASE_URL
+            const leaderboardUrl = `${API_BASE_URL}/api/leaderboard/PC`; 
+            const predatorThresholdsUrl = `${API_BASE_URL}/api/predator-points`; 
 
             try {
                 const [leaderboardResponse, predatorResponse] = await Promise.all([
@@ -1121,59 +1217,90 @@
                     fetch(predatorThresholdsUrl)
                 ]);
 
-                if (!leaderboardResponse.ok) throw new Error(`Failed to fetch leaderboard: ${leaderboardResponse.statusText}`);
-                if (!predatorResponse.ok) throw new Error(`Failed to fetch predator thresholds: ${predatorResponse.statusText}`);
-
-                const leaderboardResult = await leaderboardResponse.json();
-                const predatorResult = await predatorResponse.json();
-
-                if (!leaderboardResult.success || !leaderboardResult.data?.players) throw new Error("Invalid leaderboard data structure.");
-                if (!predatorResult.success || !predatorResult.data) throw new Error("Invalid predator thresholds data structure.");
-
-                const leaderboardData = leaderboardResult.data;
-                const predatorData = predatorResult.data;
-
-                allPlayers = leaderboardData.players.map(player => {
-                    const isLive = player.twitch_live?.is_live;
-                    const streamData = isLive ? player.twitch_live.stream_data : null;
-                    let displayName = player.player_name;
-                    const isGenericName = (displayName.toLowerCase().startsWith('player') && !isNaN(displayName.substring(6))) || displayName.toLowerCase() === 'empty name';
-                    
-                    if (isGenericName) {
-                        if (isLive && streamData?.user_name) {
-                            displayName = streamData.user_name;
-                        } else if (player.twitch_link) {
-                            try {
-                                const pathSegments = new URL(player.twitch_link).pathname.split('/').filter(Boolean);
-                                if (pathSegments.length > 0) displayName = pathSegments.pop();
-                            } catch (e) { /* ignore parsing errors */ }
-                        }
+                // Handle leaderboard data
+                let leaderboardData = null;
+                if (leaderboardResponse.ok) {
+                    const leaderboardResult = await leaderboardResponse.json();
+                    if (leaderboardResult.success && leaderboardResult.data?.players) {
+                        leaderboardData = leaderboardResult.data;
                     }
+                }
 
-                    return {
-                        rank: player.rank,
-                        name: displayName, 
-                        rp: player.rp, 
-                        change: player.rp_change_24h,
-                        level: player.level, 
-                        status: isLive ? 'Live' : player.status, 
-                        twitchLink: player.twitch_link,
-                        stream: streamData ? { viewers: streamData.viewer_count, game: streamData.game_name, twitchUser: streamData.user_name } : null
-                    };
-                });
+                // Handle predator thresholds data
+                let predatorData = null;
+                if (predatorResponse.ok) {
+                    const predatorResult = await predatorResponse.json();
+                    if (predatorResult.success && predatorResult.data) {
+                        predatorData = predatorResult.data;
+                    }
+                }
+
+                // Process leaderboard data or use fallback
+                if (leaderboardData && leaderboardData.players) {
+                    allPlayers = leaderboardData.players.map(player => {
+                        const isLive = player.twitch_live?.is_live;
+                        const streamData = isLive ? player.twitch_live.stream_data : null;
+                        let displayName = player.player_name || 'Unknown Player';
+                        const isGenericName = (displayName.toLowerCase().startsWith('player') && !isNaN(displayName.substring(6))) || displayName.toLowerCase() === 'empty name';
+                        
+                        if (isGenericName) {
+                            if (isLive && streamData?.user_name) {
+                                displayName = streamData.user_name;
+                            } else if (player.twitch_link) {
+                                try {
+                                    const pathSegments = new URL(player.twitch_link).pathname.split('/').filter(Boolean);
+                                    if (pathSegments.length > 0) displayName = pathSegments.pop();
+                                } catch (e) { /* ignore parsing errors */ }
+                            }
+                        }
+
+                        return {
+                            rank: player.rank || 0,
+                            name: displayName, 
+                            rp: player.rp || 0, 
+                            change: player.rp_change_24h || 0,
+                            level: player.level || 0, 
+                            status: isLive ? 'Live' : (player.status || 'Unknown'), 
+                            twitchLink: player.twitch_link || null,
+                            stream: streamData ? { viewers: streamData.viewer_count || 0, game: streamData.game_name || 'Streaming', twitchUser: streamData.user_name || displayName } : null
+                        };
+                    });
+                } else {
+                    // Provide fallback data when API fails
+                    allPlayers = [];
+                    console.warn('Using fallback: No leaderboard data available from API');
+                }
                 
                 filteredAndSortedPlayers = [...allPlayers]; 
                 currentPage = 1; 
                 updateLeaderboardAndPagination(); 
 
+                // Render components with safe data
                 renderPredatorThresholds(predatorData);
                 renderRpDistributionChart(allPlayers);
                 renderPlatformDistributionChart(predatorData);
                 
             } catch (error) {
                 console.error('Failed to initialize app:', error);
-                leaderboardBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-red-500">Failed to load data. Error: ${error.message}</td></tr>`; 
-                predatorThresholdsDiv.innerHTML = `<p class="text-red-500 col-span-4 text-center">Could not load predator thresholds.</p>`;
+                
+                // Show user-friendly error messages
+                leaderboardBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-red-500">
+                    <div class="flex flex-col items-center space-y-2">
+                        <span>Failed to load leaderboard data</span>
+                        <span class="text-sm text-gray-400">Please check your connection and try refreshing the page</span>
+                    </div>
+                </td></tr>`; 
+                
+                predatorThresholdsDiv.innerHTML = `
+                    <div class="col-span-4 text-center">
+                        <p class="text-red-500 mb-2">Could not load predator thresholds</p>
+                        <p class="text-sm text-gray-400">API services may be temporarily unavailable</p>
+                    </div>
+                `;
+
+                // Initialize empty charts to prevent further errors
+                renderRpDistributionChart([]);
+                renderPlatformDistributionChart(null);
             }
         }
 
