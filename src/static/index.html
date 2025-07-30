@@ -361,7 +361,7 @@
         let currentPage = 1;
         const itemsPerPage = 50; 
         let previewTimeout;
-        const NGROK_BASE_URL = 'https://adapted-cunning-rhino.ngrok-free.app'; 
+        // DELETED: const NGROK_BASE_URL = '...'; 
         const MOZAMBIQUE_API_KEY = '456c01cf240c13399563026f5604d777'; 
         const TRACKER_GG_API_KEY = 'c4cc3d18-adaf-487b-b3da-d47b924585c4'; 
         const GEMINI_API_KEY = "AIzaSyA_sdFUk6nrcC8sK3ZlnFbEexJgCTd8SqU"; 
@@ -506,7 +506,7 @@
             streamPreviewPlayer.innerHTML = ''; 
             new Twitch.Embed(streamPreviewPlayer, {
                 width: "100%", height: "100%", channel: twitchUser,
-                layout: "video", muted: true, autoplay: true, parent: ["localhost"] 
+                layout: "video", muted: true, autoplay: true, parent: ["localhost", window.location.hostname] 
             });
             streamPreview.style.opacity = '1';
             streamPreview.style.transform = 'scale(1)';
@@ -727,13 +727,12 @@
                 return;
             }
 
-            const overrideApiUrl = `${NGROK_BASE_URL}/api/twitch/override`;
+            const overrideApiUrl = `/api/add-twitch-override`;
             try {
                 const response = await fetch(overrideApiUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'ngrok-skip-browser-warning': 'true' 
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ player_name: playerName, twitch_username: twitchUsername })
                 });
@@ -806,12 +805,12 @@
                 let profileResponse, sessionsResponse;
 
                 if (selectedApi === 'tracker') {
-                    const trackerProfileUrl = `${NGROK_BASE_URL}/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=profile`;
-                    const trackerSessionsUrl = `${NGROK_BASE_URL}/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=sessions`;
+                    const trackerProfileUrl = `/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=profile`;
+                    const trackerSessionsUrl = `/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=sessions`;
                     
                     [profileResponse, sessionsResponse] = await Promise.all([
-                        fetch(trackerProfileUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } }),
-                        fetch(trackerSessionsUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } })
+                        fetch(trackerProfileUrl),
+                        fetch(trackerSessionsUrl)
                     ]);
 
                     if (!profileResponse.ok) {
@@ -1112,13 +1111,14 @@
 
 
         async function initializeApp() {
-            const leaderboardUrl = `${NGROK_BASE_URL}/api/leaderboard/PC`; 
-            const predatorThresholdsUrl = `${NGROK_BASE_URL}/api/predator-points`; 
+            // CORRECTED: These URLs now point to the single api/index.py endpoint.
+            const leaderboardUrl = `/api/leaderboard/PC`; 
+            const predatorThresholdsUrl = `/api/predator-points`; 
 
             try {
                 const [leaderboardResponse, predatorResponse] = await Promise.all([
-                    fetch(leaderboardUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } }),
-                    fetch(predatorThresholdsUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } })
+                    fetch(leaderboardUrl),
+                    fetch(predatorThresholdsUrl)
                 ]);
 
                 if (!leaderboardResponse.ok) throw new Error(`Failed to fetch leaderboard: ${leaderboardResponse.statusText}`);
