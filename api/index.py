@@ -8,6 +8,11 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
+# ----- HARDCODED TWITCH ENV -----
+TWITCH_CLIENT_ID = "1nd45y861ah5uh84jh4e68gjvjshl1"
+TWITCH_CLIENT_SECRET = "zv6enoibg0g05qx9kbos20h57twvvw"
+APEX_API_KEY = os.environ.get("APEX_API_KEY") or ""  # Still use env for other secrets
+
 # Create Flask app
 app = Flask(__name__)
 CORS(app)
@@ -75,8 +80,7 @@ class LeaderboardCache:
 leaderboard_cache = LeaderboardCache()
 
 # Twitch configuration and caches
-TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID") or ""
-TWITCH_CLIENT_SECRET = os.environ.get("TWITCH_CLIENT_SECRET") or ""
+# TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET now come from hardcoded values above
 
 twitch_token_cache = {
     "access_token": None,
@@ -88,9 +92,6 @@ twitch_live_cache = {
     "last_updated": None,
     "cache_duration": 120
 }
-
-# API Keys
-APEX_API_KEY = os.environ.get("APEX_API_KEY") or ""
 
 # --- IN-MEMORY TWITCH OVERRIDES (FOR SERVERLESS) ---
 DYNAMIC_TWITCH_OVERRIDES = {}
