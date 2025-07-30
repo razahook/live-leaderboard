@@ -1241,6 +1241,9 @@
                         const isLive = player.twitch_live?.is_live;
                         const streamData = isLive ? player.twitch_live.stream_data : null;
                         let displayName = player.player_name || 'Unknown Player';
+                        
+                        // Only apply fallback logic if the player name appears to be generic/placeholder
+                        // and we haven't already applied an override display name from the backend
                         const isGenericName = (displayName.toLowerCase().startsWith('player') && !isNaN(displayName.substring(6))) || displayName.toLowerCase() === 'empty name';
                         
                         if (isGenericName) {

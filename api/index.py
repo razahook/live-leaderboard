@@ -111,11 +111,30 @@ def extract_twitch_username(twitch_link):
 
 def load_twitch_overrides():
     global DYNAMIC_TWITCH_OVERRIDES
+    # Load from JSON file if it exists and DYNAMIC_TWITCH_OVERRIDES is empty
+    if not DYNAMIC_TWITCH_OVERRIDES:
+        twitch_overrides_file = os.path.join(os.path.dirname(__file__), '..', 'twitch_overrides.json')
+        if os.path.exists(twitch_overrides_file):
+            try:
+                with open(twitch_overrides_file, 'r', encoding='utf-8') as f:
+                    DYNAMIC_TWITCH_OVERRIDES = json.load(f)
+                    print(f"Loaded {len(DYNAMIC_TWITCH_OVERRIDES)} Twitch overrides from file")
+            except (json.JSONDecodeError, Exception) as e:
+                print(f"Error loading twitch_overrides.json: {e}")
+                DYNAMIC_TWITCH_OVERRIDES = {}
     return DYNAMIC_TWITCH_OVERRIDES
 
 def save_twitch_overrides(overrides):
     global DYNAMIC_TWITCH_OVERRIDES
     DYNAMIC_TWITCH_OVERRIDES = overrides
+    # Save to JSON file
+    twitch_overrides_file = os.path.join(os.path.dirname(__file__), '..', 'twitch_overrides.json')
+    try:
+        with open(twitch_overrides_file, 'w', encoding='utf-8') as f:
+            json.dump(overrides, f, indent=4)
+        print(f"Saved {len(overrides)} Twitch overrides to file")
+    except Exception as e:
+        print(f"Error saving twitch_overrides.json: {e}")
 
 def get_twitch_access_token():
     if (
@@ -750,6 +769,9 @@ def health_check():
         "timestamp": datetime.now().isoformat(),
         "version": "1.0.0"
     })
+
+# Load Twitch overrides on startup
+load_twitch_overrides()
 
 # Expose app for Vercel
 app
