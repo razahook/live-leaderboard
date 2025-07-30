@@ -6,7 +6,10 @@ import os
 import json
 
 # Correct import path for twitch_integration
-from src.routes.twitch_integration import get_twitch_live_status, extract_twitch_username, twitch_live_cache
+from src.routes.twitch_integration import get_twitch_live_status, twitch_live_cache
+
+# Import shared utilities
+from src.utils import extract_twitch_username, load_twitch_overrides, save_twitch_overrides
 
 # FIXED: Import from separate cache module instead of circular import
 from src.cache_manager import leaderboard_cache
@@ -15,30 +18,7 @@ apex_scraper_bp = Blueprint('apex_scraper', __name__)
 
 APEX_API_KEY = "456c01cf240c13399563026f5604d777"
 
-# Define the path for the JSON file to store Twitch overrides
-OVERRIDE_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'twitch_overrides.json')
 
-def load_twitch_overrides():
-    """Loads Twitch overrides from a JSON file."""
-    if not os.path.exists(OVERRIDE_FILE_PATH):
-        return {}
-    try:
-        with open(OVERRIDE_FILE_PATH, 'r') as f:
-            return json.load(f)
-    except json.JSONDecodeError:
-        print(f"Error decoding JSON from {OVERRIDE_FILE_PATH}. Returning empty overrides.")
-        return {}
-    except Exception as e:
-        print(f"Error loading Twitch overrides file: {e}")
-        return {}
-
-def save_twitch_overrides(overrides):
-    """Saves Twitch overrides to a JSON file."""
-    try:
-        with open(OVERRIDE_FILE_PATH, 'w') as f:
-            json.dump(overrides, f, indent=4)
-    except Exception as e:
-        print(f"Error saving Twitch overrides file: {e}")
 
 # --- MODIFIED ROUTE: Clear leaderboard cache after override ---
 @apex_scraper_bp.route('/add-twitch-override', methods=['POST'])
@@ -72,8 +52,8 @@ def add_twitch_override():
         twitch_live_cache["last_updated"] = None
         
         # --- FIXED: Clear the main leaderboard cache as well ---
-        leaderboard_cache["data"] = None
-        leaderboard_cache["last_updated"] = None
+        leaderboard_cache.data = None
+        leaderboard_cache.last_updated = None
         print("Leaderboard cache cleared due to Twitch override.")
         # --- END FIX ---
 

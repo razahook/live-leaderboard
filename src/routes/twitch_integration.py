@@ -3,6 +3,7 @@ import requests
 import os
 from datetime import datetime, timedelta
 import re
+from src.utils import extract_twitch_username
 
 twitch_bp = Blueprint("twitch", __name__)
 
@@ -232,30 +233,7 @@ def get_twitch_live_status(channels):
         print(f"Error getting Twitch live status: {e}")
         return None
 
-def extract_twitch_username(twitch_link):
-    """
-    Extract Twitch username from various link formats
-    """
-    if not twitch_link:
-        return None
-    
-    # Handle various formats:
-    # https://twitch.tv/username
-    # twitch.tv/username
-    # username
-    
-    patterns = [
-        r"apexlegendsstatus\.com/core/out\?type=twitch&id=([a-zA-Z0-9_]+)",
-        r"(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)",
-        r"^([a-zA-Z0-9_]+)$"
-    ]
-    
-    for pattern in patterns:
-        match = re.search(pattern, twitch_link.strip())
-        if match:
-            return match.group(1).lower()
-    
-    return None
+
 
 
 

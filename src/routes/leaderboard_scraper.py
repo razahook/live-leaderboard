@@ -4,8 +4,8 @@ from bs4 import BeautifulSoup
 import re
 from datetime import datetime
 import os
-from src.routes.twitch_integration import get_twitch_live_status, extract_twitch_username, twitch_token_cache, twitch_live_cache
-from src.routes.apex_scraper import load_twitch_overrides
+from src.routes.twitch_integration import get_twitch_live_status, twitch_token_cache, twitch_live_cache
+from src.utils import load_twitch_overrides, extract_twitch_username
 from src.cache_manager import leaderboard_cache
 
 leaderboard_bp = Blueprint('leaderboard', __name__)
