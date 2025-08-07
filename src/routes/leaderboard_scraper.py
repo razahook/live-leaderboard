@@ -192,23 +192,24 @@ def scrape_leaderboard(platform="PC", max_players=500):
                         # --- 4. Extract Twitch Link/Username ---
                         twitch_link = ""
                         
-                        # Strategy 1: Look for apexlegendsstatus.com redirect links
-                        twitch_anchor = player_info_cell.find("a", href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id="))
+                        # Strategy 1: Look for ApexLegendsStatus redirect links (both full and relative URLs)
+                        twitch_anchor = player_info_cell.find("a", href=re.compile(r"(apexlegendsstatus\.com)?/core/out\?type=twitch&(amp;)?id="))
                         
-                        # Strategy 2: Look for Twitch icon links (Font Awesome classes)
+                        # Strategy 2: Look for Font Awesome Twitch icons inside anchors
                         if not twitch_anchor:
-                            twitch_anchor = player_info_cell.find("a", class_=lambda x: x and ("fa-twitch" in str(x) or "twitch" in str(x).lower()))
+                            # Look for <i class="fab fa-twitch"> inside <a> tags
+                            twitch_icon = player_info_cell.find("i", class_=re.compile(r"fa-twitch|fab.*fa-twitch"))
+                            if twitch_icon:
+                                twitch_anchor = twitch_icon.find_parent("a")
                         
                         # Strategy 3: Look for any anchor with twitch in href
                         if not twitch_anchor:
                             twitch_anchor = player_info_cell.find("a", href=re.compile(r"twitch", re.IGNORECASE))
                         
-                        # Strategy 4: Look for purple/twitch-colored icons or elements
+                        # Strategy 4: Look for Twitch purple color styling (#815cd3 or #9146ff)
                         if not twitch_anchor:
-                            # Check for elements with twitch-related styling or attributes
-                            twitch_elements = player_info_cell.find_all("a", attrs={"style": re.compile(r"color.*#9146ff|color.*purple", re.IGNORECASE)})
-                            if twitch_elements:
-                                twitch_anchor = twitch_elements[0]
+                            # Look for the specific Twitch purple color used on ApexLegendsStatus
+                            twitch_anchor = player_info_cell.find("a", style=re.compile(r"color:\s*#815cd3|color:\s*#9146ff", re.IGNORECASE))
                         
                         # Strategy 5: Look for i tags with twitch classes (icon elements)
                         if not twitch_anchor:
