@@ -47,75 +47,48 @@ def debug_raw_scrape():
             # Get player info cell
             player_info_cell = cells[1]
             
-            # Extract player name - based on actual HTML structure
-            player_name = "Unknown"
+            # Extract player name - using EXACT same logic as main leaderboard scraper
+            player_name = ""
             
-            # From the HTML debug, I can see the text content shows: "ROC Vaxlon | Offline"
-            # The structure seems to have the name after some initial elements
-            cell_text = player_info_cell.get_text(separator='|', strip=True)
-            text_parts = [part.strip() for part in cell_text.split('|') if part.strip()]
+            # Method 1: Look for strong tag (same as main scraper)
+            strong_tag = player_info_cell.find('strong')
+            if strong_tag:
+                player_name = strong_tag.get_text(strip=True)
+            else:
+                # Method 2: Fallback using regex splitting (same as main scraper)
+                text_content = player_info_cell.get_text(separator=' ', strip=True)
+                name_part = re.split(r'(In\s+(?:lobby|match)|Offline|Playing|History|Performance|Lvl\s*\d+|\d+\s*RP\s+away|twitch\.tv)', text_content, 1)[0].strip()
+                player_name = re.sub(r'^\W+|\W+$', '', name_part)  # Remove leading/trailing non-alphanumeric
             
-            # Look through text parts to find the player name
-            # Skip common patterns like "#", numbers, "Offline", "History", etc.
-            skip_patterns = ["#", "History", "Performance", "Lvl", "Offline", "In match", "RP away from"]
+            # If still no name, use a generic one
+            if not player_name:
+                player_name = f"Player{rank}"
             
-            for part in text_parts:
-                if (part and 
-                    len(part) > 2 and 
-                    not part.isdigit() and 
-                    not any(skip in part for skip in skip_patterns) and
-                    not part.startswith("#")):
-                    player_name = part
-                    break
-            
-            # If still unknown, try looking at HTML structure more carefully
-            if player_name == "Unknown":
-                # Looking at the HTML, there might be nested divs
-                all_text_elements = player_info_cell.find_all(text=True)
-                for text in all_text_elements:
-                    text = text.strip()
-                    if (text and 
-                        len(text) > 2 and 
-                        not text.isdigit() and
-                        not any(skip in text for skip in skip_patterns) and
-                        not text.startswith("#") and
-                        not text in ["col", "flex", "padding-right"]):
-                        player_name = text
-                        break
-            
-            # Look for Twitch links - check multiple patterns
+            # Extract Twitch links - using EXACT same logic as main leaderboard scraper
             twitch_link = ""
             twitch_found_method = None
             
-            # Method 1: apexlegendsstatus.com redirect links
+            # Method 1: Check for specific apexlegendsstatus.com redirect link
             twitch_anchor = player_info_cell.find("a", href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id="))
+            if not twitch_anchor:
+                # Also check for Twitch icon link directly
+                twitch_anchor = player_info_cell.find("a", class_=lambda x: x and "fa-twitch" in x, href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id="))
+
             if twitch_anchor:
-                twitch_found_method = "redirect_link"
-                href = twitch_anchor.get("href", "")
-                # Try to extract from redirect
-                if "id=" in href:
-                    username = href.split("id=")[-1]
-                    if username:
-                        twitch_link = f"https://twitch.tv/{username}"
-            
-            # Method 2: Direct twitch.tv links
-            if not twitch_link:
-                all_links = player_info_cell.find_all("a")
-                for link in all_links:
-                    href = link.get("href", "")
-                    if "twitch.tv" in href:
-                        twitch_link = href
-                        twitch_found_method = "direct_link"
-                        break
-            
-            # Method 3: Text content search
-            if not twitch_link:
-                cell_text = player_info_cell.get_text(separator=' ', strip=True)
-                twitch_match = re.search(r'(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)', cell_text)
+                from routes.twitch_integration import extract_twitch_username
+                extracted_username = extract_twitch_username(twitch_anchor["href"])
+                if extracted_username:
+                    twitch_link = f"https://twitch.tv/{extracted_username}"
+                    twitch_found_method = "redirect_link"
+            else:
+                # Fallback: search for twitch.tv URL within the cell's text or HTML
+                twitch_match = re.search(r'(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)', player_info_cell.get_text(separator=' ', strip=True))
                 if twitch_match:
                     username = twitch_match.group(1)
-                    twitch_link = f"https://twitch.tv/{username}"
-                    twitch_found_method = "text_search"
+                    username = re.sub(r'(In|Offline|match|lobby)$', '', username, flags=re.IGNORECASE)
+                    if username:
+                        twitch_link = f"https://twitch.tv/{username}"
+                        twitch_found_method = "text_search"
             
             # Method 4: Check for any mention of streaming/live status
             is_live_mentioned = False
