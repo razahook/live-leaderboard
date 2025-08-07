@@ -298,6 +298,13 @@ def get_leaderboard(platform):
         leaderboard_data = scrape_leaderboard(platform, 500)
         
         if leaderboard_data:
+            # Add Twitch live status to scraped data
+            try:
+                leaderboard_data = add_twitch_live_status(leaderboard_data)
+                safe_print("Added Twitch live status to leaderboard data")
+            except Exception as e:
+                safe_print(f"Warning: Failed to add Twitch live status: {e}")
+            
             return jsonify({
                 "success": True,
                 "cached": False,
