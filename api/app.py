@@ -157,12 +157,16 @@ def rate_limit(max_requests=60, window=60):
 if DB_AVAILABLE and db:
     try:
         # Detect Vercel or serverless environment
+        current_dir = os.path.dirname(__file__)
         is_serverless = any([
             os.environ.get('VERCEL'),
-            os.environ.get('AWS_LAMBDA_FUNCTION_NAME'),  # AWS Lambda
+            os.environ.get('AWS_LAMBDA_FUNCTION_NAME'),  # AWS Lambda  
             os.environ.get('VERCEL_ENV'),  # Vercel specific
-            '/var/task' in os.path.dirname(__file__),  # Lambda runtime path
+            '/var/task' in current_dir,  # Lambda runtime path
+            '/tmp' in current_dir,  # Common serverless temp directory
         ])
+        
+        logger.info(f"Serverless detection: VERCEL={os.environ.get('VERCEL')}, current_dir={current_dir}, is_serverless={is_serverless}")
         
         # Additional check for read-only filesystem
         if not is_serverless:

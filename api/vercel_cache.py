@@ -55,13 +55,20 @@ class VercelCacheManager:
                 # Fix timestamp formats if needed
                 if 'last_updated' in data:
                     try:
-                        if isinstance(data['last_updated'], (int, float)):
+                        timestamp = data['last_updated']
+                        if isinstance(timestamp, (int, float)):
                             # Convert Unix timestamp to ISO string for consistency
-                            data['last_updated'] = datetime.fromtimestamp(data['last_updated']).isoformat()
-                    except (ValueError, OSError) as e:
-                        print(f"Warning: Could not convert timestamp {data['last_updated']}: {e}")
+                            data['last_updated'] = datetime.fromtimestamp(timestamp).isoformat()
+                        elif isinstance(timestamp, str):
+                            # Validate ISO format string (this will raise ValueError if invalid)
+                            datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                            # If we get here, the timestamp is valid ISO format
+                        else:
+                            raise ValueError(f"Unsupported timestamp type: {type(timestamp)}")
+                    except (ValueError, OSError, TypeError) as e:
+                        print(f"Warning: Could not process timestamp {data.get('last_updated')}: {e}")
                         # Remove invalid timestamp
-                        del data['last_updated']
+                        data.pop('last_updated', None)
                     
                 return data
             except Exception as e:
