@@ -165,7 +165,7 @@ def scrape_leaderboard(platform="PC", max_players=500):
                                 rank = int(rank_match.group(1))
                                 break
                         
-                        if not rank or rank > 500: # Only process top 500 real players
+                        if not rank or rank > 750: # Process all 750 real players
                             continue
                         
                         # --- 2. Find the Player Info Cell ---
@@ -297,32 +297,7 @@ def scrape_leaderboard(platform="PC", max_players=500):
         
         safe_print(f"Successfully extracted {len(all_players)} real players")
         
-        # If we have fewer than max_players, generate additional players to fill the gap
-        if len(all_players) < max_players:
-            safe_print(f"Generating {max_players - len(all_players)} additional players to reach {max_players}")
-            
-            existing_ranks = {player['rank'] for player in all_players}
-            
-            for rank in range(1, max_players + 1):
-                if rank not in existing_ranks:
-                    base_rp = 300000
-                    rp = max(10000, base_rp - (rank * 500))
-                    
-                    all_players.append({
-                        "rank": rank,
-                        "player_name": f"Predator{rank}",
-                        "rp": rp,
-                        "rp_change_24h": max(0, 10000 - (rank * 15)),
-                        "twitch_link": f"https://twitch.tv/predator{rank}" if rank % 10 == 0 else "",
-                        "level": max(100, 3000 - (rank * 3)),
-                        "status": "In lobby" if rank % 3 == 0 else ("In match" if rank % 3 == 1 else "Offline"),
-                        "twitch_live": {"is_live": False, "stream_data": None},
-                        "stream": None,
-                        "vods_enabled": False,
-                        "recent_videos": [],
-                        "hasClips": False,
-                        "recentClips": []
-                    })
+        # No fake data generation - only real players from actual leaderboard
         
         all_players = sorted(all_players, key=lambda x: x['rank'])[:max_players]
         
@@ -450,8 +425,8 @@ def get_leaderboard(platform):
     try:
         safe_print(f"Getting leaderboard for platform: {platform}")
         
-        # Try to scrape real data first
-        leaderboard_data = scrape_leaderboard(platform, 500)
+        # Try to scrape real data first - get ALL 750 players
+        leaderboard_data = scrape_leaderboard(platform, 750)
         
         if leaderboard_data:
             # Add Twitch live status to scraped data
@@ -469,45 +444,12 @@ def get_leaderboard(platform):
                 "source": "apexlegendsstatus.com"
             })
         else:
-            # Fallback to sample data if scraping fails
-            safe_print("Scraping failed, using fallback sample data")
-            max_players = 500
-            all_players = []
-            
-            for rank in range(1, max_players + 1):
-                base_rp = 300000
-                rp = max(10000, base_rp - (rank * 500))
-                
-                all_players.append({
-                    "rank": rank,
-                    "player_name": f"Predator{rank}",
-                    "rp": rp,
-                    "rp_change_24h": max(0, 10000 - (rank * 15)),
-                    "twitch_link": f"https://twitch.tv/predator{rank}" if rank % 10 == 0 else "",
-                    "level": max(100, 3000 - (rank * 3)),
-                    "status": "In lobby" if rank % 3 == 0 else ("In match" if rank % 3 == 1 else "Offline"),
-                    "twitch_live": {"is_live": False, "stream_data": None},
-                    "stream": None,
-                    "vods_enabled": False,
-                    "recent_videos": [],
-                    "hasClips": False,
-                    "recentClips": []
-                })
-            
-            fallback_data = {
-                "platform": platform.upper(),
-                "players": all_players,
-                "total_players": len(all_players),
-                "last_updated": datetime.now().isoformat()
-            }
-            
+            # No fallback data - return error if scraping fails
+            safe_print("Scraping failed - no fake data generated")
             return jsonify({
-                "success": True,
-                "cached": False,
-                "data": fallback_data,
-                "last_updated": datetime.now().isoformat(),
-                "source": "fallback_sample_data"
-            })
+                "success": False,
+                "error": "Failed to scrape leaderboard data"
+            }), 500
         
     except Exception as e:
         safe_print(f"Error in get_leaderboard: {e}")
