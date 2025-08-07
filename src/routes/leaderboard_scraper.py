@@ -103,12 +103,7 @@ def scrape_leaderboard(platform="PC", max_players=500):
     base_url = f"https://apexlegendsstatus.com/live-ranked-leaderboards/Battle_Royale/{platform}"
     
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "curl/7.68.0"
     }
     
     all_players = []
@@ -315,43 +310,12 @@ def add_twitch_live_status(leaderboard_data):
             safe_print("WARNING: Twitch integration imports failed - using fallback stubs")
             # Still try to run with stubs to populate default values
         
-        # 1. Apply Twitch overrides for players with missing links
-        # Define overrides directly here - no external file dependencies
-        twitch_overrides = {
-            "ROC Vaxlon": {"twitch_link": "https://www.twitch.tv/vaxlon"},
-            "ROC sauceror": {"twitch_link": "https://www.twitch.tv/sauceror"},
-            "4rufq": {"twitch_link": "https://www.twitch.tv/4rufq"},
-            "ImperialHal": {"twitch_link": "https://www.twitch.tv/tsm_imperialhal"},
-            "TSM_ImperialHal": {"twitch_link": "https://www.twitch.tv/tsm_imperialhal"},
-            "sweetdreams": {"twitch_link": "https://www.twitch.tv/sweetdreams"},
-            "Albralelie": {"twitch_link": "https://www.twitch.tv/albralelie"},
-            "NiceWigg": {"twitch_link": "https://www.twitch.tv/nicewigg"},
-            "aceu": {"twitch_link": "https://www.twitch.tv/aceu"},
-            "shroud": {"twitch_link": "https://www.twitch.tv/shroud"},
-            "dizzy": {"twitch_link": "https://www.twitch.tv/dizzy"},
-            "Mande": {"twitch_link": "https://www.twitch.tv/mande"},
-            "RemixPowers": {"twitch_link": "https://www.twitch.tv/remixpowers"},
-            "LG_Naughty": {"twitch_link": "https://www.twitch.tv/Naughty"}
-        }
-        safe_print(f"Using direct overrides: {len(twitch_overrides)} entries")
-        
-        try:
-            
-            max_to_check = 20  # Start small for Vercel free tier
-            for i, player in enumerate(leaderboard_data['players'][:max_to_check]):
-                player_name = player.get('player_name', '')
-                
-                # Apply override if player has no Twitch link but is in overrides
-                if not player.get('twitch_link') or player.get('twitch_link') == "":
-                    if player_name in twitch_overrides:
-                        player['twitch_link'] = twitch_overrides[player_name]['twitch_link']
-                        safe_print(f"Applied Twitch override for {player_name}: {player['twitch_link']}")
-        except Exception as e:
-            safe_print(f"Error applying Twitch overrides: {e}")
-            twitch_overrides = {}
+        # Now that scraping is fixed, we should get Twitch links directly from the website
+        safe_print("Checking for Twitch links extracted from website scraping...")
 
-        # 2. Build a canonical Twitch username cache for all players with Twitch links
+        # 1. Build a canonical Twitch username cache for all players with Twitch links
         canonical_usernames = {}
+        max_to_check = 20  # Start small for Vercel free tier
         for i, player in enumerate(leaderboard_data['players'][:max_to_check]):
             if player.get('twitch_link'):
                 username = extract_twitch_username(player['twitch_link'])
@@ -360,7 +324,7 @@ def add_twitch_live_status(leaderboard_data):
                     player['canonical_twitch_username'] = username.lower()
                     safe_print(f"Found Twitch username: {username}")
 
-        # 3. Use canonical usernames for all Twitch checks
+        # 2. Use canonical usernames for all Twitch checks
         usernames = list(canonical_usernames.values())
         username_to_player = {v: k for k, v in canonical_usernames.items()}
 
