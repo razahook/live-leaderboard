@@ -120,6 +120,12 @@ try:
 except ImportError as e:
     logger.warning(f"Could not import webhooks routes: {e}")
 
+try:
+    from routes.twitch_debug import twitch_debug_bp
+    imported_blueprints.append(('twitch_debug_bp', twitch_debug_bp))
+except ImportError as e:
+    logger.warning(f"Could not import twitch_debug routes: {e}")
+
 # Create Flask app - no static folder needed since Vercel handles static files
 app = Flask(__name__)
 

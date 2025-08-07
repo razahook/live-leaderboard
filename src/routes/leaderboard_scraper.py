@@ -306,7 +306,8 @@ def add_twitch_live_status(leaderboard_data):
         
         # 1. Build a canonical Twitch username cache for all players with Twitch links
         canonical_usernames = {}
-        for i, player in enumerate(leaderboard_data['players'][:50]):  # Limit to first 50 for testing
+        max_to_check = 20  # Start small for Vercel free tier
+        for i, player in enumerate(leaderboard_data['players'][:max_to_check]):
             if player.get('twitch_link'):
                 username = extract_twitch_username(player['twitch_link'])
                 if username:
@@ -490,6 +491,122 @@ def get_leaderboard(platform):
 def get_leaderboard_alt(platform):
     """Alternative endpoint for leaderboard data - same as /stats/<platform>"""
     return get_leaderboard(platform)
+
+@leaderboard_bp.route('/leaderboard-test/<platform>', methods=['GET'])
+@rate_limit(max_requests=15, window=60)
+def get_leaderboard_test(platform):
+    """Test endpoint with only 5 players to verify Twitch integration"""
+    try:
+        safe_print(f"TEST: Getting mini leaderboard for platform: {platform}")
+        
+        # Create test data with known Twitch streamers
+        test_players = [
+            {
+                "rank": 1,
+                "player_name": "ImperialHal",
+                "rp": 50000,
+                "rp_change_24h": 1000,
+                "twitch_link": "https://twitch.tv/tsm_imperialhal",
+                "level": 500,
+                "status": "In match",
+                "twitch_live": {"is_live": False, "stream_data": None},
+                "stream": None,
+                "vods_enabled": False,
+                "recent_videos": [],
+                "hasClips": False,
+                "recentClips": []
+            },
+            {
+                "rank": 2,
+                "player_name": "sweetdreams",
+                "rp": 49000,
+                "rp_change_24h": 800,
+                "twitch_link": "https://twitch.tv/sweetdreams",
+                "level": 500,
+                "status": "In lobby",
+                "twitch_live": {"is_live": False, "stream_data": None},
+                "stream": None,
+                "vods_enabled": False,
+                "recent_videos": [],
+                "hasClips": False,
+                "recentClips": []
+            },
+            {
+                "rank": 3,
+                "player_name": "Albralelie",
+                "rp": 48000,
+                "rp_change_24h": 600,
+                "twitch_link": "https://twitch.tv/albralelie",
+                "level": 500,
+                "status": "In match",
+                "twitch_live": {"is_live": False, "stream_data": None},
+                "stream": None,
+                "vods_enabled": False,
+                "recent_videos": [],
+                "hasClips": False,
+                "recentClips": []
+            },
+            {
+                "rank": 4,
+                "player_name": "NiceWigg",
+                "rp": 47000,
+                "rp_change_24h": 400,
+                "twitch_link": "https://twitch.tv/nicewigg",
+                "level": 500,
+                "status": "Offline",
+                "twitch_live": {"is_live": False, "stream_data": None},
+                "stream": None,
+                "vods_enabled": False,
+                "recent_videos": [],
+                "hasClips": False,
+                "recentClips": []
+            },
+            {
+                "rank": 5,
+                "player_name": "Dropped",
+                "rp": 46000,
+                "rp_change_24h": 200,
+                "twitch_link": "https://twitch.tv/dropped",
+                "level": 500,
+                "status": "In lobby",
+                "twitch_live": {"is_live": False, "stream_data": None},
+                "stream": None,
+                "vods_enabled": False,
+                "recent_videos": [],
+                "hasClips": False,
+                "recentClips": []
+            }
+        ]
+        
+        test_data = {
+            "platform": platform.upper(),
+            "players": test_players,
+            "total_players": len(test_players),
+            "last_updated": datetime.now().isoformat()
+        }
+        
+        # Add Twitch live status
+        safe_print("TEST: Adding Twitch live status...")
+        test_data = add_twitch_live_status(test_data)
+        safe_print("TEST: Twitch status added successfully")
+        
+        return jsonify({
+            "success": True,
+            "cached": False,
+            "data": test_data,
+            "last_updated": test_data["last_updated"],
+            "source": "test_endpoint",
+            "note": "This is a test endpoint with only 5 players"
+        })
+        
+    except Exception as e:
+        safe_print(f"TEST ERROR: {e}")
+        import traceback
+        safe_print(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": f"Test endpoint error: {str(e)}"
+        }), 500
 
 @leaderboard_bp.route('/predator-points', methods=['GET'])
 @rate_limit(max_requests=30, window=60)
