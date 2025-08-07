@@ -304,9 +304,26 @@ def add_twitch_live_status(leaderboard_data):
             safe_print("WARNING: Twitch integration imports failed - using fallback stubs")
             # Still try to run with stubs to populate default values
         
-        # 1. Build a canonical Twitch username cache for all players with Twitch links
+        # 1. Apply Twitch overrides for players with missing links
+        try:
+            twitch_overrides = load_twitch_overrides()
+            safe_print(f"Loaded {len(twitch_overrides)} Twitch overrides")
+            
+            max_to_check = 20  # Start small for Vercel free tier
+            for i, player in enumerate(leaderboard_data['players'][:max_to_check]):
+                player_name = player.get('player_name', '')
+                
+                # Apply override if player has no Twitch link but is in overrides
+                if not player.get('twitch_link') or player.get('twitch_link') == "":
+                    if player_name in twitch_overrides:
+                        player['twitch_link'] = twitch_overrides[player_name]['twitch_link']
+                        safe_print(f"Applied Twitch override for {player_name}: {player['twitch_link']}")
+        except Exception as e:
+            safe_print(f"Error applying Twitch overrides: {e}")
+            twitch_overrides = {}
+
+        # 2. Build a canonical Twitch username cache for all players with Twitch links
         canonical_usernames = {}
-        max_to_check = 20  # Start small for Vercel free tier
         for i, player in enumerate(leaderboard_data['players'][:max_to_check]):
             if player.get('twitch_link'):
                 username = extract_twitch_username(player['twitch_link'])
@@ -315,7 +332,7 @@ def add_twitch_live_status(leaderboard_data):
                     player['canonical_twitch_username'] = username.lower()
                     safe_print(f"Found Twitch username: {username}")
 
-        # 2. Use canonical usernames for all Twitch checks
+        # 3. Use canonical usernames for all Twitch checks
         usernames = list(canonical_usernames.values())
         username_to_player = {v: k for k, v in canonical_usernames.items()}
 
