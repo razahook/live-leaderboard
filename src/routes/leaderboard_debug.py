@@ -47,38 +47,39 @@ def debug_raw_scrape():
             # Get player info cell
             player_info_cell = cells[1]
             
-            # Extract player name - try multiple methods
+            # Extract player name - based on actual HTML structure
             player_name = "Unknown"
             
-            # Method 1: div with class="player"
-            name_div = player_info_cell.find("div", class_="player")
-            if name_div:
-                player_name = name_div.get_text(strip=True)
+            # From the HTML debug, I can see the text content shows: "ROC Vaxlon | Offline"
+            # The structure seems to have the name after some initial elements
+            cell_text = player_info_cell.get_text(separator='|', strip=True)
+            text_parts = [part.strip() for part in cell_text.split('|') if part.strip()]
             
-            # Method 2: Look for any div in the cell
-            if player_name == "Unknown":
-                all_divs = player_info_cell.find_all("div")
-                for div in all_divs:
-                    text = div.get_text(strip=True)
-                    if text and not text.startswith("#") and len(text) > 2:
-                        player_name = text
-                        break
+            # Look through text parts to find the player name
+            # Skip common patterns like "#", numbers, "Offline", "History", etc.
+            skip_patterns = ["#", "History", "Performance", "Lvl", "Offline", "In match", "RP away from"]
             
-            # Method 3: Look for text nodes directly
-            if player_name == "Unknown":
-                cell_text = player_info_cell.get_text(separator='|', strip=True)
-                text_parts = [part.strip() for part in cell_text.split('|') if part.strip()]
-                for part in text_parts:
-                    if not part.startswith("#") and len(part) > 2 and not part.isdigit():
-                        player_name = part
-                        break
+            for part in text_parts:
+                if (part and 
+                    len(part) > 2 and 
+                    not part.isdigit() and 
+                    not any(skip in part for skip in skip_patterns) and
+                    not part.startswith("#")):
+                    player_name = part
+                    break
             
-            # Method 4: Look for strong/b tags
+            # If still unknown, try looking at HTML structure more carefully
             if player_name == "Unknown":
-                strong_tags = player_info_cell.find_all(['strong', 'b'])
-                for tag in strong_tags:
-                    text = tag.get_text(strip=True)
-                    if text and len(text) > 2:
+                # Looking at the HTML, there might be nested divs
+                all_text_elements = player_info_cell.find_all(text=True)
+                for text in all_text_elements:
+                    text = text.strip()
+                    if (text and 
+                        len(text) > 2 and 
+                        not text.isdigit() and
+                        not any(skip in text for skip in skip_patterns) and
+                        not text.startswith("#") and
+                        not text in ["col", "flex", "padding-right"]):
                         player_name = text
                         break
             
