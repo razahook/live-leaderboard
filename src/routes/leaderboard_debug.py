@@ -27,8 +27,8 @@ def debug_raw_scrape():
         players_found = []
         twitch_links_found = 0
         
-        # Extract first 20 rows
-        rows = soup.find_all("tr")[:21]  # Include header
+        # Extract first 50 rows to include rank 33+
+        rows = soup.find_all("tr")[:51]  # Include header
         
         for i, row in enumerate(rows):
             if i == 0:  # Skip header
@@ -46,7 +46,7 @@ def debug_raw_scrape():
                 continue
                 
             rank = int(rank_text)
-            if rank > 20:
+            if rank > 50:
                 break
                 
             # Get player info cell - it's the 3rd cell (index 2), not the 2nd
