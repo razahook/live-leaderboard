@@ -15,8 +15,8 @@ twitch_oauth_bp = Blueprint('twitch_oauth', __name__)
 # OAuth configuration
 TWITCH_CLIENT_ID = os.environ.get('TWITCH_CLIENT_ID')
 TWITCH_CLIENT_SECRET = os.environ.get('TWITCH_CLIENT_SECRET')
-# Default redirect URI (will be overridden dynamically)
-REDIRECT_URI = "http://localhost:8080/api/session/complete"
+# Default redirect URI for Vercel deployment
+REDIRECT_URI = "https://live-leaderboard-plum.vercel.app/api/session/complete"
 
 # Required scopes for clip creation
 REQUIRED_SCOPES = "clips:edit"
