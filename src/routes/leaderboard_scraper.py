@@ -65,8 +65,10 @@ def rate_limit(max_requests: int = 60, window: int = 60) -> Callable:
 try:
     from routes.twitch_integration import extract_twitch_username, get_twitch_access_token, load_cache_file, save_cache_file
     from routes.apex_scraper import load_twitch_overrides
-    from cache_manager import leaderboard_cache 
     from routes.twitch_clips import get_user_clips_cached
+    # Import Vercel cache manager for proper caching
+    from vercel_cache import VercelCacheManager
+    CACHE_AVAILABLE = True
 except ImportError as e:
     safe_print(f"Import warning in leaderboard_scraper: {e}")
     # Fallback stubs for Vercel deployment
@@ -76,13 +78,7 @@ except ImportError as e:
     def save_cache_file(path, data): pass
     def load_twitch_overrides(): return {}
     def get_user_clips_cached(username, headers, limit=3): return {"has_clips": False, "recent_clips": []}
-    class MockCache:
-        def get_data(self): return None
-        def is_expired(self): return True
-        def set_data(self, data): pass
-        @property
-        def last_updated(self): return datetime.now()
-    leaderboard_cache = MockCache()
+    CACHE_AVAILABLE = False
 
 # Define the Blueprint for leaderboard routes
 leaderboard_bp = Blueprint('leaderboard', __name__)
@@ -368,17 +364,31 @@ def get_leaderboard_alt(platform):
 def get_predator_points():
     """Get minimum RP for predator rank"""
     try:
-        # Sample predator points data
+        # Sample predator points data - format to match frontend expectations
         predator_data = {
-            "predator_rank": {
-                "PC": {"min_rp": 15000, "current_players": 750},
-                "PlayStation": {"min_rp": 12000, "current_players": 750}, 
-                "Xbox": {"min_rp": 11500, "current_players": 750}
+            "PC": {
+                "min_rp": 15000,
+                "current_players": 750,
+                "masters_count": 10000,
+                "rp_change_24h": 150
             },
-            "master_rank": {
-                "PC": {"min_rp": 10000},
-                "PlayStation": {"min_rp": 10000},
-                "Xbox": {"min_rp": 10000}
+            "PS4": {
+                "min_rp": 12000, 
+                "current_players": 750,
+                "masters_count": 8500,
+                "rp_change_24h": 120
+            },
+            "X1": {
+                "min_rp": 11500,
+                "current_players": 750, 
+                "masters_count": 7200,
+                "rp_change_24h": 110
+            },
+            "SWITCH": {
+                "min_rp": 10000,
+                "current_players": 750,
+                "masters_count": 5000,
+                "rp_change_24h": 80
             },
             "last_updated": datetime.now().isoformat()
         }
