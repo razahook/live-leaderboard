@@ -14,24 +14,107 @@ load_dotenv()
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(__file__))
 
-from models.user import db
-from routes.user import user_bp
-from routes.apex_scraper import apex_scraper_bp
-from routes.leaderboard_scraper import leaderboard_bp
-from routes.twitch_integration import twitch_bp
-from routes.twitch_override import twitch_override_bp
-from routes.tracker_proxy import tracker_proxy_bp
-from routes.twitch_clips import twitch_clips_bp
-from routes.twitch_vod_downloader import twitch_vod_bp
-from routes.twitch_hidden_vods import twitch_hidden_vods_bp
-from routes.twitch_live_rewind import twitch_live_rewind_bp
-from routes.twitch_oauth import twitch_oauth_bp
+# Try to import database models (may fail in Vercel)
+try:
+    from models.user import db
+    DB_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Database models not available: {e}")
+    DB_AVAILABLE = False
+    db = None
 
-# Import QoL improvement modules
-from routes.user_preferences import user_preferences_bp
-from routes.health import health_bp
-from routes.analytics import analytics_bp
-from routes.webhooks import webhooks_bp
+# Import route modules with error handling
+imported_blueprints = []
+
+try:
+    from routes.user import user_bp
+    imported_blueprints.append(('user_bp', user_bp))
+except ImportError as e:
+    logger.warning(f"Could not import user routes: {e}")
+
+try:
+    from routes.apex_scraper import apex_scraper_bp
+    imported_blueprints.append(('apex_scraper_bp', apex_scraper_bp))
+except ImportError as e:
+    logger.warning(f"Could not import apex_scraper routes: {e}")
+
+try:
+    from routes.leaderboard_scraper import leaderboard_bp
+    imported_blueprints.append(('leaderboard_bp', leaderboard_bp))
+except ImportError as e:
+    logger.warning(f"Could not import leaderboard routes: {e}")
+
+try:
+    from routes.twitch_integration import twitch_bp
+    imported_blueprints.append(('twitch_bp', twitch_bp))
+except ImportError as e:
+    logger.warning(f"Could not import twitch_integration routes: {e}")
+
+try:
+    from routes.twitch_override import twitch_override_bp
+    imported_blueprints.append(('twitch_override_bp', twitch_override_bp))
+except ImportError as e:
+    logger.warning(f"Could not import twitch_override routes: {e}")
+
+try:
+    from routes.tracker_proxy import tracker_proxy_bp
+    imported_blueprints.append(('tracker_proxy_bp', tracker_proxy_bp))
+except ImportError as e:
+    logger.warning(f"Could not import tracker_proxy routes: {e}")
+
+try:
+    from routes.twitch_clips import twitch_clips_bp
+    imported_blueprints.append(('twitch_clips_bp', twitch_clips_bp))
+except ImportError as e:
+    logger.warning(f"Could not import twitch_clips routes: {e}")
+
+try:
+    from routes.twitch_vod_downloader import twitch_vod_bp
+    imported_blueprints.append(('twitch_vod_bp', twitch_vod_bp))
+except ImportError as e:
+    logger.warning(f"Could not import twitch_vod_downloader routes: {e}")
+
+try:
+    from routes.twitch_hidden_vods import twitch_hidden_vods_bp
+    imported_blueprints.append(('twitch_hidden_vods_bp', twitch_hidden_vods_bp))
+except ImportError as e:
+    logger.warning(f"Could not import twitch_hidden_vods routes: {e}")
+
+try:
+    from routes.twitch_live_rewind import twitch_live_rewind_bp
+    imported_blueprints.append(('twitch_live_rewind_bp', twitch_live_rewind_bp))
+except ImportError as e:
+    logger.warning(f"Could not import twitch_live_rewind routes: {e}")
+
+try:
+    from routes.twitch_oauth import twitch_oauth_bp
+    imported_blueprints.append(('twitch_oauth_bp', twitch_oauth_bp))
+except ImportError as e:
+    logger.warning(f"Could not import twitch_oauth routes: {e}")
+
+try:
+    from routes.user_preferences import user_preferences_bp
+    imported_blueprints.append(('user_preferences_bp', user_preferences_bp))
+except ImportError as e:
+    logger.warning(f"Could not import user_preferences routes: {e}")
+
+try:
+    from routes.health import health_bp
+    imported_blueprints.append(('health_bp', health_bp))
+except ImportError as e:
+    logger.warning(f"Could not import health routes: {e}")
+
+try:
+    from routes.analytics import analytics_bp
+    imported_blueprints.append(('analytics_bp', analytics_bp))
+except ImportError as e:
+    logger.warning(f"Could not import analytics routes: {e}")
+
+try:
+    from routes.webhooks import webhooks_bp
+    imported_blueprints.append(('webhooks_bp', webhooks_bp))
+except ImportError as e:
+    logger.warning(f"Could not import webhooks routes: {e}")
 
 # Create Flask app - no static folder needed since Vercel handles static files
 app = Flask(__name__)
@@ -68,71 +151,61 @@ def rate_limit(max_requests=60, window=60):
         return decorated_function
     return decorator
 
-# Database configuration
-database_path = os.path.join(os.path.dirname(__file__), 'database', 'test_app.db')
-os.makedirs(os.path.dirname(database_path), exist_ok=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Database configuration (only if available)
+if DB_AVAILABLE and db:
+    database_path = os.path.join(os.path.dirname(__file__), 'database', 'test_app.db')
+    os.makedirs(os.path.dirname(database_path), exist_ok=True)
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db.init_app(app)
+    logger.info("Database initialized successfully")
+else:
+    logger.warning("Database not available - running without persistence")
 
-# Initialize database
-db.init_app(app)
-
-# Register blueprints with API prefix
-app.register_blueprint(user_bp, url_prefix='/api')
-app.register_blueprint(apex_scraper_bp, url_prefix='/api') 
-app.register_blueprint(leaderboard_bp, url_prefix='/api')
-app.register_blueprint(twitch_bp, url_prefix='/api')
-app.register_blueprint(twitch_override_bp, url_prefix='/api')
-app.register_blueprint(tracker_proxy_bp, url_prefix='/api')
-app.register_blueprint(twitch_clips_bp, url_prefix='/api')
-app.register_blueprint(twitch_vod_bp, url_prefix='/api')
-app.register_blueprint(twitch_hidden_vods_bp, url_prefix='/api')
-app.register_blueprint(twitch_live_rewind_bp, url_prefix='/api')
-app.register_blueprint(twitch_oauth_bp, url_prefix='/api')
-
-# Register QoL improvement blueprints
-app.register_blueprint(user_preferences_bp, url_prefix='/api')
-app.register_blueprint(health_bp, url_prefix='/api')
-app.register_blueprint(analytics_bp, url_prefix='/api')
-app.register_blueprint(webhooks_bp, url_prefix='/api')
-
-# Serve the main HTML file at root
-@app.route('/')
-def index():
-    """Serve the main HTML file"""
+# Register successfully imported blueprints
+logger.info(f"Registering {len(imported_blueprints)} blueprints")
+for blueprint_name, blueprint in imported_blueprints:
     try:
-        return send_file('index.html')
+        app.register_blueprint(blueprint, url_prefix='/api')
+        logger.info(f"Registered blueprint: {blueprint_name}")
     except Exception as e:
-        logger.error(f"Error serving index.html: {e}")
-        return jsonify({'error': 'Frontend not found'}), 404
+        logger.error(f"Failed to register blueprint {blueprint_name}: {e}")
 
-# Serve static files
-@app.route('/static/<path:filename>')
-def static_files(filename):
-    """Serve static files"""
-    try:
-        return send_from_directory('static', filename)
-    except Exception as e:
-        logger.error(f"Error serving static file {filename}: {e}")
-        return jsonify({'error': 'File not found'}), 404
+# Add a simple root route for health checking
+@app.route('/api/status')
+def api_status():
+    """API status endpoint"""
+    return jsonify({
+        'status': 'ok',
+        'message': 'API is running',
+        'blueprints_loaded': len(imported_blueprints),
+        'database_available': DB_AVAILABLE
+    })
 
 # Health check endpoint
-@app.route('/health')
+@app.route('/api/health')
 def health_check():
     """Simple health check"""
     return jsonify({
         'status': 'healthy',
         'message': 'Apex Legends Leaderboard API is running',
-        'timestamp': time.time()
+        'timestamp': time.time(),
+        'blueprints_loaded': [name for name, _ in imported_blueprints]
     })
 
-# Create database tables
-with app.app_context():
-    try:
-        db.create_all()
-        logger.info("Database tables created successfully")
-    except Exception as e:
-        logger.error(f"Error creating database tables: {e}")
+# Create database tables (only if database is available)
+if DB_AVAILABLE and db:
+    with app.app_context():
+        try:
+            db.create_all()
+            logger.info("Database tables created successfully")
+        except Exception as e:
+            logger.error(f"Error creating database tables: {e}")
+else:
+    logger.info("Skipping database table creation - database not available")
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
