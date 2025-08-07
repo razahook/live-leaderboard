@@ -3,7 +3,8 @@
     "allow": [
       "Bash(python test:*)",
       "Bash(rm:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

@@ -50,7 +50,14 @@ class VercelCacheManager:
         if os.path.exists(cache_file):
             try:
                 with open(cache_file, 'r') as f:
-                    return json.load(f)
+                    data = json.load(f)
+                    
+                # Fix timestamp formats if needed
+                if 'last_updated' in data and isinstance(data['last_updated'], (int, float)):
+                    # Convert Unix timestamp to ISO string for consistency
+                    data['last_updated'] = datetime.fromtimestamp(data['last_updated']).isoformat()
+                    
+                return data
             except Exception as e:
                 print(f"Warning: Could not load cache file {cache_file}: {e}")
         return {}
@@ -169,11 +176,16 @@ def init_vercel_cache():
     """Initialize the Vercel cache system."""
     print("Initializing Vercel cache system...")
     
-    # Pre-load critical cache data
+    # Pre-load critical cache data with error handling
     for cache_type in ['access_tokens', 'user_validation']:
-        initial_data = VercelCacheManager.load_initial_cache(cache_type)
-        for key, value in initial_data.items():
-            VercelCacheManager.set(key, value, cache_type)
+        try:
+            initial_data = VercelCacheManager.load_initial_cache(cache_type)
+            for key, value in initial_data.items():
+                # Skip metadata fields like 'last_updated' when setting cache
+                if key not in ['last_updated']:
+                    VercelCacheManager.set(key, value, cache_type)
+        except Exception as e:
+            print(f"Warning: Failed to load initial cache for {cache_type}: {e}")
     
     print(f"Cache initialized with stats: {VercelCacheManager.get_stats()}")
 

@@ -11,6 +11,10 @@ from collections import defaultdict
 # Load environment variables
 load_dotenv()
 
+# Set up logging FIRST
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -124,9 +128,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'test-secret-key')
 # Enable CORS
 CORS(app)
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Logging already set up above
 
 # Simple rate limiting
 rate_limits = defaultdict(list)
@@ -151,14 +153,31 @@ def rate_limit(max_requests=60, window=60):
         return decorated_function
     return decorator
 
-# Database configuration (only if available)
+# Database configuration (only if available) - handle Vercel read-only filesystem
 if DB_AVAILABLE and db:
-    database_path = os.path.join(os.path.dirname(__file__), 'database', 'test_app.db')
-    os.makedirs(os.path.dirname(database_path), exist_ok=True)
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db.init_app(app)
-    logger.info("Database initialized successfully")
+    try:
+        # Use in-memory database for Vercel deployment
+        if os.environ.get('VERCEL'):
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+            logger.info("Using in-memory database for Vercel deployment")
+        else:
+            # Use file-based database for local development
+            database_path = os.path.join(os.path.dirname(__file__), 'database', 'test_app.db')
+            try:
+                os.makedirs(os.path.dirname(database_path), exist_ok=True)
+                app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
+                logger.info(f"Using file-based database: {database_path}")
+            except OSError as e:
+                logger.warning(f"Cannot create database directory: {e}, falling back to in-memory")
+                app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        db.init_app(app)
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+        DB_AVAILABLE = False
+        db = None
 else:
     logger.warning("Database not available - running without persistence")
 

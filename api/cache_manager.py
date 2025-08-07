@@ -118,7 +118,17 @@ class PersistentCache(EnhancedCache):
                 # Check if file data is still valid
                 if 'last_updated' in cache_data and cache_data['last_updated']:
                     try:
-                        last_updated = datetime.fromisoformat(cache_data['last_updated'])
+                        # Handle both numeric timestamps and ISO strings
+                        timestamp = cache_data['last_updated']
+                        if isinstance(timestamp, (int, float)):
+                            # Unix timestamp
+                            last_updated = datetime.fromtimestamp(timestamp)
+                        elif isinstance(timestamp, str):
+                            # ISO format string
+                            last_updated = datetime.fromisoformat(timestamp)
+                        else:
+                            raise ValueError(f"Invalid timestamp format: {type(timestamp)}")
+                            
                         if datetime.now() - last_updated <= timedelta(seconds=self.ttl):
                             self.data = cache_data.get('data')
                             self.last_updated = last_updated
