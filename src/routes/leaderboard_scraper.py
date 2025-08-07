@@ -358,9 +358,8 @@ def add_twitch_live_status(leaderboard_data):
 
         # 1. Build a canonical Twitch username cache for all players with Twitch links
         canonical_usernames = {}
-        # Check top 100 players for Twitch links (balance between speed and coverage)
-        max_twitch_check = 100  # Optimized for speed while still catching most streamers
-        for i, player in enumerate(leaderboard_data['players'][:max_twitch_check]):
+        # Check ALL players for Twitch links - no limits (keep the 18 live streamers working)
+        for i, player in enumerate(leaderboard_data['players']):
             if player.get('twitch_link'):
                 username = extract_twitch_username(player['twitch_link'])
                 if username:
