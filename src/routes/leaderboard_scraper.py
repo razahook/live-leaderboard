@@ -154,16 +154,11 @@ def scrape_leaderboard(platform="PC", max_players=500):
                         if not rank or rank > 500: # Only process top 500 real players
                             continue
                         
-                        # --- 2. Find the Player Info Cell (most likely to contain name and links) ---
-                        player_info_cell = None
-                        # Heuristic: find the cell with the most direct text or a link
-                        for cell in cells:
-                            if cell.find('a') or len(cell.get_text(strip=True)) > 10: # Assuming player cell has more content
-                                player_info_cell = cell
-                                break
-                        
-                        if not player_info_cell:
+                        # --- 2. Find the Player Info Cell ---
+                        # Based on HTML structure analysis: cells[0] = hidden pos, cells[1] = rank, cells[2] = player info
+                        if len(cells) < 3:
                             continue
+                        player_info_cell = cells[2]
                         
                         # --- 3. Extract Player Name ---
                         player_name = ""

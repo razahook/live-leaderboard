@@ -49,8 +49,10 @@ def debug_raw_scrape():
             if rank > 20:
                 break
                 
-            # Get player info cell
-            player_info_cell = cells[1]
+            # Get player info cell - it's the 3rd cell (index 2), not the 2nd
+            if len(cells) < 3:
+                continue
+            player_info_cell = cells[2]
             
             # Extract player name - using EXACT same logic as main leaderboard scraper
             player_name = ""
