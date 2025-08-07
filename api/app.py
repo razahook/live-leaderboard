@@ -167,6 +167,7 @@ if DB_AVAILABLE and db:
         ])
         
         logger.info(f"Serverless detection: VERCEL={os.environ.get('VERCEL')}, current_dir={current_dir}, is_serverless={is_serverless}")
+        logger.info("Deployment timestamp: 2025-08-07 10:30 - All fixes applied")
         
         # Additional check for read-only filesystem
         if not is_serverless:
