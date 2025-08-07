@@ -2772,14 +2772,14 @@
             console.log('=== POPULATING STREAMER DROPDOWNS ===');
             console.log('Total players available:', allPlayers.length);
             
-            // Include multiple ways a player can be considered "live"
+            // Only show players who are actually live on Twitch (not just in-game status)
             const liveStreamers = allPlayers.filter(player => {
-                const statusLive = String(player.status).toLowerCase().includes('live');
-                const statusInMatch = String(player.status).toLowerCase().includes('match');
+                // Must have confirmed Twitch live status AND stream data
                 const twitchLive = player.twitch_live?.is_live === true;
-                const hasStream = player.stream !== null && player.stream !== undefined;
+                const hasStreamData = player.stream !== null && player.stream !== undefined;
+                const hasViewers = player.stream?.viewers !== undefined;
                 
-                return statusLive || statusInMatch || twitchLive || hasStream;
+                return twitchLive && hasStreamData && hasViewers;
             });
             
             console.log('Live streamers found:', liveStreamers.length);
@@ -2788,41 +2788,27 @@
                 status: p.status,
                 twitch_live_status: p.twitch_live?.is_live,
                 has_stream: !!p.stream,
+                viewers: p.stream?.viewers || 0,
                 twitchUser: p.stream?.twitchUser || 'no_stream'
             })));
+            
             const dropdowns = ['streamer1', 'streamer2', 'streamer3'];
             dropdowns.forEach(dropdownId => {
                 const dropdown = document.getElementById(dropdownId);
                 const placeholder = dropdown.options[0];
                 dropdown.innerHTML = '';
                 dropdown.appendChild(placeholder);
-                // Only add hardcoded anayaunni if not already present by username or display name
-                const alreadyPresent = liveStreamers.some(player => {
-                    const twitchUsername = player.stream?.twitchUser || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
-                    return twitchUsername === 'anayaunni' || player.name === 'あなやちゃんねる';
-                });
-                if (!alreadyPresent) {
-                    const anayaOption = document.createElement('option');
-                    anayaOption.value = 'anayaunni';
-                    anayaOption.textContent = 'あなやちゃんねる (anayaunni)';
-                    anayaOption.dataset.playerName = 'あなやちゃんねる';
-                    anayaOption.dataset.twitchLink = 'https://www.twitch.tv/anayaunni';
-                    dropdown.appendChild(anayaOption);
-                }
-                // Add the rest of the live streamers (show ALL live streamers, including 0-viewer streams)
+                
+                // Add only live streamers dynamically - NO HARDCODED ENTRIES
                 liveStreamers.forEach(player => {
                     const twitchUsername = player.stream?.twitchUser || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
                     const viewerCount = player.stream?.viewers || 0;
                     
-                    // Skip only if this is the hardcoded user to avoid duplicate
-                    if (
-                        (twitchUsername && twitchUsername !== 'anayaunni') ||
-                        (player.name !== 'あなやちゃんねる')
-                    ) {
+                    if (twitchUsername) {
                         const option = document.createElement('option');
                         option.value = twitchUsername;
-                        option.textContent = `${player.name} (${viewerCount.toLocaleString()} viewers)`;
-                        option.dataset.playerName = player.name;
+                        option.textContent = `${player.name || player.player_name} (${viewerCount.toLocaleString()} viewers)`;
+                        option.dataset.playerName = player.name || player.player_name;
                         option.dataset.twitchLink = player.twitch_link || `https://www.twitch.tv/${twitchUsername}`;
                         dropdown.appendChild(option);
                     }
@@ -3359,11 +3345,9 @@ ${(() => {
             });
         });
 
-        // In loadMultiStreams, after getting the selected streamer value:
+        // Get canonical Twitch username for multistream loading
         const getCanonicalTwitchUsername = (streamer, playerName) => {
-            if (streamer === 'anayaunni' || playerName === 'あなやちゃんねる') {
-                return 'anayaunni';
-            }
+            // Simply return the streamer username - no hardcoded mappings
             return streamer;
         };
 
