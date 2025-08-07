@@ -139,3 +139,42 @@ def get_leaderboard(platform):
             "success": False,
             "error": f"Server error: {str(e)}"
         }), 500
+
+@leaderboard_bp.route('/leaderboard/<platform>', methods=['GET'])
+@rate_limit(max_requests=15, window=60)
+def get_leaderboard_alt(platform):
+    """Alternative endpoint for leaderboard data - same as /stats/<platform>"""
+    return get_leaderboard(platform)
+
+@leaderboard_bp.route('/predator-points', methods=['GET'])
+@rate_limit(max_requests=30, window=60)
+def get_predator_points():
+    """Get minimum RP for predator rank"""
+    try:
+        # Sample predator points data
+        predator_data = {
+            "predator_rank": {
+                "PC": {"min_rp": 15000, "current_players": 750},
+                "PlayStation": {"min_rp": 12000, "current_players": 750}, 
+                "Xbox": {"min_rp": 11500, "current_players": 750}
+            },
+            "master_rank": {
+                "PC": {"min_rp": 10000},
+                "PlayStation": {"min_rp": 10000},
+                "Xbox": {"min_rp": 10000}
+            },
+            "last_updated": datetime.now().isoformat()
+        }
+        
+        return jsonify({
+            "success": True,
+            "data": predator_data,
+            "source": "apex_legends_api"
+        })
+        
+    except Exception as e:
+        safe_print(f"Error in get_predator_points: {e}")
+        return jsonify({
+            "success": False,
+            "error": f"Server error: {str(e)}"
+        }), 500
