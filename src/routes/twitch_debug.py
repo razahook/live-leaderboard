@@ -87,6 +87,90 @@ def debug_twitch_batch():
             "error_type": type(e).__name__
         })
 
+@twitch_debug_bp.route('/debug/overrides-check', methods=['GET'])
+def debug_overrides_check():
+    """Debug endpoint to check Twitch overrides file loading"""
+    try:
+        import os
+        from routes.apex_scraper import load_twitch_overrides, OVERRIDE_FILE_PATH
+        
+        # Check various paths
+        current_file = __file__
+        current_dir = os.path.dirname(__file__)
+        parent_dir = os.path.dirname(current_dir)
+        root_dir = os.path.dirname(parent_dir)
+        
+        # Try multiple possible paths
+        paths_to_try = [
+            OVERRIDE_FILE_PATH,
+            os.path.join(root_dir, 'twitch_overrides.json'),
+            os.path.join(parent_dir, 'twitch_overrides.json'),
+            os.path.join(current_dir, 'twitch_overrides.json'),
+            '/var/task/src/twitch_overrides.json',  # Vercel path
+        ]
+        
+        path_results = []
+        for path in paths_to_try:
+            exists = os.path.exists(path)
+            try:
+                if exists:
+                    with open(path, 'r') as f:
+                        content = f.read()
+                        import json
+                        data = json.loads(content)
+                        path_results.append({
+                            "path": path,
+                            "exists": True,
+                            "entries_count": len(data),
+                            "sample_keys": list(data.keys())[:3]
+                        })
+                else:
+                    path_results.append({
+                        "path": path,
+                        "exists": False,
+                        "error": "File not found"
+                    })
+            except Exception as e:
+                path_results.append({
+                    "path": path,
+                    "exists": exists,
+                    "error": str(e)
+                })
+        
+        # Try loading overrides
+        try:
+            overrides = load_twitch_overrides()
+            overrides_loaded = True
+            overrides_count = len(overrides)
+            sample_overrides = dict(list(overrides.items())[:3]) if overrides else {}
+        except Exception as e:
+            overrides_loaded = False
+            overrides_count = 0
+            sample_overrides = {"error": str(e)}
+        
+        return jsonify({
+            "success": True,
+            "file_paths": {
+                "current_file": current_file,
+                "current_dir": current_dir,
+                "parent_dir": parent_dir,
+                "root_dir": root_dir,
+                "configured_path": OVERRIDE_FILE_PATH
+            },
+            "path_checks": path_results,
+            "override_loading": {
+                "loaded": overrides_loaded,
+                "count": overrides_count,
+                "sample": sample_overrides
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
+        })
+
 @twitch_debug_bp.route('/debug/leaderboard-sample', methods=['GET'])
 def debug_leaderboard_sample():
     """Debug endpoint to show sample leaderboard data with Twitch info"""
@@ -126,6 +210,90 @@ def debug_leaderboard_sample():
             "leaderboard_metadata": {
                 "last_updated": leaderboard_data.get('last_updated'),
                 "total_predators": leaderboard_data.get('total_predators')
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
+        })
+
+@twitch_debug_bp.route('/debug/overrides-check', methods=['GET'])
+def debug_overrides_check():
+    """Debug endpoint to check Twitch overrides file loading"""
+    try:
+        import os
+        from routes.apex_scraper import load_twitch_overrides, OVERRIDE_FILE_PATH
+        
+        # Check various paths
+        current_file = __file__
+        current_dir = os.path.dirname(__file__)
+        parent_dir = os.path.dirname(current_dir)
+        root_dir = os.path.dirname(parent_dir)
+        
+        # Try multiple possible paths
+        paths_to_try = [
+            OVERRIDE_FILE_PATH,
+            os.path.join(root_dir, 'twitch_overrides.json'),
+            os.path.join(parent_dir, 'twitch_overrides.json'),
+            os.path.join(current_dir, 'twitch_overrides.json'),
+            '/var/task/src/twitch_overrides.json',  # Vercel path
+        ]
+        
+        path_results = []
+        for path in paths_to_try:
+            exists = os.path.exists(path)
+            try:
+                if exists:
+                    with open(path, 'r') as f:
+                        content = f.read()
+                        import json
+                        data = json.loads(content)
+                        path_results.append({
+                            "path": path,
+                            "exists": True,
+                            "entries_count": len(data),
+                            "sample_keys": list(data.keys())[:3]
+                        })
+                else:
+                    path_results.append({
+                        "path": path,
+                        "exists": False,
+                        "error": "File not found"
+                    })
+            except Exception as e:
+                path_results.append({
+                    "path": path,
+                    "exists": exists,
+                    "error": str(e)
+                })
+        
+        # Try loading overrides
+        try:
+            overrides = load_twitch_overrides()
+            overrides_loaded = True
+            overrides_count = len(overrides)
+            sample_overrides = dict(list(overrides.items())[:3]) if overrides else {}
+        except Exception as e:
+            overrides_loaded = False
+            overrides_count = 0
+            sample_overrides = {"error": str(e)}
+        
+        return jsonify({
+            "success": True,
+            "file_paths": {
+                "current_file": current_file,
+                "current_dir": current_dir,
+                "parent_dir": parent_dir,
+                "root_dir": root_dir,
+                "configured_path": OVERRIDE_FILE_PATH
+            },
+            "path_checks": path_results,
+            "override_loading": {
+                "loaded": overrides_loaded,
+                "count": overrides_count,
+                "sample": sample_overrides
             }
         })
     except Exception as e:
@@ -206,6 +374,90 @@ def debug_vercel_optimization():
             "error_type": type(e).__name__
         })
 
+@twitch_debug_bp.route('/debug/overrides-check', methods=['GET'])
+def debug_overrides_check():
+    """Debug endpoint to check Twitch overrides file loading"""
+    try:
+        import os
+        from routes.apex_scraper import load_twitch_overrides, OVERRIDE_FILE_PATH
+        
+        # Check various paths
+        current_file = __file__
+        current_dir = os.path.dirname(__file__)
+        parent_dir = os.path.dirname(current_dir)
+        root_dir = os.path.dirname(parent_dir)
+        
+        # Try multiple possible paths
+        paths_to_try = [
+            OVERRIDE_FILE_PATH,
+            os.path.join(root_dir, 'twitch_overrides.json'),
+            os.path.join(parent_dir, 'twitch_overrides.json'),
+            os.path.join(current_dir, 'twitch_overrides.json'),
+            '/var/task/src/twitch_overrides.json',  # Vercel path
+        ]
+        
+        path_results = []
+        for path in paths_to_try:
+            exists = os.path.exists(path)
+            try:
+                if exists:
+                    with open(path, 'r') as f:
+                        content = f.read()
+                        import json
+                        data = json.loads(content)
+                        path_results.append({
+                            "path": path,
+                            "exists": True,
+                            "entries_count": len(data),
+                            "sample_keys": list(data.keys())[:3]
+                        })
+                else:
+                    path_results.append({
+                        "path": path,
+                        "exists": False,
+                        "error": "File not found"
+                    })
+            except Exception as e:
+                path_results.append({
+                    "path": path,
+                    "exists": exists,
+                    "error": str(e)
+                })
+        
+        # Try loading overrides
+        try:
+            overrides = load_twitch_overrides()
+            overrides_loaded = True
+            overrides_count = len(overrides)
+            sample_overrides = dict(list(overrides.items())[:3]) if overrides else {}
+        except Exception as e:
+            overrides_loaded = False
+            overrides_count = 0
+            sample_overrides = {"error": str(e)}
+        
+        return jsonify({
+            "success": True,
+            "file_paths": {
+                "current_file": current_file,
+                "current_dir": current_dir,
+                "parent_dir": parent_dir,
+                "root_dir": root_dir,
+                "configured_path": OVERRIDE_FILE_PATH
+            },
+            "path_checks": path_results,
+            "override_loading": {
+                "loaded": overrides_loaded,
+                "count": overrides_count,
+                "sample": sample_overrides
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
+        })
+
 @twitch_debug_bp.route('/debug/leaderboard-sample', methods=['GET'])
 def debug_leaderboard_sample():
     """Debug endpoint to show sample leaderboard data with Twitch info"""
@@ -245,6 +497,90 @@ def debug_leaderboard_sample():
             "leaderboard_metadata": {
                 "last_updated": leaderboard_data.get('last_updated'),
                 "total_predators": leaderboard_data.get('total_predators')
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
+        })
+
+@twitch_debug_bp.route('/debug/overrides-check', methods=['GET'])
+def debug_overrides_check():
+    """Debug endpoint to check Twitch overrides file loading"""
+    try:
+        import os
+        from routes.apex_scraper import load_twitch_overrides, OVERRIDE_FILE_PATH
+        
+        # Check various paths
+        current_file = __file__
+        current_dir = os.path.dirname(__file__)
+        parent_dir = os.path.dirname(current_dir)
+        root_dir = os.path.dirname(parent_dir)
+        
+        # Try multiple possible paths
+        paths_to_try = [
+            OVERRIDE_FILE_PATH,
+            os.path.join(root_dir, 'twitch_overrides.json'),
+            os.path.join(parent_dir, 'twitch_overrides.json'),
+            os.path.join(current_dir, 'twitch_overrides.json'),
+            '/var/task/src/twitch_overrides.json',  # Vercel path
+        ]
+        
+        path_results = []
+        for path in paths_to_try:
+            exists = os.path.exists(path)
+            try:
+                if exists:
+                    with open(path, 'r') as f:
+                        content = f.read()
+                        import json
+                        data = json.loads(content)
+                        path_results.append({
+                            "path": path,
+                            "exists": True,
+                            "entries_count": len(data),
+                            "sample_keys": list(data.keys())[:3]
+                        })
+                else:
+                    path_results.append({
+                        "path": path,
+                        "exists": False,
+                        "error": "File not found"
+                    })
+            except Exception as e:
+                path_results.append({
+                    "path": path,
+                    "exists": exists,
+                    "error": str(e)
+                })
+        
+        # Try loading overrides
+        try:
+            overrides = load_twitch_overrides()
+            overrides_loaded = True
+            overrides_count = len(overrides)
+            sample_overrides = dict(list(overrides.items())[:3]) if overrides else {}
+        except Exception as e:
+            overrides_loaded = False
+            overrides_count = 0
+            sample_overrides = {"error": str(e)}
+        
+        return jsonify({
+            "success": True,
+            "file_paths": {
+                "current_file": current_file,
+                "current_dir": current_dir,
+                "parent_dir": parent_dir,
+                "root_dir": root_dir,
+                "configured_path": OVERRIDE_FILE_PATH
+            },
+            "path_checks": path_results,
+            "override_loading": {
+                "loaded": overrides_loaded,
+                "count": overrides_count,
+                "sample": sample_overrides
             }
         })
     except Exception as e:

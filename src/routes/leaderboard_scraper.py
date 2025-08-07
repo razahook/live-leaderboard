@@ -306,8 +306,27 @@ def add_twitch_live_status(leaderboard_data):
         
         # 1. Apply Twitch overrides for players with missing links
         try:
+            # Try to load from file first
             twitch_overrides = load_twitch_overrides()
-            safe_print(f"Loaded {len(twitch_overrides)} Twitch overrides")
+            safe_print(f"Loaded {len(twitch_overrides)} Twitch overrides from file")
+            
+            # If file loading failed, use hardcoded overrides as fallback
+            if not twitch_overrides:
+                twitch_overrides = {
+                    "ROC Vaxlon": {"twitch_link": "https://www.twitch.tv/vaxlon"},
+                    "ROC sauceror": {"twitch_link": "https://www.twitch.tv/sauceror"},
+                    "4rufq": {"twitch_link": "https://www.twitch.tv/4rufq"},
+                    "ImperialHal": {"twitch_link": "https://www.twitch.tv/tsm_imperialhal"},
+                    "TSM_ImperialHal": {"twitch_link": "https://www.twitch.tv/tsm_imperialhal"},
+                    "sweetdreams": {"twitch_link": "https://www.twitch.tv/sweetdreams"},
+                    "Albralelie": {"twitch_link": "https://www.twitch.tv/albralelie"},
+                    "NiceWigg": {"twitch_link": "https://www.twitch.tv/nicewigg"},
+                    "aceu": {"twitch_link": "https://www.twitch.tv/aceu"},
+                    "shroud": {"twitch_link": "https://www.twitch.tv/shroud"},
+                    "dizzy": {"twitch_link": "https://www.twitch.tv/dizzy"},
+                    "Mande": {"twitch_link": "https://www.twitch.tv/mande"}
+                }
+                safe_print(f"Using hardcoded overrides: {len(twitch_overrides)} entries")
             
             max_to_check = 20  # Start small for Vercel free tier
             for i, player in enumerate(leaderboard_data['players'][:max_to_check]):
