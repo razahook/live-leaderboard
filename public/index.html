@@ -682,7 +682,7 @@
         let currentPage = 1;
         const itemsPerPage = 50; 
         let previewTimeout;
-        // Dynamically detect the base URL for ngrok/localhost
+        // Dynamically detect the base URL for ngrok/localhost/vercel
         const NGROK_BASE_URL = (() => {
             const currentHost = window.location.hostname;
             const currentProtocol = window.location.protocol;
@@ -690,6 +690,10 @@
             
             // If accessing through ngrok (ngrok-free.app domain)
             if (currentHost.includes('ngrok-free.app') || currentHost.includes('ngrok.io')) {
+                return `${currentProtocol}//${currentHost}`;
+            }
+            // If accessing through Vercel (vercel.app domain) or other production domains
+            else if (currentHost.includes('vercel.app') || currentHost.includes('netlify.app') || (!currentHost.includes('localhost') && !currentHost.includes('127.0.0.1'))) {
                 return `${currentProtocol}//${currentHost}`;
             }
             // If accessing locally
@@ -1549,19 +1553,31 @@
                             }
                         };
                         
-                        // Load leaderboard data
-                        const leaderboardScript = document.createElement('script');
-                        leaderboardScript.src = `${NGROK_BASE_URL}/assets/data.js`;
-                        leaderboardScript.onload = checkComplete;
-                        leaderboardScript.onerror = () => reject(new Error('Failed to load leaderboard data'));
-                        document.head.appendChild(leaderboardScript);
+                        // Load leaderboard data via API
+                        fetch(`${NGROK_BASE_URL}/api/leaderboard/PC`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success && data.data && data.data.players) {
+                                    window.leaderboardData = data.data.players;
+                                    checkComplete();
+                                } else {
+                                    reject(new Error('Invalid leaderboard data format'));
+                                }
+                            })
+                            .catch(() => reject(new Error('Failed to load leaderboard data')));
                         
-                        // Load predator thresholds data
-                        const predatorScript = document.createElement('script');
-                        predatorScript.src = `${NGROK_BASE_URL}/assets/settings.js`;
-                        predatorScript.onload = checkComplete;
-                        predatorScript.onerror = () => reject(new Error('Failed to load predator thresholds'));
-                        document.head.appendChild(predatorScript);
+                        // Load predator thresholds data via API
+                        fetch(`${NGROK_BASE_URL}/api/predator-points`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success && data.data) {
+                                    window.predatorThresholds = data.data;
+                                    checkComplete();
+                                } else {
+                                    reject(new Error('Invalid predator thresholds data format'));
+                                }
+                            })
+                            .catch(() => reject(new Error('Failed to load predator thresholds')));
                     });
                 };
                 
