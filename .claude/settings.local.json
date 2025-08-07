@@ -11,7 +11,8 @@
       "Bash(diff:*)",
       "Bash(mkdir:*)",
       "Bash(cp:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "WebFetch(domain:live-leaderboard-plum.vercel.app)"
     ],
     "deny": []
   }

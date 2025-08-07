@@ -884,8 +884,11 @@
 
         const handleMouseEnter = (event, player) => {
             clearTimeout(previewTimeout);
-            if (player.status === 'Live' && player.stream && player.stream.twitchUser) {
-                previewTimeout = setTimeout(() => showStreamPreview(player.stream.twitchUser), 300); 
+            // Check for live status and either stream object or twitch_link
+            const twitchUsername = player.stream?.twitchUser || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
+            
+            if (player.status === 'Live' && twitchUsername) {
+                previewTimeout = setTimeout(() => showStreamPreview(twitchUsername), 300); 
             }
         };
 
@@ -2800,21 +2803,21 @@
                     anayaOption.dataset.twitchLink = 'https://www.twitch.tv/anayaunni';
                     dropdown.appendChild(anayaOption);
                 }
-                // Add the rest of the live streamers (filter out 0-viewer streams)
+                // Add the rest of the live streamers (show ALL live streamers, including 0-viewer streams)
                 liveStreamers.forEach(player => {
                     const twitchUsername = player.stream?.twitchUser || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
                     const viewerCount = player.stream?.viewers || 0;
                     
-                    // Skip if this is the hardcoded user to avoid duplicate, or if viewer count is 0
+                    // Skip only if this is the hardcoded user to avoid duplicate
                     if (
-                        ((twitchUsername && twitchUsername !== 'anayaunni') ||
-                        (player.name !== 'あなやちゃんねる')) &&
-                        viewerCount > 0  // Only show streamers with viewers
+                        (twitchUsername && twitchUsername !== 'anayaunni') ||
+                        (player.name !== 'あなやちゃんねる')
                     ) {
                         const option = document.createElement('option');
                         option.value = twitchUsername;
                         option.textContent = `${player.name} (${viewerCount.toLocaleString()} viewers)`;
                         option.dataset.playerName = player.name;
+                        option.dataset.twitchLink = player.twitch_link || `https://www.twitch.tv/${twitchUsername}`;
                         dropdown.appendChild(option);
                     }
                 });

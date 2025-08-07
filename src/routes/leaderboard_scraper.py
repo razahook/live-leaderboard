@@ -76,13 +76,27 @@ except ImportError as e:
     def extract_twitch_username(url): 
         if not url:
             return None
-        # Basic extraction without full integration
+        # Enhanced extraction to handle multiple URL patterns
         import re
-        patterns = [r'twitch\.tv/([a-zA-Z0-9_]+)']
+        
+        # Multiple patterns to catch various Twitch URL formats
+        patterns = [
+            r'apexlegendsstatus\.com/core/out\?type=twitch&id=([a-zA-Z0-9_]+)',  # ApexLegendsStatus redirect
+            r'twitch\.tv/([a-zA-Z0-9_]+)',                                        # Direct twitch.tv links
+            r'www\.twitch\.tv/([a-zA-Z0-9_]+)',                                  # With www
+            r'https?://twitch\.tv/([a-zA-Z0-9_]+)',                             # With protocol
+            r'https?://www\.twitch\.tv/([a-zA-Z0-9_]+)',                        # Full URL
+            r'id=([a-zA-Z0-9_]+)',                                               # Generic id parameter
+        ]
+        
         for pattern in patterns:
-            match = re.search(pattern, url)
+            match = re.search(pattern, url, re.IGNORECASE)
             if match:
-                return match.group(1).lower()
+                username = match.group(1).lower()
+                # Clean up any trailing parameters or junk
+                username = re.sub(r'[&?].*$', '', username)
+                if username and len(username) > 0:
+                    return username
         return None
     
     def get_twitch_access_token(): return None
@@ -177,23 +191,51 @@ def scrape_leaderboard(platform="PC", max_players=500):
 
                         # --- 4. Extract Twitch Link/Username ---
                         twitch_link = ""
-                        # First, check for the specific apexlegendsstatus.com redirect link or the Twitch icon link
+                        
+                        # Strategy 1: Look for apexlegendsstatus.com redirect links
                         twitch_anchor = player_info_cell.find("a", href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id="))
+                        
+                        # Strategy 2: Look for Twitch icon links (Font Awesome classes)
                         if not twitch_anchor:
-                            # Also check for the Twitch icon link directly if not found via redirect
-                            twitch_anchor = player_info_cell.find("a", class_=lambda x: x and "fa-twitch" in x, href=re.compile(r"apexlegendsstatus\.com/core/out\?type=twitch&id="))
-
-                        if twitch_anchor:
+                            twitch_anchor = player_info_cell.find("a", class_=lambda x: x and ("fa-twitch" in str(x) or "twitch" in str(x).lower()))
+                        
+                        # Strategy 3: Look for any anchor with twitch in href
+                        if not twitch_anchor:
+                            twitch_anchor = player_info_cell.find("a", href=re.compile(r"twitch", re.IGNORECASE))
+                        
+                        # Strategy 4: Look for purple/twitch-colored icons or elements
+                        if not twitch_anchor:
+                            # Check for elements with twitch-related styling or attributes
+                            twitch_elements = player_info_cell.find_all("a", attrs={"style": re.compile(r"color.*#9146ff|color.*purple", re.IGNORECASE)})
+                            if twitch_elements:
+                                twitch_anchor = twitch_elements[0]
+                        
+                        # Strategy 5: Look for i tags with twitch classes (icon elements)
+                        if not twitch_anchor:
+                            twitch_icon = player_info_cell.find("i", class_=re.compile(r"twitch|fa-twitch", re.IGNORECASE))
+                            if twitch_icon:
+                                # Find parent anchor of the icon
+                                twitch_anchor = twitch_icon.find_parent("a")
+                        
+                        # Extract username from found anchor
+                        if twitch_anchor and twitch_anchor.get("href"):
                             extracted_username = extract_twitch_username(twitch_anchor["href"])
                             if extracted_username:
                                 twitch_link = f"https://twitch.tv/{extracted_username}"
-                        else:
-                            # Fallback: search for twitch.tv URL within the cell's text or HTML
-                            twitch_match = re.search(r'(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)', player_info_cell.get_text(separator=' ', strip=True))
+                        
+                        # Strategy 6: Fallback - search for twitch.tv in text content and HTML
+                        if not twitch_link:
+                            # Search in both text and HTML source
+                            cell_html = str(player_info_cell)
+                            cell_text = player_info_cell.get_text(separator=' ', strip=True)
+                            combined_content = f"{cell_html} {cell_text}"
+                            
+                            twitch_match = re.search(r'(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)', combined_content, re.IGNORECASE)
                             if twitch_match:
                                 username = twitch_match.group(1)
-                                username = re.sub(r'(In|Offline|match|lobby)$', '', username, flags=re.IGNORECASE)
-                                if username:
+                                # Clean up username from status indicators
+                                username = re.sub(r'(In|Offline|match|lobby|Playing|History|Performance).*$', '', username, flags=re.IGNORECASE).strip()
+                                if username and len(username) > 0:
                                     twitch_link = f"https://twitch.tv/{username}"
 
                         # --- 5. Extract Status ---
@@ -353,13 +395,15 @@ def add_twitch_live_status(leaderboard_data):
                 player = leaderboard_data['players'][player_index]
                 player['twitch_live'] = live_status
                 
-                # Populate 'stream' key for frontend
+                # Populate 'stream' key for frontend and update status
                 if live_status["is_live"]:
                     player['stream'] = {
                         "viewers": live_status["stream_data"].get("viewer_count", 0),
                         "game": live_status["stream_data"].get("game_name", "Streaming"),
                         "twitchUser": live_status["stream_data"].get("user_name", username)
                     }
+                    # CRITICAL FIX: Set status to "Live" for streaming players
+                    player['status'] = "Live"
                     # Only check VODs/clips for live users to speed up the process
                     live_users_for_vods.append((username, player))
                 else:
