@@ -1558,7 +1558,7 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success && data.data && data.data.players) {
-                                    window.leaderboardData = data.data.players;
+                                    window.leaderboardData = data.data; // Keep the full data object with players property
                                     checkComplete();
                                 } else {
                                     reject(new Error('Invalid leaderboard data format'));
