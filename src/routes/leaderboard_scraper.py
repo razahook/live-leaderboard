@@ -130,7 +130,7 @@ def scrape_leaderboard(platform="PC", max_players=500):
     try:
         safe_print(f"Scraping leaderboard from: {base_url}")
         
-        response = requests.get(base_url, headers=headers, timeout=15)
+        response = requests.get(base_url, headers=headers, timeout=10)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.content, "html.parser")
@@ -358,8 +358,9 @@ def add_twitch_live_status(leaderboard_data):
 
         # 1. Build a canonical Twitch username cache for all players with Twitch links
         canonical_usernames = {}
-        # Check ALL players for Twitch links - no limits
-        for i, player in enumerate(leaderboard_data['players']):
+        # Check top 100 players for Twitch links (balance between speed and coverage)
+        max_twitch_check = 100  # Optimized for speed while still catching most streamers
+        for i, player in enumerate(leaderboard_data['players'][:max_twitch_check]):
             if player.get('twitch_link'):
                 username = extract_twitch_username(player['twitch_link'])
                 if username:
@@ -418,32 +419,8 @@ def add_twitch_live_status(leaderboard_data):
                     'recentClips': []
                 })
         
-        # Second pass: Only check VODs and clips for live users (much faster!)
-        safe_print(f"Checking VODs and clips for {len(live_users_for_vods)} live users only...")
-        for username, player in live_users_for_vods:
-            # --- Check VODs for live users only ---
-            try:
-                vods_data = get_user_videos_cached(username, headers)
-                if vods_data and vods_data.get('has_vods', False):
-                    player.update({
-                        'vods_enabled': True,
-                        'recent_videos': vods_data.get('recent_videos', [])
-                    })
-                    safe_print(f"✅ VODs found for live user {username}")
-            except Exception as e:
-                safe_print(f"VOD error for live user {username}: {e}")
-            
-            # --- Check Clips for live users only ---
-            try:
-                clips_data = get_user_clips_cached(username, headers, limit=3)
-                player.update({
-                    'hasClips': clips_data.get('has_clips', False),
-                    'recentClips': clips_data.get('recent_clips', [])
-                })
-                if clips_data.get('has_clips', False):
-                    safe_print(f"✅ Clips found for live user {username}")
-            except Exception as e:
-                safe_print(f"Clips error for live user {username}: {e}")
+        # Skip VODs/clips checking for speed - focus on core live status only
+        safe_print(f"Skipping VODs/clips for speed optimization - {len(live_users_for_vods)} live users detected")
         
         # Set default values for players without Twitch links
         for player in leaderboard_data['players']:
@@ -468,7 +445,7 @@ def add_twitch_live_status(leaderboard_data):
         return leaderboard_data
 
 @leaderboard_bp.route('/stats/<platform>', methods=['GET'])
-@rate_limit(max_requests=15, window=60)
+@rate_limit(max_requests=30, window=60)
 def get_leaderboard(platform):
     """Get live ranked leaderboard for specified platform"""
     try:
@@ -541,13 +518,13 @@ def get_leaderboard(platform):
         }), 500
 
 @leaderboard_bp.route('/leaderboard/<platform>', methods=['GET'])
-@rate_limit(max_requests=15, window=60)
+@rate_limit(max_requests=30, window=60)
 def get_leaderboard_alt(platform):
     """Alternative endpoint for leaderboard data - same as /stats/<platform>"""
     return get_leaderboard(platform)
 
 @leaderboard_bp.route('/leaderboard-test/<platform>', methods=['GET'])
-@rate_limit(max_requests=15, window=60)
+@rate_limit(max_requests=30, window=60)
 def get_leaderboard_test(platform):
     """Test endpoint with only 5 players to verify Twitch integration"""
     try:

@@ -49,7 +49,7 @@ except ImportError:
 
 # Detect serverless environment for optimized batch sizes
 is_vercel = bool(os.environ.get('VERCEL'))
-BATCH_SIZE = 5 if is_vercel else 20  # Much smaller batches for Vercel free tier
+BATCH_SIZE = 10 if is_vercel else 25  # Optimized batch sizes for better performance
 
 # In-memory cache for faster access (backup)
 twitch_access_cache = {}
