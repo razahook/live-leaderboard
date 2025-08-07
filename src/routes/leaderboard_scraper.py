@@ -79,7 +79,7 @@ except ImportError as e:
     def load_twitch_overrides(): return {}
     def get_user_clips_cached(username, headers, limit=3): return {"has_clips": False, "recent_clips": []}
     def get_user_videos_cached(username, headers, limit=3): return {"has_vods": False, "recent_videos": []}
-    def get_twitch_live_status_batch(usernames, batch_size=50): return {}
+    def get_twitch_live_status_batch(usernames): return {}
     CACHE_AVAILABLE = False
 
 # Define the Blueprint for leaderboard routes
@@ -324,7 +324,7 @@ def add_twitch_live_status(leaderboard_data):
             return leaderboard_data
 
         safe_print(f"Checking Twitch status for {len(usernames)} users in batches...")
-        live_status_results = get_twitch_live_status_batch(usernames, batch_size=50)
+        live_status_results = get_twitch_live_status_batch(usernames)  # Use optimized batch size
         safe_print(f"Got live status results for {len(live_status_results)} users")
 
         # Prepare headers for clips API
