@@ -2774,12 +2774,19 @@
             
             // Only show players who are actually live on Twitch (not just in-game status)
             const liveStreamers = allPlayers.filter(player => {
-                // Must have confirmed Twitch live status AND stream data
+                // Must have all these conditions to be considered truly live
                 const twitchLive = player.twitch_live?.is_live === true;
                 const hasStreamData = player.stream !== null && player.stream !== undefined;
-                const hasViewers = player.stream?.viewers !== undefined;
+                const hasViewers = player.stream?.viewers !== undefined && player.stream?.viewers >= 0;
+                const hasTwitchUser = player.stream?.twitchUser && player.stream.twitchUser.length > 0;
+                const statusIsLive = player.status === "Live";
                 
-                return twitchLive && hasStreamData && hasViewers;
+                // Debug logging for problematic entries
+                if (!twitchLive || !hasStreamData || !hasViewers || !hasTwitchUser || !statusIsLive) {
+                    console.log(`Filtering out ${player.player_name || player.name}: twitchLive=${twitchLive}, hasStreamData=${hasStreamData}, hasViewers=${hasViewers}, hasTwitchUser=${hasTwitchUser}, statusIsLive=${statusIsLive}`);
+                }
+                
+                return twitchLive && hasStreamData && hasViewers && hasTwitchUser && statusIsLive;
             });
             
             console.log('Live streamers found:', liveStreamers.length);
