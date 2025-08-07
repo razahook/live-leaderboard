@@ -22,10 +22,13 @@ USER_VALIDATION_CACHE = os.path.join(CACHE_DIR, 'user_validation.json')
 INVALID_USERNAMES_CACHE = os.path.join(CACHE_DIR, 'invalid_usernames.json')
 
 # Cache file paths - Updated for Vercel compatibility
+CACHE_MANAGER = None
 try:
     from vercel_cache import VercelCacheManager, load_cache_file, save_cache_file
     CACHE_MANAGER = VercelCacheManager()
+    print("Using Vercel cache manager")
 except ImportError:
+    print("Fallback to local file cache")
     # Fallback for local development
     def load_cache_file(file_path):
         if os.path.exists(file_path):
@@ -43,6 +46,10 @@ except ImportError:
                 json.dump(data, f)
         except Exception as e:
             print(f"Error saving cache file {file_path}: {e}")
+
+# Detect serverless environment for optimized batch sizes
+is_vercel = bool(os.environ.get('VERCEL'))
+BATCH_SIZE = 5 if is_vercel else 20  # Much smaller batches for Vercel free tier
 
 # In-memory cache for faster access (backup)
 twitch_access_cache = {}
@@ -107,22 +114,30 @@ def save_cache_file(cache_file, data):
         print(f"Error saving cache file {cache_file}: {e}")
 
 def get_twitch_access_token():
-    """Get Twitch access token with file-based caching"""
+    """Get Twitch access token with Vercel-compatible caching"""
     # Check in-memory cache first
-    if 'token' in twitch_access_cache and time.time() - twitch_access_cache['timestamp'] < 5184000:  # 60 days
+    if 'token' in twitch_access_cache and time.time() - twitch_access_cache['timestamp'] < 3600:  # 1 hour for Vercel
         return twitch_access_cache['token']
     
-    # Check file cache
-    cache_data = load_cache_file(ACCESS_TOKENS_CACHE)
-    if cache_data.get('last_updated'):
-        # Check if cache is still valid (60 days)
-        if time.time() - cache_data['last_updated'] < 5184000:
-            token = cache_data.get('tokens', {}).get('current_token')
-            if token:
-                # Update in-memory cache
-                twitch_access_cache['token'] = token
-                twitch_access_cache['timestamp'] = time.time()
-                return token
+    # Use Vercel cache manager if available
+    if CACHE_MANAGER:
+        cached_token = CACHE_MANAGER.get('current_token', 'access_tokens')
+        if cached_token:
+            twitch_access_cache['token'] = cached_token
+            twitch_access_cache['timestamp'] = time.time()
+            return cached_token
+    else:
+        # Check file cache for local development
+        cache_data = load_cache_file(ACCESS_TOKENS_CACHE)
+        if cache_data.get('last_updated'):
+            # Check if cache is still valid (60 days for local)
+            if time.time() - cache_data['last_updated'] < 5184000:
+                token = cache_data.get('tokens', {}).get('current_token')
+                if token:
+                    # Update in-memory cache
+                    twitch_access_cache['token'] = token
+                    twitch_access_cache['timestamp'] = time.time()
+                    return token
     
     try:
         client_id = os.environ.get('TWITCH_CLIENT_ID')
@@ -147,12 +162,15 @@ def get_twitch_access_token():
             twitch_access_cache['token'] = token
             twitch_access_cache['timestamp'] = time.time()
             
-            # Update file cache
-            cache_data = {
-                "tokens": {"current_token": token},
-                "last_updated": time.time()
-            }
-            save_cache_file(ACCESS_TOKENS_CACHE, cache_data)
+            # Update cache (Vercel or file-based)
+            if CACHE_MANAGER:
+                CACHE_MANAGER.set('current_token', token, 'access_tokens', ttl=3600)
+            else:
+                cache_data = {
+                    "tokens": {"current_token": token},
+                    "last_updated": time.time()
+                }
+                save_cache_file(ACCESS_TOKENS_CACHE, cache_data)
             
             return token
         else:
@@ -164,7 +182,7 @@ def get_twitch_access_token():
         return None
 
 def is_valid_twitch_username(username):
-    """Check if username is valid for Twitch API with file caching"""
+    """Check if username is valid for Twitch API with Vercel-compatible caching"""
     if not username or len(username) < 4 or len(username) > 25:
         return False
     
@@ -172,26 +190,37 @@ def is_valid_twitch_username(username):
     if username in invalid_username_cache:
         return False
     
-    # Check file cache
-    cache_data = load_cache_file(INVALID_USERNAMES_CACHE)
-    if username in cache_data.get('invalid_usernames', {}):
-        # Check if cache entry is still valid (24 hours)
-        if time.time() - cache_data['invalid_usernames'][username] < 86400:
-            invalid_username_cache[username] = time.time()
-            return False
-    
-    # Check against blocked usernames
+    # Check against blocked usernames first (fastest check)
     if username.lower() in BLOCKED_USERNAMES:
-        # Add to file cache
-        cache_data = load_cache_file(INVALID_USERNAMES_CACHE)
-        if 'invalid_usernames' not in cache_data:
-            cache_data['invalid_usernames'] = {}
-        cache_data['invalid_usernames'][username] = time.time()
-        save_cache_file(INVALID_USERNAMES_CACHE, cache_data)
-        
         # Add to in-memory cache
         invalid_username_cache[username] = time.time()
+        
+        # Add to cache (Vercel or file-based)
+        if CACHE_MANAGER:
+            CACHE_MANAGER.set(username, time.time(), 'invalid_usernames', ttl=86400)
+        else:
+            cache_data = load_cache_file(INVALID_USERNAMES_CACHE)
+            if 'invalid_usernames' not in cache_data:
+                cache_data['invalid_usernames'] = {}
+            cache_data['invalid_usernames'][username] = time.time()
+            save_cache_file(INVALID_USERNAMES_CACHE, cache_data)
+        
         return False
+    
+    # Check cached invalid usernames
+    if CACHE_MANAGER:
+        cached_invalid = CACHE_MANAGER.get(username, 'invalid_usernames')
+        if cached_invalid and time.time() - cached_invalid < 86400:
+            invalid_username_cache[username] = cached_invalid
+            return False
+    else:
+        # Check file cache
+        cache_data = load_cache_file(INVALID_USERNAMES_CACHE)
+        if username in cache_data.get('invalid_usernames', {}):
+            # Check if cache entry is still valid (24 hours)
+            if time.time() - cache_data['invalid_usernames'][username] < 86400:
+                invalid_username_cache[username] = time.time()
+                return False
     
     return True
 
@@ -308,10 +337,16 @@ def get_twitch_live_status_single(username):
         print(f"Error checking Twitch status for {username}: {e}")
         return {"is_live": False, "stream_data": None, "has_vods": False, "recent_videos": []}
 
-def get_twitch_live_status_batch(usernames, batch_size=50):
+def get_twitch_live_status_batch(usernames, batch_size=None):
     """Get live status for multiple usernames in batches with file caching"""
     if not usernames:
         return {}
+    
+    # Use environment-optimized batch size if not specified
+    if batch_size is None:
+        batch_size = BATCH_SIZE
+    
+    print(f"Processing {len(usernames)} usernames with batch size {batch_size} (Vercel: {is_vercel})")
     
     # Filter out invalid usernames
     valid_usernames = [u for u in usernames if is_valid_twitch_username(u)]

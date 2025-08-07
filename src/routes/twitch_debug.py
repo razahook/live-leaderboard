@@ -63,13 +63,18 @@ def debug_twitch_token():
 def debug_twitch_batch():
     """Test batch Twitch status check with known streamers"""
     try:
-        # Test with some known large streamers who are often live
-        test_usernames = ['xqc', 'summit1g', 'shroud', 'ninja', 'pokimane']
+        # Import the optimized batch size
+        from routes.twitch_integration import BATCH_SIZE, is_vercel
         
-        results = get_twitch_live_status_batch(test_usernames, batch_size=5)
+        # Test with some known streamers - smaller set for Vercel
+        test_usernames = ['imperialhal', 'aceu', 'shroud'] if is_vercel else ['xqc', 'summit1g', 'shroud', 'ninja', 'pokimane']
+        
+        results = get_twitch_live_status_batch(test_usernames)
         
         return jsonify({
             "success": True,
+            "environment": "vercel" if is_vercel else "local",
+            "batch_size": BATCH_SIZE,
             "tested_usernames": test_usernames,
             "results": results,
             "total_checked": len(test_usernames),
@@ -100,7 +105,7 @@ def debug_test_player():
             })
         
         # Check live status
-        results = get_twitch_live_status_batch([username], batch_size=1)
+        results = get_twitch_live_status_batch([username])
         
         return jsonify({
             "success": True,
@@ -115,4 +120,40 @@ def debug_test_player():
         return jsonify({
             "success": False,
             "error": str(e)
+        })
+
+@twitch_debug_bp.route('/debug/vercel-optimization', methods=['GET'])
+def debug_vercel_optimization():
+    """Debug endpoint to show Vercel-specific optimizations"""
+    try:
+        from routes.twitch_integration import BATCH_SIZE, is_vercel, CACHE_MANAGER, BLOCKED_USERNAMES
+        
+        # Test cache manager
+        cache_available = CACHE_MANAGER is not None
+        cache_stats = {}
+        if cache_available:
+            try:
+                cache_stats = CACHE_MANAGER.get_stats()
+            except:
+                cache_stats = {"error": "Could not get cache stats"}
+        
+        return jsonify({
+            "success": True,
+            "environment": {
+                "is_vercel": is_vercel,
+                "vercel_env": os.environ.get('VERCEL_ENV'),
+                "vercel_url": os.environ.get('VERCEL_URL')
+            },
+            "optimizations": {
+                "batch_size": BATCH_SIZE,
+                "cache_manager_available": cache_available,
+                "cache_stats": cache_stats,
+                "blocked_usernames_count": len(BLOCKED_USERNAMES)
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
         })
