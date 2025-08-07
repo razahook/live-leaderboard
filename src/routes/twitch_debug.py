@@ -5,7 +5,7 @@ from routes.twitch_integration import get_twitch_access_token, get_twitch_live_s
 
 twitch_debug_bp = Blueprint('twitch_debug', __name__)
 
-@twitch_debug_bp.route('/api/debug/twitch-config', methods=['GET'])
+@twitch_debug_bp.route('/debug/twitch-config', methods=['GET'])
 def debug_twitch_config():
     """Debug endpoint to check Twitch configuration"""
     client_id = os.environ.get('TWITCH_CLIENT_ID')
@@ -20,7 +20,7 @@ def debug_twitch_config():
         "environment_vars": list(os.environ.keys())
     })
 
-@twitch_debug_bp.route('/api/debug/twitch-token', methods=['GET'])
+@twitch_debug_bp.route('/debug/twitch-token', methods=['GET'])
 def debug_twitch_token():
     """Test getting Twitch access token"""
     try:
@@ -59,7 +59,7 @@ def debug_twitch_token():
             "error": str(e)
         })
 
-@twitch_debug_bp.route('/api/debug/twitch-batch', methods=['GET'])
+@twitch_debug_bp.route('/debug/twitch-batch', methods=['GET'])
 def debug_twitch_batch():
     """Test batch Twitch status check with known streamers"""
     try:
@@ -82,7 +82,7 @@ def debug_twitch_batch():
             "error_type": type(e).__name__
         })
 
-@twitch_debug_bp.route('/api/debug/test-player', methods=['GET'])
+@twitch_debug_bp.route('/debug/test-player', methods=['GET'])
 def debug_test_player():
     """Test Twitch integration with a specific player"""
     player_name = request.args.get('player', 'imperialhal')
