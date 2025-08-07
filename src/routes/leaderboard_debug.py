@@ -11,8 +11,18 @@ def debug_raw_scrape():
     try:
         base_url = "https://apexlegendsstatus.com/live-ranked-leaderboards/Battle_Royale/PC"
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Referer": "https://apexlegendsstatus.com/",
+            "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"Windows"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "same-origin",
+            "Upgrade-Insecure-Requests": "1"
         }
         
         response = requests.get(base_url, headers=headers, timeout=15)
@@ -48,11 +58,40 @@ def debug_raw_scrape():
             # Get player info cell
             player_info_cell = cells[1]
             
-            # Extract player name
+            # Extract player name - try multiple methods
             player_name = "Unknown"
+            
+            # Method 1: div with class="player"
             name_div = player_info_cell.find("div", class_="player")
             if name_div:
                 player_name = name_div.get_text(strip=True)
+            
+            # Method 2: Look for any div in the cell
+            if player_name == "Unknown":
+                all_divs = player_info_cell.find_all("div")
+                for div in all_divs:
+                    text = div.get_text(strip=True)
+                    if text and not text.startswith("#") and len(text) > 2:
+                        player_name = text
+                        break
+            
+            # Method 3: Look for text nodes directly
+            if player_name == "Unknown":
+                cell_text = player_info_cell.get_text(separator='|', strip=True)
+                text_parts = [part.strip() for part in cell_text.split('|') if part.strip()]
+                for part in text_parts:
+                    if not part.startswith("#") and len(part) > 2 and not part.isdigit():
+                        player_name = part
+                        break
+            
+            # Method 4: Look for strong/b tags
+            if player_name == "Unknown":
+                strong_tags = player_info_cell.find_all(['strong', 'b'])
+                for tag in strong_tags:
+                    text = tag.get_text(strip=True)
+                    if text and len(text) > 2:
+                        player_name = text
+                        break
             
             # Look for Twitch links - check multiple patterns
             twitch_link = ""
@@ -107,6 +146,16 @@ def debug_raw_scrape():
                 "cell_text_preview": player_info_cell.get_text(separator=' ', strip=True)[:100]
             })
         
+        # Add HTML structure debugging
+        first_few_rows_html = []
+        for i, row in enumerate(rows[:6]):  # First 5 rows + header
+            first_few_rows_html.append({
+                "row_index": i,
+                "html": str(row)[:500],  # First 500 chars
+                "cells_count": len(row.find_all("td")),
+                "text_content": row.get_text(separator=' | ', strip=True)[:200]
+            })
+        
         return jsonify({
             "success": True,
             "total_players": len(players_found),
@@ -115,7 +164,12 @@ def debug_raw_scrape():
             "players_without_twitch": [p for p in players_found if not p["has_twitch"]],
             "all_players": players_found,
             "response_status": response.status_code,
-            "content_length": len(response.content)
+            "content_length": len(response.content),
+            "html_debug": {
+                "total_rows_found": len(rows),
+                "first_few_rows": first_few_rows_html,
+                "page_title": soup.title.get_text() if soup.title else "No title found"
+            }
         })
         
     except Exception as e:
