@@ -138,6 +138,12 @@ try:
 except ImportError as e:
     logger.warning(f"Could not import twitch_import_debug routes: {e}")
 
+try:
+    from routes.leaderboard_debug import leaderboard_debug_bp
+    imported_blueprints.append(('leaderboard_debug_bp', leaderboard_debug_bp))
+except ImportError as e:
+    logger.warning(f"Could not import leaderboard_debug routes: {e}")
+
 # Create Flask app - no static folder needed since Vercel handles static files
 app = Flask(__name__)
 
