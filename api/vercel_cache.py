@@ -53,9 +53,15 @@ class VercelCacheManager:
                     data = json.load(f)
                     
                 # Fix timestamp formats if needed
-                if 'last_updated' in data and isinstance(data['last_updated'], (int, float)):
-                    # Convert Unix timestamp to ISO string for consistency
-                    data['last_updated'] = datetime.fromtimestamp(data['last_updated']).isoformat()
+                if 'last_updated' in data:
+                    try:
+                        if isinstance(data['last_updated'], (int, float)):
+                            # Convert Unix timestamp to ISO string for consistency
+                            data['last_updated'] = datetime.fromtimestamp(data['last_updated']).isoformat()
+                    except (ValueError, OSError) as e:
+                        print(f"Warning: Could not convert timestamp {data['last_updated']}: {e}")
+                        # Remove invalid timestamp
+                        del data['last_updated']
                     
                 return data
             except Exception as e:

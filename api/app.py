@@ -156,10 +156,27 @@ def rate_limit(max_requests=60, window=60):
 # Database configuration (only if available) - handle Vercel read-only filesystem
 if DB_AVAILABLE and db:
     try:
-        # Use in-memory database for Vercel deployment
-        if os.environ.get('VERCEL'):
+        # Detect Vercel or serverless environment
+        is_serverless = any([
+            os.environ.get('VERCEL'),
+            os.environ.get('AWS_LAMBDA_FUNCTION_NAME'),  # AWS Lambda
+            os.environ.get('VERCEL_ENV'),  # Vercel specific
+            '/var/task' in os.path.dirname(__file__),  # Lambda runtime path
+        ])
+        
+        # Additional check for read-only filesystem
+        if not is_serverless:
+            try:
+                test_path = os.path.join(os.path.dirname(__file__), 'test_write')
+                with open(test_path, 'w') as f:
+                    f.write('test')
+                os.remove(test_path)
+            except (OSError, PermissionError):
+                is_serverless = True  # Filesystem is read-only
+        
+        if is_serverless:
             app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-            logger.info("Using in-memory database for Vercel deployment")
+            logger.info("Detected serverless environment - using in-memory database")
         else:
             # Use file-based database for local development
             database_path = os.path.join(os.path.dirname(__file__), 'database', 'test_app.db')
@@ -167,7 +184,7 @@ if DB_AVAILABLE and db:
                 os.makedirs(os.path.dirname(database_path), exist_ok=True)
                 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
                 logger.info(f"Using file-based database: {database_path}")
-            except OSError as e:
+            except (OSError, PermissionError) as e:
                 logger.warning(f"Cannot create database directory: {e}, falling back to in-memory")
                 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         
@@ -222,9 +239,6 @@ if DB_AVAILABLE and db:
             logger.error(f"Error creating database tables: {e}")
 else:
     logger.info("Skipping database table creation - database not available")
-
-if __name__ == '__main__':
-    app.run(debug=True)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
