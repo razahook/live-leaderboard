@@ -64,6 +64,8 @@ def oauth_login():
         current_url = request.args.get('current_url', '')
         if 'ngrok' in current_url or 'ngrok-free.app' in current_url:
             redirect_uri = "https://adapted-cunning-rhino.ngrok-free.app/api/session/complete"
+        elif 'vercel.app' in current_url or 'live-leaderboard-plum.vercel.app' in current_url:
+            redirect_uri = "https://live-leaderboard-plum.vercel.app/api/session/complete"
         else:
             redirect_uri = REDIRECT_URI
         
@@ -140,6 +142,8 @@ def oauth_callback():
         current_url = request.args.get('current_url', '')
         if 'ngrok' in current_url or 'ngrok-free.app' in current_url:
             redirect_uri = "https://adapted-cunning-rhino.ngrok-free.app/api/session/complete"
+        elif 'vercel.app' in current_url or 'live-leaderboard-plum.vercel.app' in current_url:
+            redirect_uri = "https://live-leaderboard-plum.vercel.app/api/session/complete"
         else:
             redirect_uri = REDIRECT_URI
         
