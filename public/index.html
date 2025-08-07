@@ -328,6 +328,12 @@
                             <span class="text-sm font-semibold text-blue-400" id="total-viewers">0</span>
                             <span class="text-xs text-gray-400">viewers</span>
                         </div>
+                        <!-- Auto-Refresh Countdown Timer -->
+                        <div id="refresh-countdown" class="flex items-center space-x-2 bg-gray-800 px-3 py-2 rounded-lg border border-gray-700/50">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                            <span class="text-sm text-gray-400">Next refresh:</span>
+                            <span class="text-sm font-semibold text-blue-400" id="countdown-timer">60s</span>
+                        </div>
                         <!-- Live Streamers Only Toggle -->
                         <div class="flex items-center space-x-3">
                             <span class="font-medium text-white">Live Streamers Only</span>
@@ -3809,6 +3815,9 @@ ${(() => {
                 this.userPreferences = {};
                 this.notificationPermission = false;
                 this.streamPreviewElement = null;
+                this.refreshIntervalId = null;
+                this.countdownIntervalId = null;
+                this.countdownSeconds = 60;
                 this.init();
             }
 
@@ -3871,6 +3880,13 @@ ${(() => {
                 if (document.getElementById('notificationsToggle')) {
                     document.getElementById('notificationsToggle').checked = prefs.notifications_enabled === true;
                 }
+                
+                // Start auto-refresh if enabled
+                if (prefs.auto_refresh_enabled !== false) {
+                    this.startAutoRefresh();
+                } else {
+                    this.stopAutoRefresh();
+                }
             }
 
             async saveUserPreferences() {
@@ -3909,6 +3925,13 @@ ${(() => {
                 if (autoRefreshToggle) {
                     autoRefreshToggle.addEventListener('change', (e) => {
                         this.userPreferences.auto_refresh_enabled = e.target.checked;
+                        
+                        if (e.target.checked) {
+                            this.startAutoRefresh();
+                        } else {
+                            this.stopAutoRefresh();
+                        }
+                        
                         this.trackAnalyticsEvent('settings', 'auto_refresh_toggle', e.target.checked.toString());
                     });
                 }
@@ -3918,6 +3941,11 @@ ${(() => {
                     refreshInterval.addEventListener('input', (e) => {
                         this.userPreferences.auto_refresh_interval = parseInt(e.target.value);
                         document.getElementById('refreshIntervalValue').textContent = `${e.target.value}s`;
+                        
+                        // Restart timer with new interval if auto-refresh is enabled
+                        if (this.userPreferences.auto_refresh_enabled) {
+                            this.startAutoRefresh();
+                        }
                     });
                 }
 
@@ -4156,6 +4184,96 @@ ${(() => {
             focusStream(streamNumber) {
                 console.log(`Focus stream ${streamNumber}`);
                 this.trackAnalyticsEvent('controls', 'focus_stream', streamNumber.toString());
+            }
+
+            // Auto-refresh and countdown timer methods
+            startAutoRefresh() {
+                if (this.refreshIntervalId) {
+                    clearInterval(this.refreshIntervalId);
+                }
+                if (this.countdownIntervalId) {
+                    clearInterval(this.countdownIntervalId);
+                }
+
+                const interval = this.userPreferences.auto_refresh_interval || 60;
+                this.countdownSeconds = interval;
+                
+                // Start countdown timer (updates every second)
+                this.countdownIntervalId = setInterval(() => {
+                    this.updateCountdown();
+                }, 1000);
+
+                // Start refresh timer
+                this.refreshIntervalId = setInterval(() => {
+                    this.refreshLeaderboard();
+                }, interval * 1000);
+
+                console.log(`Auto-refresh started: ${interval}s interval`);
+                this.updateCountdownDisplay();
+            }
+
+            stopAutoRefresh() {
+                if (this.refreshIntervalId) {
+                    clearInterval(this.refreshIntervalId);
+                    this.refreshIntervalId = null;
+                }
+                if (this.countdownIntervalId) {
+                    clearInterval(this.countdownIntervalId);
+                    this.countdownIntervalId = null;
+                }
+                
+                const countdownElement = document.getElementById('refresh-countdown');
+                if (countdownElement) {
+                    countdownElement.style.display = 'none';
+                }
+                
+                console.log('Auto-refresh stopped');
+            }
+
+            updateCountdown() {
+                this.countdownSeconds--;
+                
+                if (this.countdownSeconds <= 0) {
+                    this.countdownSeconds = this.userPreferences.auto_refresh_interval || 60;
+                }
+                
+                this.updateCountdownDisplay();
+            }
+
+            updateCountdownDisplay() {
+                const timerElement = document.getElementById('countdown-timer');
+                const countdownElement = document.getElementById('refresh-countdown');
+                
+                if (timerElement) {
+                    timerElement.textContent = `${this.countdownSeconds}s`;
+                }
+                
+                if (countdownElement) {
+                    countdownElement.style.display = this.userPreferences.auto_refresh_enabled ? 'flex' : 'none';
+                }
+            }
+
+            async refreshLeaderboard() {
+                try {
+                    console.log('Auto-refreshing leaderboard...');
+                    
+                    // Reset countdown
+                    this.countdownSeconds = this.userPreferences.auto_refresh_interval || 60;
+                    
+                    // Trigger the existing loadPlayerData function if it exists
+                    if (typeof window.loadPlayerData === 'function') {
+                        await window.loadPlayerData();
+                    } else {
+                        // Fallback: reload the page
+                        window.location.reload();
+                    }
+                    
+                    this.showToast('Data refreshed', 'info');
+                    this.trackAnalyticsEvent('auto_refresh', 'data_updated');
+                } catch (error) {
+                    console.error('Auto-refresh error:', error);
+                    this.showToast('Refresh failed', 'error');
+                }
             }
         }
 
