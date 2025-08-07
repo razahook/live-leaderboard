@@ -294,18 +294,25 @@ def add_twitch_live_status(leaderboard_data):
     """
     try:
         if not leaderboard_data or 'players' not in leaderboard_data:
+            safe_print("No leaderboard data or players to process")
             return leaderboard_data
         
         safe_print("Starting batched Twitch username checks...")
         
+        # Check if imports are available
+        if not CACHE_AVAILABLE:
+            safe_print("WARNING: Twitch integration imports failed - using fallback stubs")
+            # Still try to run with stubs to populate default values
+        
         # 1. Build a canonical Twitch username cache for all players with Twitch links
         canonical_usernames = {}
-        for i, player in enumerate(leaderboard_data['players']):
+        for i, player in enumerate(leaderboard_data['players'][:50]):  # Limit to first 50 for testing
             if player.get('twitch_link'):
                 username = extract_twitch_username(player['twitch_link'])
                 if username:
                     canonical_usernames[i] = username.lower()
                     player['canonical_twitch_username'] = username.lower()
+                    safe_print(f"Found Twitch username: {username}")
 
         # 2. Use canonical usernames for all Twitch checks
         usernames = list(canonical_usernames.values())
@@ -317,6 +324,7 @@ def add_twitch_live_status(leaderboard_data):
 
         safe_print(f"Checking Twitch status for {len(usernames)} users in batches...")
         live_status_results = get_twitch_live_status_batch(usernames, batch_size=50)
+        safe_print(f"Got live status results for {len(live_status_results)} users")
 
         # Prepare headers for clips API
         access_token = get_twitch_access_token()

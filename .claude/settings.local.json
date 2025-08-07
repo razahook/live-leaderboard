@@ -10,7 +10,8 @@
       "Bash(find:*)",
       "Bash(diff:*)",
       "Bash(mkdir:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(tree:*)"
     ],
     "deny": []
   }
