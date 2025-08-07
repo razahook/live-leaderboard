@@ -63,24 +63,35 @@ def rate_limit(max_requests: int = 60, window: int = 60) -> Callable:
 
 # Import necessary functions - use absolute imports for Vercel
 try:
-    from routes.twitch_integration import extract_twitch_username, get_twitch_access_token, load_cache_file, save_cache_file, get_twitch_live_status_batch, get_user_videos_cached
+    from routes.twitch_integration import extract_twitch_username, get_twitch_access_token, get_twitch_live_status_batch, get_user_videos_cached
     from routes.apex_scraper import load_twitch_overrides
     from routes.twitch_clips import get_user_clips_cached
-    # Import Vercel cache manager for proper caching
-    from vercel_cache import VercelCacheManager
     CACHE_AVAILABLE = True
+    safe_print("Successfully imported Twitch integration functions")
 except ImportError as e:
-    safe_print(f"Import warning in leaderboard_scraper: {e}")
-    # Fallback stubs for Vercel deployment
-    def extract_twitch_username(url): return None
+    safe_print(f"CRITICAL: Twitch integration imports failed: {e}")
+    CACHE_AVAILABLE = False
+    
+    # Create working stubs that don't break everything
+    def extract_twitch_username(url): 
+        if not url:
+            return None
+        # Basic extraction without full integration
+        import re
+        patterns = [r'twitch\.tv/([a-zA-Z0-9_]+)']
+        for pattern in patterns:
+            match = re.search(pattern, url)
+            if match:
+                return match.group(1).lower()
+        return None
+    
     def get_twitch_access_token(): return None
-    def load_cache_file(path): return {}
-    def save_cache_file(path, data): pass
     def load_twitch_overrides(): return {}
     def get_user_clips_cached(username, headers, limit=3): return {"has_clips": False, "recent_clips": []}
     def get_user_videos_cached(username, headers, limit=3): return {"has_vods": False, "recent_videos": []}
-    def get_twitch_live_status_batch(usernames): return {}
-    CACHE_AVAILABLE = False
+    def get_twitch_live_status_batch(usernames): 
+        # Return offline status for all users when integration fails
+        return {username: {"is_live": False, "stream_data": None, "has_vods": False, "recent_videos": []} for username in usernames}
 
 # Define the Blueprint for leaderboard routes
 leaderboard_bp = Blueprint('leaderboard', __name__)
@@ -305,28 +316,26 @@ def add_twitch_live_status(leaderboard_data):
             # Still try to run with stubs to populate default values
         
         # 1. Apply Twitch overrides for players with missing links
+        # Define overrides directly here - no external file dependencies
+        twitch_overrides = {
+            "ROC Vaxlon": {"twitch_link": "https://www.twitch.tv/vaxlon"},
+            "ROC sauceror": {"twitch_link": "https://www.twitch.tv/sauceror"},
+            "4rufq": {"twitch_link": "https://www.twitch.tv/4rufq"},
+            "ImperialHal": {"twitch_link": "https://www.twitch.tv/tsm_imperialhal"},
+            "TSM_ImperialHal": {"twitch_link": "https://www.twitch.tv/tsm_imperialhal"},
+            "sweetdreams": {"twitch_link": "https://www.twitch.tv/sweetdreams"},
+            "Albralelie": {"twitch_link": "https://www.twitch.tv/albralelie"},
+            "NiceWigg": {"twitch_link": "https://www.twitch.tv/nicewigg"},
+            "aceu": {"twitch_link": "https://www.twitch.tv/aceu"},
+            "shroud": {"twitch_link": "https://www.twitch.tv/shroud"},
+            "dizzy": {"twitch_link": "https://www.twitch.tv/dizzy"},
+            "Mande": {"twitch_link": "https://www.twitch.tv/mande"},
+            "RemixPowers": {"twitch_link": "https://www.twitch.tv/remixpowers"},
+            "LG_Naughty": {"twitch_link": "https://www.twitch.tv/Naughty"}
+        }
+        safe_print(f"Using direct overrides: {len(twitch_overrides)} entries")
+        
         try:
-            # Try to load from file first
-            twitch_overrides = load_twitch_overrides()
-            safe_print(f"Loaded {len(twitch_overrides)} Twitch overrides from file")
-            
-            # If file loading failed, use hardcoded overrides as fallback
-            if not twitch_overrides:
-                twitch_overrides = {
-                    "ROC Vaxlon": {"twitch_link": "https://www.twitch.tv/vaxlon"},
-                    "ROC sauceror": {"twitch_link": "https://www.twitch.tv/sauceror"},
-                    "4rufq": {"twitch_link": "https://www.twitch.tv/4rufq"},
-                    "ImperialHal": {"twitch_link": "https://www.twitch.tv/tsm_imperialhal"},
-                    "TSM_ImperialHal": {"twitch_link": "https://www.twitch.tv/tsm_imperialhal"},
-                    "sweetdreams": {"twitch_link": "https://www.twitch.tv/sweetdreams"},
-                    "Albralelie": {"twitch_link": "https://www.twitch.tv/albralelie"},
-                    "NiceWigg": {"twitch_link": "https://www.twitch.tv/nicewigg"},
-                    "aceu": {"twitch_link": "https://www.twitch.tv/aceu"},
-                    "shroud": {"twitch_link": "https://www.twitch.tv/shroud"},
-                    "dizzy": {"twitch_link": "https://www.twitch.tv/dizzy"},
-                    "Mande": {"twitch_link": "https://www.twitch.tv/mande"}
-                }
-                safe_print(f"Using hardcoded overrides: {len(twitch_overrides)} entries")
             
             max_to_check = 20  # Start small for Vercel free tier
             for i, player in enumerate(leaderboard_data['players'][:max_to_check]):
