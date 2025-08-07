@@ -374,25 +374,25 @@ def get_predator_points():
         # Sample predator points data - format to match frontend expectations
         predator_data = {
             "PC": {
-                "min_rp": 15000,
+                "predator_rp": 15000,
                 "current_players": 750,
                 "masters_count": 10000,
                 "rp_change_24h": 150
             },
             "PS4": {
-                "min_rp": 12000, 
+                "predator_rp": 12000, 
                 "current_players": 750,
                 "masters_count": 8500,
                 "rp_change_24h": 120
             },
             "X1": {
-                "min_rp": 11500,
+                "predator_rp": 11500,
                 "current_players": 750, 
                 "masters_count": 7200,
                 "rp_change_24h": 110
             },
             "SWITCH": {
-                "min_rp": 10000,
+                "predator_rp": 10000,
                 "current_players": 750,
                 "masters_count": 5000,
                 "rp_change_24h": 80
