@@ -14,24 +14,24 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 # Add test directory to path for imports
 sys.path.insert(0, os.path.dirname(__file__))
 
-from models.user import db
-from routes.user import user_bp
-from routes.apex_scraper import apex_scraper_bp
-from routes.leaderboard_scraper import leaderboard_bp
-from routes.twitch_integration import twitch_bp
-from routes.twitch_override import twitch_override_bp
-from routes.tracker_proxy import tracker_proxy_bp
-from routes.twitch_clips import twitch_clips_bp
-from routes.twitch_vod_downloader import twitch_vod_bp
-from routes.twitch_hidden_vods import twitch_hidden_vods_bp
-from routes.twitch_live_rewind import twitch_live_rewind_bp
-from routes.twitch_oauth import twitch_oauth_bp
+from api.models.user import db
+from api.routes.user import user_bp
+from api.routes.apex_scraper import apex_scraper_bp
+from api.routes.leaderboard_scraper import leaderboard_bp
+from api.routes.twitch_integration import twitch_bp
+from api.routes.twitch_override import twitch_override_bp
+from api.routes.tracker_proxy import tracker_proxy_bp
+from api.routes.twitch_clips import twitch_clips_bp
+from api.routes.twitch_vod_downloader import twitch_vod_bp
+from api.routes.twitch_hidden_vods import twitch_hidden_vods_bp
+from api.routes.twitch_live_rewind import twitch_live_rewind_bp
+from api.routes.twitch_oauth import twitch_oauth_bp
 
 # Import new QoL improvement modules
-from routes.user_preferences import user_preferences_bp
-from routes.health import health_bp
-from routes.analytics import analytics_bp
-from routes.webhooks import webhooks_bp
+from api.routes.user_preferences import user_preferences_bp
+from api.routes.health import health_bp
+from api.routes.analytics import analytics_bp
+from api.routes.webhooks import webhooks_bp
 
 app = Flask(__name__, static_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'test-secret-key')

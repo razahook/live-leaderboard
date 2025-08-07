@@ -1,0 +1,2929 @@
+{
+  "valid_users": {
+    "https://www.twitch.tv/Naughty": {
+      "username": "naughty",
+      "timestamp": 1754550556.95817
+    },
+    "https://twitch.tv/jukezyfps": {
+      "username": "jukezyfps",
+      "timestamp": 1754452308.6969478
+    },
+    "https://twitch.tv/ZeekoTV_": {
+      "username": "zeekotv_",
+      "timestamp": 1754297054.4746122
+    },
+    "https://twitch.tv/anayaunni": {
+      "username": "anayaunni",
+      "timestamp": 1754550558.6511292
+    },
+    "https://twitch.tv/Hawqeh": {
+      "username": "hawqeh",
+      "timestamp": 1754297054.476737
+    },
+    "https://twitch.tv/axiss311": {
+      "username": "axiss311",
+      "timestamp": 1754452308.4195695
+    },
+    "https://twitch.tv/brainsy": {
+      "username": "brainsy",
+      "timestamp": 1754550557.4968665
+    },
+    "https://twitch.tv/ChaoticMuch": {
+      "username": "chaoticmuch",
+      "timestamp": 1754550557.2104118
+    },
+    "https://twitch.tv/Rogue": {
+      "username": "rogue",
+      "timestamp": 1754550557.5838847
+    },
+    "https://twitch.tv/NV_MessiaH": {
+      "username": "nv_messiah",
+      "timestamp": 1754550558.7698526
+    },
+    "https://twitch.tv/CuttingWPurpose": {
+      "username": "cuttingwpurpose",
+      "timestamp": 1754105717.4209435
+    },
+    "https://twitch.tv/Sang": {
+      "username": "sang",
+      "timestamp": 1754550559.151484
+    },
+    "https://twitch.tv/PedroPascal": {
+      "username": "pedropascal",
+      "timestamp": 1754105717.422835
+    },
+    "https://twitch.tv/riiaassxx": {
+      "username": "riiaassxx",
+      "timestamp": 1754452310.0796883
+    },
+    "https://twitch.tv/ojrein": {
+      "username": "ojrein",
+      "timestamp": 1754550558.0594988
+    },
+    "https://twitch.tv/Codddy": {
+      "username": "codddy",
+      "timestamp": 1754550557.9385867
+    },
+    "https://twitch.tv/Mlops": {
+      "username": "mlops",
+      "timestamp": 1754297054.5146496
+    },
+    "https://twitch.tv/bili": {
+      "username": "bili",
+      "timestamp": 1754297054.5234263
+    },
+    "https://twitch.tv/Empty": {
+      "username": "empty",
+      "timestamp": 1754550557.2684996
+    },
+    "https://twitch.tv/AirmanZz": {
+      "username": "airmanzz",
+      "timestamp": 1754550557.9606483
+    },
+    "https://twitch.tv/fwgaryy": {
+      "username": "fwgaryy",
+      "timestamp": 1754452309.0839126
+    },
+    "https://twitch.tv/killmete": {
+      "username": "killmete",
+      "timestamp": 1754297054.5371974
+    },
+    "https://twitch.tv/Pyrosama": {
+      "username": "pyrosama",
+      "timestamp": 1754550557.7145991
+    },
+    "https://twitch.tv/Honey": {
+      "username": "honey",
+      "timestamp": 1754297054.5477958
+    },
+    "https://twitch.tv/Jaydot_Apex": {
+      "username": "jaydot_apex",
+      "timestamp": 1754452309.9644432
+    },
+    "https://twitch.tv/Scarlet": {
+      "username": "scarlet",
+      "timestamp": 1754550558.986619
+    },
+    "https://twitch.tv/TAKESHI": {
+      "username": "takeshi",
+      "timestamp": 1754550559.2073743
+    },
+    "https://twitch.tv/Rost": {
+      "username": "rost",
+      "timestamp": 1754550559.527791
+    },
+    "https://twitch.tv/mental": {
+      "username": "mental",
+      "timestamp": 1754297054.5856895
+    },
+    "https://twitch.tv/TMPR": {
+      "username": "tmpr",
+      "timestamp": 1754297054.5902448
+    },
+    "https://twitch.tv/Flinzar": {
+      "username": "flinzar",
+      "timestamp": 1754550557.3395169
+    },
+    "https://twitch.tv/GGhetto": {
+      "username": "gghetto",
+      "timestamp": 1754297054.5754066
+    },
+    "https://twitch.tv/Urbanistx": {
+      "username": "urbanistx",
+      "timestamp": 1754192137.7143855
+    },
+    "https://twitch.tv/Pinotr": {
+      "username": "pinotr",
+      "timestamp": 1754550557.2238786
+    },
+    "https://twitch.tv/KIFUSS": {
+      "username": "kifuss",
+      "timestamp": 1754297054.5996492
+    },
+    "https://twitch.tv/guba": {
+      "username": "guba",
+      "timestamp": 1754297054.6022587
+    },
+    "https://twitch.tv/Lixsiz": {
+      "username": "lixsiz",
+      "timestamp": 1754297054.6103847
+    },
+    "https://twitch.tv/MobiuS": {
+      "username": "mobius",
+      "timestamp": 1754297054.6147418
+    },
+    "https://twitch.tv/Enoch": {
+      "username": "enoch",
+      "timestamp": 1754452309.8825366
+    },
+    "https://twitch.tv/Milim": {
+      "username": "milim",
+      "timestamp": 1754297054.638996
+    },
+    "https://twitch.tv/PanicApex": {
+      "username": "panicapex",
+      "timestamp": 1754550557.4311895
+    },
+    "https://twitch.tv/dezepine": {
+      "username": "dezepine",
+      "timestamp": 1754297054.6259673
+    },
+    "https://twitch.tv/cxelestv": {
+      "username": "cxelestv",
+      "timestamp": 1754297054.6474419
+    },
+    "https://twitch.tv/AiriKannaLoveTi": {
+      "username": "airikannaloveti",
+      "timestamp": 1754297054.6558435
+    },
+    "https://twitch.tv/ethanbandz": {
+      "username": "ethanbandz",
+      "timestamp": 1754550557.6460466
+    },
+    "https://twitch.tv/bdtaniko": {
+      "username": "bdtaniko",
+      "timestamp": 1754550559.122559
+    },
+    "https://twitch.tv/MikeJitsu": {
+      "username": "mikejitsu",
+      "timestamp": 1754550557.7877226
+    },
+    "https://twitch.tv/Paul_FpsTv": {
+      "username": "paul_fpstv",
+      "timestamp": 1754452310.002983
+    },
+    "https://twitch.tv/Pvccini": {
+      "username": "pvccini",
+      "timestamp": 1754550558.5083692
+    },
+    "https://twitch.tv/nuveii": {
+      "username": "nuveii",
+      "timestamp": 1754297054.6849418
+    },
+    "https://twitch.tv/Perfect": {
+      "username": "perfect",
+      "timestamp": 1754297054.6952522
+    },
+    "https://twitch.tv/ZoroBD": {
+      "username": "zorobd",
+      "timestamp": 1754297054.6660163
+    },
+    "https://twitch.tv/Ilteris": {
+      "username": "ilteris",
+      "timestamp": 1754297054.6788635
+    },
+    "https://twitch.tv/ST_KisKq": {
+      "username": "st_kiskq",
+      "timestamp": 1754550557.0064454
+    },
+    "https://twitch.tv/Moon": {
+      "username": "moon",
+      "timestamp": 1754192137.8031993
+    },
+    "https://twitch.tv/DaiYuChenYa": {
+      "username": "daiyuchenya",
+      "timestamp": 1754297054.7007594
+    },
+    "https://twitch.tv/Kuromichan": {
+      "username": "kuromichan",
+      "timestamp": 1754297054.715091
+    },
+    "https://twitch.tv/chuchu": {
+      "username": "chuchu",
+      "timestamp": 1754297054.751126
+    },
+    "https://twitch.tv/ThatsWallahi": {
+      "username": "thatswallahi",
+      "timestamp": 1754550558.7073605
+    },
+    "https://twitch.tv/rainy": {
+      "username": "rainy",
+      "timestamp": 1754297054.721397
+    },
+    "https://twitch.tv/Dijaii": {
+      "username": "dijaii",
+      "timestamp": 1754297054.76578
+    },
+    "https://twitch.tv/Hateworm": {
+      "username": "hateworm",
+      "timestamp": 1754297054.7096598
+    },
+    "https://twitch.tv/JSavageW": {
+      "username": "jsavagew",
+      "timestamp": 1754297054.746832
+    },
+    "https://twitch.tv/Nyanmerrypop": {
+      "username": "nyanmerrypop",
+      "timestamp": 1754550557.1148326
+    },
+    "https://twitch.tv/MOZE": {
+      "username": "moze",
+      "timestamp": 1754297054.5040934
+    },
+    "https://twitch.tv/HydraFPS_": {
+      "username": "hydrafps_",
+      "timestamp": 1754297054.7822351
+    },
+    "https://twitch.tv/orbit": {
+      "username": "orbit",
+      "timestamp": 1754297054.7778442
+    },
+    "https://twitch.tv/Apryze": {
+      "username": "apryze",
+      "timestamp": 1754297054.7424014
+    },
+    "https://twitch.tv/HAO_Right": {
+      "username": "hao_right",
+      "timestamp": 1754297054.7615197
+    },
+    "https://twitch.tv/Patient": {
+      "username": "patient",
+      "timestamp": 1754550559.1992314
+    },
+    "https://twitch.tv/Twitch": {
+      "username": "twitch",
+      "timestamp": 1754550557.4451506
+    },
+    "https://twitch.tv/tttcheekyttt": {
+      "username": "tttcheekyttt",
+      "timestamp": 1754550557.360736
+    },
+    "https://twitch.tv/BABO": {
+      "username": "babo",
+      "timestamp": 1754550557.203585
+    },
+    "https://twitch.tv/AAAbuser": {
+      "username": "aaabuser",
+      "timestamp": 1754297054.8173711
+    },
+    "https://twitch.tv/not8an": {
+      "username": "not8an",
+      "timestamp": 1754550559.385082
+    },
+    "https://twitch.tv/billieapex": {
+      "username": "billieapex",
+      "timestamp": 1754297054.827132
+    },
+    "https://twitch.tv/uncave": {
+      "username": "uncave",
+      "timestamp": 1754297054.8317409
+    },
+    "https://twitch.tv/3TrixX": {
+      "username": "3trixx",
+      "timestamp": 1754297054.836909
+    },
+    "https://twitch.tv/ctrlrsyco": {
+      "username": "ctrlrsyco",
+      "timestamp": 1754550557.737534
+    },
+    "https://twitch.tv/reva": {
+      "username": "reva",
+      "timestamp": 1754297054.794916
+    },
+    "https://twitch.tv/HURT": {
+      "username": "hurt",
+      "timestamp": 1754192137.875367
+    },
+    "https://twitch.tv/douyin": {
+      "username": "douyin",
+      "timestamp": 1754297054.8467715
+    },
+    "https://twitch.tv/DooMee": {
+      "username": "doomee",
+      "timestamp": 1754297054.8617418
+    },
+    "https://twitch.tv/izzxxv": {
+      "username": "izzxxv",
+      "timestamp": 1754550558.2336266
+    },
+    "https://twitch.tv/Rxgve": {
+      "username": "rxgve",
+      "timestamp": 1754297054.8231034
+    },
+    "https://twitch.tv/KirirenStar": {
+      "username": "kirirenstar",
+      "timestamp": 1754297054.79909
+    },
+    "https://twitch.tv/tororo_tps": {
+      "username": "tororo_tps",
+      "timestamp": 1754550558.0820346
+    },
+    "https://twitch.tv/Oblivion": {
+      "username": "oblivion",
+      "timestamp": 1754452309.3010652
+    },
+    "https://twitch.tv/Onyx": {
+      "username": "onyx",
+      "timestamp": 1754297054.8825498
+    },
+    "https://twitch.tv/johwny": {
+      "username": "johwny",
+      "timestamp": 1754550558.5821803
+    },
+    "https://twitch.tv/AXElA": {
+      "username": "axela",
+      "timestamp": 1754297054.85719
+    },
+    "https://twitch.tv/MIMIBEAR_OWO": {
+      "username": "mimibear_owo",
+      "timestamp": 1754297054.9336786
+    },
+    "https://twitch.tv/Slickxzz": {
+      "username": "slickxzz",
+      "timestamp": 1754297054.8778036
+    },
+    "https://twitch.tv/Netty": {
+      "username": "netty",
+      "timestamp": 1754297054.9209538
+    },
+    "https://twitch.tv/Hinson": {
+      "username": "hinson",
+      "timestamp": 1754550558.4757533
+    },
+    "https://twitch.tv/Meowzilla": {
+      "username": "meowzilla",
+      "timestamp": 1754297054.9395382
+    },
+    "https://twitch.tv/Nekotama": {
+      "username": "nekotama",
+      "timestamp": 1754297054.909656
+    },
+    "https://twitch.tv/Mahdi_8TaG": {
+      "username": "mahdi_8tag",
+      "timestamp": 1754297054.8659189
+    },
+    "https://twitch.tv/Dopey": {
+      "username": "dopey",
+      "timestamp": 1754297054.9526348
+    },
+    "https://twitch.tv/WDS_": {
+      "username": "wds_",
+      "timestamp": 1754297054.9055934
+    },
+    "https://twitch.tv/predator170": {
+      "username": "predator170",
+      "timestamp": 1754105717.569759
+    },
+    "https://twitch.tv/yannie": {
+      "username": "yannie",
+      "timestamp": 1754192137.9360313
+    },
+    "https://twitch.tv/Prestisx": {
+      "username": "prestisx",
+      "timestamp": 1754297054.9739158
+    },
+    "https://twitch.tv/grapes": {
+      "username": "grapes",
+      "timestamp": 1754297054.978002
+    },
+    "https://twitch.tv/sauce": {
+      "username": "sauce",
+      "timestamp": 1754297054.9171371
+    },
+    "https://twitch.tv/Raiei": {
+      "username": "raiei",
+      "timestamp": 1754550559.4433167
+    },
+    "https://twitch.tv/Riddle": {
+      "username": "riddle",
+      "timestamp": 1754314261.253542
+    },
+    "https://twitch.tv/HeartInTilt": {
+      "username": "heartintilt",
+      "timestamp": 1754297054.9440198
+    },
+    "https://twitch.tv/Bili": {
+      "username": "bili",
+      "timestamp": 1754452309.4000018
+    },
+    "https://twitch.tv/PoyZed": {
+      "username": "poyzed",
+      "timestamp": 1754297054.9998305
+    },
+    "https://twitch.tv/LukaQT": {
+      "username": "lukaqt",
+      "timestamp": 1754550559.0026126
+    },
+    "https://twitch.tv/kiki": {
+      "username": "kiki",
+      "timestamp": 1754297055.004645
+    },
+    "https://twitch.tv/crucial": {
+      "username": "crucial",
+      "timestamp": 1754550558.429539
+    },
+    "https://twitch.tv/SongYou": {
+      "username": "songyou",
+      "timestamp": 1754452309.9287627
+    },
+    "https://twitch.tv/dezganchik": {
+      "username": "dezganchik",
+      "timestamp": 1754297055.0324235
+    },
+    "https://twitch.tv/IPunchPancakes": {
+      "username": "ipunchpancakes",
+      "timestamp": 1754105717.6026347
+    },
+    "https://twitch.tv/IPhillyzFinest": {
+      "username": "iphillyzfinest",
+      "timestamp": 1754297055.0132537
+    },
+    "https://twitch.tv/siebakk": {
+      "username": "siebakk",
+      "timestamp": 1754550558.3957307
+    },
+    "https://twitch.tv/Totem": {
+      "username": "totem",
+      "timestamp": 1754297055.0419562
+    },
+    "https://twitch.tv/Buxtz": {
+      "username": "buxtz",
+      "timestamp": 1754297054.995637
+    },
+    "https://twitch.tv/Fredstxr": {
+      "username": "fredstxr",
+      "timestamp": 1754550557.6694295
+    },
+    "https://twitch.tv/JPrecisions": {
+      "username": "jprecisions",
+      "timestamp": 1754550557.2835476
+    },
+    "https://twitch.tv/Pikatoqx": {
+      "username": "pikatoqx",
+      "timestamp": 1754297055.0506985
+    },
+    "https://twitch.tv/xtrinxX": {
+      "username": "xtrinxx",
+      "timestamp": 1754297055.0173807
+    },
+    "https://twitch.tv/haruubloom": {
+      "username": "haruubloom",
+      "timestamp": 1754192138.0961392
+    },
+    "https://twitch.tv/IWantToDisappear": {
+      "username": "iwanttodisappear",
+      "timestamp": 1754297055.0555813
+    },
+    "https://twitch.tv/Kerwin": {
+      "username": "kerwin",
+      "timestamp": 1754550559.3098512
+    },
+    "https://twitch.tv/Wooju": {
+      "username": "wooju",
+      "timestamp": 1754297055.0938513
+    },
+    "https://twitch.tv/ONIC": {
+      "username": "onic",
+      "timestamp": 1754297055.0216901
+    },
+    "https://twitch.tv/Christian": {
+      "username": "christian",
+      "timestamp": 1754297055.0269463
+    },
+    "https://twitch.tv/Mudholeo": {
+      "username": "mudholeo",
+      "timestamp": 1754297055.103966
+    },
+    "https://twitch.tv/VolzZ_kn": {
+      "username": "volzz_kn",
+      "timestamp": 1754550557.2647686
+    },
+    "https://twitch.tv/Youtube": {
+      "username": "youtube",
+      "timestamp": 1754297055.082558
+    },
+    "https://twitch.tv/IHAVEQQ": {
+      "username": "ihaveqq",
+      "timestamp": 1754192138.1058266
+    },
+    "https://twitch.tv/Eccio": {
+      "username": "eccio",
+      "timestamp": 1754550558.9707944
+    },
+    "https://twitch.tv/Aznboi": {
+      "username": "aznboi",
+      "timestamp": 1754297055.1309047
+    },
+    "https://twitch.tv/hitzbasic": {
+      "username": "hitzbasic",
+      "timestamp": 1754297055.126238
+    },
+    "https://twitch.tv/LETSJOKEYPRIDEBATTLE": {
+      "username": "letsjokeypridebattle",
+      "timestamp": 1754105717.6582978
+    },
+    "https://twitch.tv/MV_Pizzle": {
+      "username": "mv_pizzle",
+      "timestamp": 1754297055.1703155
+    },
+    "https://twitch.tv/Roar": {
+      "username": "roar",
+      "timestamp": 1754105717.6610136
+    },
+    "https://twitch.tv/hachhh__": {
+      "username": "hachhh__",
+      "timestamp": 1754452310.0668547
+    },
+    "https://twitch.tv/RUIN": {
+      "username": "ruin",
+      "timestamp": 1754297055.1355143
+    },
+    "https://twitch.tv/Jitter": {
+      "username": "jitter",
+      "timestamp": 1754105717.665153
+    },
+    "https://twitch.tv/Gyozey": {
+      "username": "gyozey",
+      "timestamp": 1754452309.9363742
+    },
+    "https://twitch.tv/deho_o": {
+      "username": "deho_o",
+      "timestamp": 1754297055.1927736
+    },
+    "https://twitch.tv/Lovelystory": {
+      "username": "lovelystory",
+      "timestamp": 1754297055.1615489
+    },
+    "https://twitch.tv/Lymo": {
+      "username": "lymo",
+      "timestamp": 1754550558.0975006
+    },
+    "https://twitch.tv/VENDETTA": {
+      "username": "vendetta",
+      "timestamp": 1754550557.9311004
+    },
+    "https://twitch.tv/Cloud": {
+      "username": "cloud",
+      "timestamp": 1754297055.2214715
+    },
+    "https://twitch.tv/kuchakala": {
+      "username": "kuchakala",
+      "timestamp": 1754297055.2295136
+    },
+    "https://twitch.tv/BelieveInYourself": {
+      "username": "believeinyourself",
+      "timestamp": 1754297055.1077032
+    },
+    "https://twitch.tv/lovense": {
+      "username": "lovense",
+      "timestamp": 1754297055.1552944
+    },
+    "https://twitch.tv/Kolibri": {
+      "username": "kolibri",
+      "timestamp": 1754297055.2033892
+    },
+    "https://twitch.tv/MashVanDead": {
+      "username": "mashvandead",
+      "timestamp": 1754297055.2563434
+    },
+    "https://twitch.tv/Xoyo": {
+      "username": "xoyo",
+      "timestamp": 1754550557.6298294
+    },
+    "https://twitch.tv/Ryuukan": {
+      "username": "ryuukan",
+      "timestamp": 1754297055.1489077
+    },
+    "https://twitch.tv/nekoawoo": {
+      "username": "nekoawoo",
+      "timestamp": 1754192138.2014635
+    },
+    "https://twitch.tv/hannzi": {
+      "username": "hannzi",
+      "timestamp": 1754297055.2620978
+    },
+    "https://twitch.tv/DANGER": {
+      "username": "danger",
+      "timestamp": 1754297055.267044
+    },
+    "https://twitch.tv/tatsahmi": {
+      "username": "tatsahmi",
+      "timestamp": 1754297055.1661484
+    },
+    "https://twitch.tv/DJCaTLInK": {
+      "username": "djcatlink",
+      "timestamp": 1754550557.4895475
+    },
+    "https://twitch.tv/NIBBE": {
+      "username": "nibbe",
+      "timestamp": 1754297055.2118623
+    },
+    "https://twitch.tv/RR_Orca": {
+      "username": "rr_orca",
+      "timestamp": 1754297055.2719796
+    },
+    "https://twitch.tv/vDanDa": {
+      "username": "vdanda",
+      "timestamp": 1754452310.0464196
+    },
+    "https://twitch.tv/MesfLas": {
+      "username": "mesflas",
+      "timestamp": 1754297055.2828717
+    },
+    "https://twitch.tv/Internet": {
+      "username": "internet",
+      "timestamp": 1754105717.696495
+    },
+    "https://twitch.tv/Unbeatable": {
+      "username": "unbeatable",
+      "timestamp": 1754297055.2255366
+    },
+    "https://twitch.tv/jyona": {
+      "username": "jyona",
+      "timestamp": 1754297055.3108647
+    },
+    "https://twitch.tv/kina": {
+      "username": "kina",
+      "timestamp": 1754297055.3347094
+    },
+    "https://twitch.tv/arct9c": {
+      "username": "arct9c",
+      "timestamp": 1754452310.0875425
+    },
+    "https://twitch.tv/Warm": {
+      "username": "warm",
+      "timestamp": 1754297055.3533943
+    },
+    "https://twitch.tv/Zombare": {
+      "username": "zombare",
+      "timestamp": 1754297055.3060052
+    },
+    "https://twitch.tv/Yukinon": {
+      "username": "yukinon",
+      "timestamp": 1754297055.3200269
+    },
+    "https://twitch.tv/horst": {
+      "username": "horst",
+      "timestamp": 1754297055.2343874
+    },
+    "https://twitch.tv/LPwarriorLive": {
+      "username": "lpwarriorlive",
+      "timestamp": 1754452309.9020762
+    },
+    "https://twitch.tv/Motowastaken": {
+      "username": "motowastaken",
+      "timestamp": 1754297055.348305
+    },
+    "https://twitch.tv/ShirasuAzusa": {
+      "username": "shirasuazusa",
+      "timestamp": 1754297055.3940282
+    },
+    "https://twitch.tv/xMiapIe": {
+      "username": "xmiapie",
+      "timestamp": 1754192138.326649
+    },
+    "https://twitch.tv/EVOS": {
+      "username": "evos",
+      "timestamp": 1754550557.2394392
+    },
+    "https://twitch.tv/Biohazardsv": {
+      "username": "biohazardsv",
+      "timestamp": 1754297055.1840045
+    },
+    "https://twitch.tv/taketoyo": {
+      "username": "taketoyo",
+      "timestamp": 1754297055.4207993
+    },
+    "https://twitch.tv/TayluSs": {
+      "username": "tayluss",
+      "timestamp": 1754550557.3043363
+    },
+    "https://twitch.tv/iChurch": {
+      "username": "ichurch",
+      "timestamp": 1754550557.591147
+    },
+    "https://twitch.tv/exempttfps": {
+      "username": "exempttfps",
+      "timestamp": 1754452310.0171564
+    },
+    "https://twitch.tv/Judgment": {
+      "username": "judgment",
+      "timestamp": 1754297055.4911785
+    },
+    "https://twitch.tv/SorryMyFault": {
+      "username": "sorrymyfault",
+      "timestamp": 1754297055.3390808
+    },
+    "https://twitch.tv/Feather": {
+      "username": "feather",
+      "timestamp": 1754105717.7382746
+    },
+    "https://twitch.tv/Maison": {
+      "username": "maison",
+      "timestamp": 1754297055.252427
+    },
+    "https://twitch.tv/FloweR": {
+      "username": "flower",
+      "timestamp": 1754297055.2920113
+    },
+    "https://twitch.tv/Dongzz": {
+      "username": "dongzz",
+      "timestamp": 1754297055.4668126
+    },
+    "https://twitch.tv/Chinatsu": {
+      "username": "chinatsu",
+      "timestamp": 1754105717.7498312
+    },
+    "https://twitch.tv/BlancPur": {
+      "username": "blancpur",
+      "timestamp": 1754105717.7526734
+    },
+    "https://twitch.tv/Lenka": {
+      "username": "lenka",
+      "timestamp": 1754297055.4368203
+    },
+    "https://twitch.tv/Kyner__": {
+      "username": "kyner__",
+      "timestamp": 1754297055.411457
+    },
+    "https://twitch.tv/saykoo": {
+      "username": "saykoo",
+      "timestamp": 1754297055.4156232
+    },
+    "https://twitch.tv/hsanx": {
+      "username": "hsanx",
+      "timestamp": 1754297055.445793
+    },
+    "https://twitch.tv/betrayals": {
+      "username": "betrayals",
+      "timestamp": 1754192138.446473
+    },
+    "https://twitch.tv/alluka": {
+      "username": "alluka",
+      "timestamp": 1754105717.7737997
+    },
+    "https://twitch.tv/Kano": {
+      "username": "kano",
+      "timestamp": 1754297055.499553
+    },
+    "https://twitch.tv/ffFiji": {
+      "username": "fffiji",
+      "timestamp": 1754550557.65344
+    },
+    "https://twitch.tv/Amaki": {
+      "username": "amaki",
+      "timestamp": 1754297055.4628534
+    },
+    "https://twitch.tv/MiaKhaleesi": {
+      "username": "miakhaleesi",
+      "timestamp": 1754297055.3621657
+    },
+    "https://twitch.tv/ASKYY": {
+      "username": "askyy",
+      "timestamp": 1754452308.7981179
+    },
+    "https://twitch.tv/sirasuGCh": {
+      "username": "sirasugch",
+      "timestamp": 1754297055.578078
+    },
+    "https://twitch.tv/Shadows": {
+      "username": "shadows",
+      "timestamp": 1754550558.2503152
+    },
+    "https://twitch.tv/EGOIST": {
+      "username": "egoist",
+      "timestamp": 1754192138.474925
+    },
+    "https://twitch.tv/phineas": {
+      "username": "phineas",
+      "timestamp": 1754314261.3300848
+    },
+    "https://twitch.tv/true": {
+      "username": "true",
+      "timestamp": 1754297055.5732703
+    },
+    "https://twitch.tv/KaanKRB": {
+      "username": "kaankrb",
+      "timestamp": 1754297055.5172696
+    },
+    "https://twitch.tv/Pure_White": {
+      "username": "pure_white",
+      "timestamp": 1754297055.5829768
+    },
+    "https://twitch.tv/Datskii": {
+      "username": "datskii",
+      "timestamp": 1754452309.3065012
+    },
+    "https://twitch.tv/Ennn": {
+      "username": "ennn",
+      "timestamp": 1754105717.8188958
+    },
+    "https://twitch.tv/Nexqy": {
+      "username": "nexqy",
+      "timestamp": 1754297055.4586189
+    },
+    "https://twitch.tv/higanbana": {
+      "username": "higanbana",
+      "timestamp": 1754297055.6098893
+    },
+    "https://twitch.tv/Luto": {
+      "username": "luto",
+      "timestamp": 1754105717.8308487
+    },
+    "https://twitch.tv/EsmeruH": {
+      "username": "esmeruh",
+      "timestamp": 1754297055.534328
+    },
+    "https://twitch.tv/hlde1": {
+      "username": "hlde1",
+      "timestamp": 1754297055.4866936
+    },
+    "https://twitch.tv/SLH_Tark": {
+      "username": "slh_tark",
+      "timestamp": 1754297055.5076935
+    },
+    "https://twitch.tv/Noelsang": {
+      "username": "noelsang",
+      "timestamp": 1754297055.3665037
+    },
+    "https://twitch.tv/CardBoardBoat": {
+      "username": "cardboardboat",
+      "timestamp": 1754105717.8483088
+    },
+    "https://twitch.tv/Killer": {
+      "username": "killer",
+      "timestamp": 1754297055.6921754
+    },
+    "https://twitch.tv/Ronin": {
+      "username": "ronin",
+      "timestamp": 1754297055.6700833
+    },
+    "https://twitch.tv/EnemyAPEX": {
+      "username": "enemyapex",
+      "timestamp": 1754550556.9445944
+    },
+    "https://twitch.tv/TWIS": {
+      "username": "twis",
+      "timestamp": 1754550556.9857526
+    },
+    "https://twitch.tv/ferb": {
+      "username": "ferb",
+      "timestamp": 1754297055.592885
+    },
+    "https://twitch.tv/FOUR": {
+      "username": "four",
+      "timestamp": 1754297055.5526197
+    },
+    "https://twitch.tv/XimLynk": {
+      "username": "ximlynk",
+      "timestamp": 1754297055.635831
+    },
+    "https://twitch.tv/gjbjhbjfgf": {
+      "username": "gjbjhbjfgf",
+      "timestamp": 1754192138.5984874
+    },
+    "https://twitch.tv/KrissUwU": {
+      "username": "krissuwu",
+      "timestamp": 1754297055.5124571
+    },
+    "https://twitch.tv/Mauzxi": {
+      "username": "mauzxi",
+      "timestamp": 1754550558.1573935
+    },
+    "https://twitch.tv/byxirski": {
+      "username": "byxirski",
+      "timestamp": 1754297055.5880792
+    },
+    "https://twitch.tv/gongondao__": {
+      "username": "gongondao__",
+      "timestamp": 1754314261.342851
+    },
+    "https://twitch.tv/Levi": {
+      "username": "levi",
+      "timestamp": 1754297055.5454519
+    },
+    "https://twitch.tv/Varyn": {
+      "username": "varyn",
+      "timestamp": 1754297055.7054658
+    },
+    "https://twitch.tv/KoFloZ": {
+      "username": "kofloz",
+      "timestamp": 1754297055.6051571
+    },
+    "https://twitch.tv/muxgi": {
+      "username": "muxgi",
+      "timestamp": 1754297055.6878266
+    },
+    "https://twitch.tv/Apex": {
+      "username": "apex",
+      "timestamp": 1754297055.7121596
+    },
+    "https://twitch.tv/bape59_": {
+      "username": "bape59_",
+      "timestamp": 1754297055.6312969
+    },
+    "https://twitch.tv/Maes": {
+      "username": "maes",
+      "timestamp": 1754297055.7307737
+    },
+    "https://twitch.tv/controllerhim": {
+      "username": "controllerhim",
+      "timestamp": 1754297055.6002674
+    },
+    "https://twitch.tv/Ho_ponG": {
+      "username": "ho_pong",
+      "timestamp": 1754297055.6482809
+    },
+    "https://twitch.tv/kirichanga": {
+      "username": "kirichanga",
+      "timestamp": 1754297055.6746225
+    },
+    "https://twitch.tv/AoskoryMo": {
+      "username": "aoskorymo",
+      "timestamp": 1754297055.7454574
+    },
+    "https://twitch.tv/Shark": {
+      "username": "shark",
+      "timestamp": 1754297055.652032
+    },
+    "https://twitch.tv/xZlyzz_": {
+      "username": "xzlyzz_",
+      "timestamp": 1754297055.75414
+    },
+    "https://twitch.tv/nano": {
+      "username": "nano",
+      "timestamp": 1754550557.0197785
+    },
+    "https://twitch.tv/iKnowUhateMe": {
+      "username": "iknowuhateme",
+      "timestamp": 1754550558.9950023
+    },
+    "https://twitch.tv/ProdigyAces": {
+      "username": "prodigyaces",
+      "timestamp": 1754297055.725878
+    },
+    "https://twitch.tv/sightlxss": {
+      "username": "sightlxss",
+      "timestamp": 1754452309.5360138
+    },
+    "https://twitch.tv/sanyar": {
+      "username": "sanyar",
+      "timestamp": 1754297055.3813248
+    },
+    "https://twitch.tv/Tiller": {
+      "username": "tiller",
+      "timestamp": 1754297055.7215383
+    },
+    "https://twitch.tv/Bazaar": {
+      "username": "bazaar",
+      "timestamp": 1754297055.8157732
+    },
+    "https://twitch.tv/Wheyorn": {
+      "username": "wheyorn",
+      "timestamp": 1754192138.701872
+    },
+    "https://twitch.tv/Impulseboiii": {
+      "username": "impulseboiii",
+      "timestamp": 1754192138.7056808
+    },
+    "https://twitch.tv/Hope": {
+      "username": "hope",
+      "timestamp": 1754550557.8304791
+    },
+    "https://twitch.tv/zGato": {
+      "username": "zgato",
+      "timestamp": 1754550559.3345373
+    },
+    "https://twitch.tv/Zerking": {
+      "username": "zerking",
+      "timestamp": 1754192138.7209659
+    },
+    "https://twitch.tv/kenjisann": {
+      "username": "kenjisann",
+      "timestamp": 1754192138.7248025
+    },
+    "https://twitch.tv/ilian": {
+      "username": "ilian",
+      "timestamp": 1754297055.7984688
+    },
+    "https://twitch.tv/DirtySlapzz": {
+      "username": "dirtyslapzz",
+      "timestamp": 1754452309.9792018
+    },
+    "https://twitch.tv/OminousPlays": {
+      "username": "ominousplays",
+      "timestamp": 1754192138.7375784
+    },
+    "https://twitch.tv/UMItv_": {
+      "username": "umitv_",
+      "timestamp": 1754192138.754213
+    },
+    "https://twitch.tv/Klemme": {
+      "username": "klemme",
+      "timestamp": 1754297055.5395997
+    },
+    "https://twitch.tv/DG_Louis": {
+      "username": "dg_louis",
+      "timestamp": 1754297055.766779
+    },
+    "https://twitch.tv/Scaredjohn": {
+      "username": "scaredjohn",
+      "timestamp": 1754297055.771078
+    },
+    "https://twitch.tv/MckayWrigley": {
+      "username": "mckaywrigley",
+      "timestamp": 1754192138.762378
+    },
+    "https://twitch.tv/Chambers": {
+      "username": "chambers",
+      "timestamp": 1754105718.0145257
+    },
+    "https://twitch.tv/MiMaanchiy": {
+      "username": "mimaanchiy",
+      "timestamp": 1754105718.0185764
+    },
+    "https://twitch.tv/exterino": {
+      "username": "exterino",
+      "timestamp": 1754192138.750423
+    },
+    "https://twitch.tv/Hakai": {
+      "username": "hakai",
+      "timestamp": 1754297055.645518
+    },
+    "https://twitch.tv/NiuNiu": {
+      "username": "niuniu",
+      "timestamp": 1754105718.0296435
+    },
+    "https://twitch.tv/Matteo": {
+      "username": "matteo",
+      "timestamp": 1754550559.074913
+    },
+    "https://twitch.tv/Gwrred": {
+      "username": "gwrred",
+      "timestamp": 1754105718.036994
+    },
+    "https://twitch.tv/xiaobai": {
+      "username": "xiaobai",
+      "timestamp": 1754105718.040556
+    },
+    "https://twitch.tv/Liina": {
+      "username": "liina",
+      "timestamp": 1754105718.044111
+    },
+    "https://twitch.tv/Pipexe": {
+      "username": "pipexe",
+      "timestamp": 1754297055.7167087
+    },
+    "https://twitch.tv/Remember_Avicii": {
+      "username": "remember_avicii",
+      "timestamp": 1754297055.4544148
+    },
+    "https://twitch.tv/RidgeBee": {
+      "username": "ridgebee",
+      "timestamp": 1754314261.3662438
+    },
+    "https://twitch.tv/Niko": {
+      "username": "niko",
+      "timestamp": 1754105718.0599203
+    },
+    "https://twitch.tv/envi": {
+      "username": "envi",
+      "timestamp": 1754297054.874084
+    },
+    "https://twitch.tv/Mida": {
+      "username": "mida",
+      "timestamp": 1754550559.0587778
+    },
+    "https://twitch.tv/ItzGentonic": {
+      "username": "itzgentonic",
+      "timestamp": 1754297054.9572604
+    },
+    "https://twitch.tv/rigmaboi": {
+      "username": "rigmaboi",
+      "timestamp": 1754297055.296684
+    },
+    "https://twitch.tv/vampy": {
+      "username": "vampy",
+      "timestamp": 1754297054.4950404
+    },
+    "https://twitch.tv/qqBiddy": {
+      "username": "qqbiddy",
+      "timestamp": 1754297054.4994059
+    },
+    "https://twitch.tv/Legit": {
+      "username": "legit",
+      "timestamp": 1754297054.5280669
+    },
+    "https://twitch.tv/4rushado7": {
+      "username": "4rushado7",
+      "timestamp": 1754297054.5972865
+    },
+    "https://twitch.tv/Keon_FA": {
+      "username": "keon_fa",
+      "timestamp": 1754550556.9512594
+    },
+    "https://twitch.tv/iknowiloveyou": {
+      "username": "iknowiloveyou",
+      "timestamp": 1754192137.9663763
+    },
+    "https://twitch.tv/Daliru": {
+      "username": "daliru",
+      "timestamp": 1754297054.9291859
+    },
+    "https://twitch.tv/predator180": {
+      "username": "predator180",
+      "timestamp": 1754192138.0072472
+    },
+    "https://twitch.tv/miwssnoitome": {
+      "username": "miwssnoitome",
+      "timestamp": 1754192138.0558238
+    },
+    "https://twitch.tv/bruh": {
+      "username": "bruh",
+      "timestamp": 1754297055.1793144
+    },
+    "https://twitch.tv/Retired": {
+      "username": "retired",
+      "timestamp": 1754297055.2077715
+    },
+    "https://twitch.tv/GusukeOfBirdopia": {
+      "username": "gusukeofbirdopia",
+      "timestamp": 1754192138.2569647
+    },
+    "https://twitch.tv/fujikonji": {
+      "username": "fujikonji",
+      "timestamp": 1754550559.034497
+    },
+    "https://twitch.tv/Tifari": {
+      "username": "tifari",
+      "timestamp": 1754297055.3855488
+    },
+    "https://twitch.tv/Fata": {
+      "username": "fata",
+      "timestamp": 1754297055.372676
+    },
+    "https://twitch.tv/perry": {
+      "username": "perry",
+      "timestamp": 1754297055.4324381
+    },
+    "https://twitch.tv/NyanmerrypopEX": {
+      "username": "nyanmerrypopex",
+      "timestamp": 1754192138.392033
+    },
+    "https://twitch.tv/Floating": {
+      "username": "floating",
+      "timestamp": 1754550556.9325564
+    },
+    "https://twitch.tv/Psychedelic": {
+      "username": "psychedelic",
+      "timestamp": 1754192138.409745
+    },
+    "https://twitch.tv/XChippiChappaX": {
+      "username": "xchippichappax",
+      "timestamp": 1754297055.5682094
+    },
+    "https://twitch.tv/TPM_LiLium": {
+      "username": "tpm_lilium",
+      "timestamp": 1754297055.5252273
+    },
+    "https://twitch.tv/Nihility": {
+      "username": "nihility",
+      "timestamp": 1754192138.4913564
+    },
+    "https://twitch.tv/TIEFSEE": {
+      "username": "tiefsee",
+      "timestamp": 1754297055.5034955
+    },
+    "https://twitch.tv/PlaytimePred": {
+      "username": "playtimepred",
+      "timestamp": 1754192138.5148063
+    },
+    "https://twitch.tv/PlutoReality": {
+      "username": "plutoreality",
+      "timestamp": 1754550557.1006382
+    },
+    "https://twitch.tv/Kagami": {
+      "username": "kagami",
+      "timestamp": 1754192138.5412073
+    },
+    "https://twitch.tv/mushiies": {
+      "username": "mushiies",
+      "timestamp": 1754550558.1414518
+    },
+    "https://twitch.tv/Abracadabra": {
+      "username": "abracadabra",
+      "timestamp": 1754550557.7803683
+    },
+    "https://twitch.tv/Rynox": {
+      "username": "rynox",
+      "timestamp": 1754192138.6722565
+    },
+    "https://twitch.tv/ultimatekodak": {
+      "username": "ultimatekodak",
+      "timestamp": 1754297055.77544
+    },
+    "https://twitch.tv/DROPPED": {
+      "username": "dropped",
+      "timestamp": 1754550557.142912
+    },
+    "https://twitch.tv/DemoniioTV": {
+      "username": "demoniiotv",
+      "timestamp": 1754452309.5294878
+    },
+    "https://twitch.tv/astroilyy": {
+      "username": "astroilyy",
+      "timestamp": 1754550557.990664
+    },
+    "https://twitch.tv/FanpleSama": {
+      "username": "fanplesama",
+      "timestamp": 1754192138.746593
+    },
+    "https://twitch.tv/svdbufg": {
+      "username": "svdbufg",
+      "timestamp": 1754297055.7583117
+    },
+    "https://twitch.tv/Dreckzyz": {
+      "username": "dreckzyz",
+      "timestamp": 1754297055.6658995
+    },
+    "https://twitch.tv/wasaKINGTTV": {
+      "username": "wasakingttv",
+      "timestamp": 1754452310.032024
+    },
+    "https://twitch.tv/predator430": {
+      "username": "predator430",
+      "timestamp": 1754452310.009725
+    },
+    "https://twitch.tv/astrofrogyy": {
+      "username": "astrofrogyy",
+      "timestamp": 1754297054.4925554
+    },
+    "https://twitch.tv/AnTrxld": {
+      "username": "antrxld",
+      "timestamp": 1754550559.470556
+    },
+    "https://twitch.tv/Iwannadisappear": {
+      "username": "iwannadisappear",
+      "timestamp": 1754297054.705303
+    },
+    "https://twitch.tv/QwQVeydr": {
+      "username": "qwqveydr",
+      "timestamp": 1754297054.7739425
+    },
+    "https://twitch.tv/Lustiqxe": {
+      "username": "lustiqxe",
+      "timestamp": 1754297054.852363
+    },
+    "https://twitch.tv/MaiAka": {
+      "username": "maiaka",
+      "timestamp": 1754297054.9820507
+    },
+    "https://twitch.tv/iamVVIAN": {
+      "username": "iamvvian",
+      "timestamp": 1754297054.991818
+    },
+    "https://twitch.tv/tnelatonevahuoy": {
+      "username": "tnelatonevahuoy",
+      "timestamp": 1754297055.0464454
+    },
+    "https://twitch.tv/smile": {
+      "username": "smile",
+      "timestamp": 1754297055.060471
+    },
+    "https://twitch.tv/Perry": {
+      "username": "perry",
+      "timestamp": 1754297055.0901542
+    },
+    "https://twitch.tv/fatmonkeybaby": {
+      "username": "fatmonkeybaby",
+      "timestamp": 1754297055.1125185
+    },
+    "https://twitch.tv/Lyue": {
+      "username": "lyue",
+      "timestamp": 1754550559.2576501
+    },
+    "https://twitch.tv/sobachiy": {
+      "username": "sobachiy",
+      "timestamp": 1754297055.1218865
+    },
+    "https://twitch.tv/ReiApex": {
+      "username": "reiapex",
+      "timestamp": 1754452309.1201565
+    },
+    "https://twitch.tv/minerva": {
+      "username": "minerva",
+      "timestamp": 1754297055.3437438
+    },
+    "https://twitch.tv/MikuNoUta": {
+      "username": "mikunouta",
+      "timestamp": 1754297055.4009643
+    },
+    "https://twitch.tv/Eastyy": {
+      "username": "eastyy",
+      "timestamp": 1754550556.9263346
+    },
+    "https://twitch.tv/DJArisunyan": {
+      "username": "djarisunyan",
+      "timestamp": 1754297055.4287412
+    },
+    "https://twitch.tv/GarbageTruck": {
+      "username": "garbagetruck",
+      "timestamp": 1754297055.4499636
+    },
+    "https://twitch.tv/Makise": {
+      "username": "makise",
+      "timestamp": 1754297055.4756021
+    },
+    "https://twitch.tv/Sedna": {
+      "username": "sedna",
+      "timestamp": 1754297055.562353
+    },
+    "https://twitch.tv/JACK": {
+      "username": "jack",
+      "timestamp": 1754550557.7447522
+    },
+    "https://twitch.tv/Puppyplayz": {
+      "username": "puppyplayz",
+      "timestamp": 1754297055.6788049
+    },
+    "https://twitch.tv/zquanii": {
+      "username": "zquanii",
+      "timestamp": 1754297055.6965394
+    },
+    "https://twitch.tv/Mamba": {
+      "username": "mamba",
+      "timestamp": 1754297055.7009213
+    },
+    "https://twitch.tv/RYKEYDADDY_X": {
+      "username": "rykeydaddy_x",
+      "timestamp": 1754297055.7372048
+    },
+    "https://twitch.tv/isikawa": {
+      "username": "isikawa",
+      "timestamp": 1754297055.749759
+    },
+    "https://twitch.tv/Nothing": {
+      "username": "nothing",
+      "timestamp": 1754550558.1191163
+    },
+    "https://twitch.tv/SBI_egoist": {
+      "username": "sbi_egoist",
+      "timestamp": 1754550557.5465066
+    },
+    "https://twitch.tv/Wadadawan": {
+      "username": "wadadawan",
+      "timestamp": 1754297055.7937183
+    },
+    "https://twitch.tv/ignisFPS": {
+      "username": "ignisfps",
+      "timestamp": 1754297055.8025992
+    },
+    "https://twitch.tv/Nonameguy": {
+      "username": "nonameguy",
+      "timestamp": 1754297055.806874
+    },
+    "https://twitch.tv/xzerlution": {
+      "username": "xzerlution",
+      "timestamp": 1754297055.8112128
+    },
+    "https://twitch.tv/ST_gavomk": {
+      "username": "st_gavomk",
+      "timestamp": 1754314261.1887014
+    },
+    "https://twitch.tv/gghetto": {
+      "username": "gghetto",
+      "timestamp": 1754550557.2722638
+    },
+    "https://twitch.tv/dwaahegewdaf": {
+      "username": "dwaahegewdaf",
+      "timestamp": 1754452308.9923387
+    },
+    "https://twitch.tv/xenoglosy": {
+      "username": "xenoglosy",
+      "timestamp": 1754314261.224563
+    },
+    "https://twitch.tv/predator320": {
+      "username": "predator320",
+      "timestamp": 1754314261.305608
+    },
+    "https://twitch.tv/Lara": {
+      "username": "lara",
+      "timestamp": 1754314261.3175218
+    },
+    "https://twitch.tv/xosw": {
+      "username": "xosw",
+      "timestamp": 1754314261.3382583
+    },
+    "https://twitch.tv/Deviation": {
+      "username": "deviation",
+      "timestamp": 1754314261.3766303
+    },
+    "https://twitch.tv/Xonada": {
+      "username": "xonada",
+      "timestamp": 1754317709.1934175
+    },
+    "https://twitch.tv/SR_Koy": {
+      "username": "sr_koy",
+      "timestamp": 1754550556.893028
+    },
+    "https://twitch.tv/zaptohh": {
+      "username": "zaptohh",
+      "timestamp": 1754550556.912317
+    },
+    "https://twitch.tv/LG_Shooby": {
+      "username": "lg_shooby",
+      "timestamp": 1754550557.163433
+    },
+    "https://twitch.tv/qzeir": {
+      "username": "qzeir",
+      "timestamp": 1754550557.0283265
+    },
+    "https://twitch.tv/VKG_QQ": {
+      "username": "vkg_qq",
+      "timestamp": 1754550556.9185982
+    },
+    "https://twitch.tv/Vaxlon": {
+      "username": "vaxlon",
+      "timestamp": 1754452308.3477747
+    },
+    "https://twitch.tv/TLAW_jaguares": {
+      "username": "tlaw_jaguares",
+      "timestamp": 1754550556.9721577
+    },
+    "https://twitch.tv/SR_Xynew": {
+      "username": "sr_xynew",
+      "timestamp": 1754550556.9059732
+    },
+    "https://twitch.tv/sauceror": {
+      "username": "sauceror",
+      "timestamp": 1754550556.8856485
+    },
+    "https://twitch.tv/GN_iHenchman": {
+      "username": "gn_ihenchman",
+      "timestamp": 1754550556.9649801
+    },
+    "https://twitch.tv/Ahkuyy": {
+      "username": "ahkuyy",
+      "timestamp": 1754550557.560592
+    },
+    "https://twitch.tv/Charming": {
+      "username": "charming",
+      "timestamp": 1754550557.0860422
+    },
+    "https://twitch.tv/Gild_NRG": {
+      "username": "gild_nrg",
+      "timestamp": 1754550557.1080213
+    },
+    "https://twitch.tv/tung": {
+      "username": "tung",
+      "timestamp": 1754452308.391826
+    },
+    "https://twitch.tv/Ingunn": {
+      "username": "ingunn",
+      "timestamp": 1754452308.4013386
+    },
+    "https://twitch.tv/Zachmazer": {
+      "username": "zachmazer",
+      "timestamp": 1754550556.9928691
+    },
+    "https://twitch.tv/Zeddo": {
+      "username": "zeddo",
+      "timestamp": 1754452308.409945
+    },
+    "https://twitch.tv/Satuki": {
+      "username": "satuki",
+      "timestamp": 1754550557.5767145
+    },
+    "https://twitch.tv/SEN_carter": {
+      "username": "sen_carter",
+      "timestamp": 1754550557.135644
+    },
+    "https://twitch.tv/TLAW_YanYa": {
+      "username": "tlaw_yanya",
+      "timestamp": 1754550557.0422802
+    },
+    "https://twitch.tv/fwkenjii": {
+      "username": "fwkenjii",
+      "timestamp": 1754550557.332651
+    },
+    "https://twitch.tv/ILoveMeganFox": {
+      "username": "ilovemeganfox",
+      "timestamp": 1754550557.0132842
+    },
+    "https://twitch.tv/Reptar": {
+      "username": "reptar",
+      "timestamp": 1754550557.9980597
+    },
+    "https://twitch.tv/FNC_Lykqs": {
+      "username": "fnc_lykqs",
+      "timestamp": 1754550557.2460144
+    },
+    "https://twitch.tv/ST_gaaa": {
+      "username": "st_gaaa",
+      "timestamp": 1754550557.071808
+    },
+    "https://twitch.tv/Kuzmei": {
+      "username": "kuzmei",
+      "timestamp": 1754452308.4678564
+    },
+    "https://twitch.tv/NRG_Sikezzz": {
+      "username": "nrg_sikezzz",
+      "timestamp": 1754550557.172547
+    },
+    "https://twitch.tv/SkittleCakes": {
+      "username": "skittlecakes",
+      "timestamp": 1754550557.3889832
+    },
+    "https://twitch.tv/JackieChan": {
+      "username": "jackiechan",
+      "timestamp": 1754550557.1798728
+    },
+    "https://twitch.tv/Lemon": {
+      "username": "lemon",
+      "timestamp": 1754550557.0491047
+    },
+    "https://twitch.tv/MiaKnightley": {
+      "username": "miaknightley",
+      "timestamp": 1754550557.0793006
+    },
+    "https://twitch.tv/KUREV": {
+      "username": "kurev",
+      "timestamp": 1754550558.3536081
+    },
+    "https://twitch.tv/TLAW_Neazul": {
+      "username": "tlaw_neazul",
+      "timestamp": 1754550557.2573175
+    },
+    "https://twitch.tv/ThisSwiftness": {
+      "username": "thisswiftness",
+      "timestamp": 1754550557.7729466
+    },
+    "https://twitch.tv/Luck": {
+      "username": "luck",
+      "timestamp": 1754550557.121883
+    },
+    "https://twitch.tv/YukaPEROdator": {
+      "username": "yukaperodator",
+      "timestamp": 1754550557.7218866
+    },
+    "https://twitch.tv/Lazur": {
+      "username": "lazur",
+      "timestamp": 1754550557.1884944
+    },
+    "https://twitch.tv/Nightcore": {
+      "username": "nightcore",
+      "timestamp": 1754550558.3881183
+    },
+    "https://twitch.tv/BananaCat": {
+      "username": "bananacat",
+      "timestamp": 1754550557.758647
+    },
+    "https://twitch.tv/yJely": {
+      "username": "yjely",
+      "timestamp": 1754550557.424096
+    },
+    "https://twitch.tv/ROC_Deeds": {
+      "username": "roc_deeds",
+      "timestamp": 1754452308.5700846
+    },
+    "https://twitch.tv/Code": {
+      "username": "code",
+      "timestamp": 1754550557.802012
+    },
+    "https://twitch.tv/TUNG": {
+      "username": "tung",
+      "timestamp": 1754452308.5896518
+    },
+    "https://twitch.tv/BL_Durxy": {
+      "username": "bl_durxy",
+      "timestamp": 1754550558.4683387
+    },
+    "https://twitch.tv/SLBoykaTV": {
+      "username": "slboykatv",
+      "timestamp": 1754550558.955582
+    },
+    "https://twitch.tv/Etelya": {
+      "username": "etelya",
+      "timestamp": 1754550558.5500941
+    },
+    "https://twitch.tv/FNC_YukaF": {
+      "username": "fnc_yukaf",
+      "timestamp": 1754550559.010841
+    },
+    "https://twitch.tv/ZuniUK": {
+      "username": "zuniuk",
+      "timestamp": 1754550556.8999135
+    },
+    "https://twitch.tv/tomanycheeters": {
+      "username": "tomanycheeters",
+      "timestamp": 1754550556.979055
+    },
+    "https://twitch.tv/absurdists": {
+      "username": "absurdists",
+      "timestamp": 1754550558.9267886
+    },
+    "https://twitch.tv/remixpowers": {
+      "username": "remixpowers",
+      "timestamp": 1754550556.9386027
+    },
+    "https://twitch.tv/yulariman": {
+      "username": "yulariman",
+      "timestamp": 1754550557.4593773
+    },
+    "https://twitch.tv/bokiiyu": {
+      "username": "bokiiyu",
+      "timestamp": 1754550558.4445271
+    },
+    "https://twitch.tv/KIRILL": {
+      "username": "kirill",
+      "timestamp": 1754452308.665435
+    },
+    "https://twitch.tv/TreeCleaner": {
+      "username": "treecleaner",
+      "timestamp": 1754550557.911669
+    },
+    "https://twitch.tv/Twitch_Digvibezz": {
+      "username": "twitch_digvibezz",
+      "timestamp": 1754550557.1568005
+    },
+    "https://twitch.tv/Acca_gg": {
+      "username": "acca_gg",
+      "timestamp": 1754550557.0559754
+    },
+    "https://twitch.tv/ArkarlosOne": {
+      "username": "arkarlosone",
+      "timestamp": 1754550558.8679204
+    },
+    "https://twitch.tv/RevalChoco": {
+      "username": "revalchoco",
+      "timestamp": 1754550557.43791
+    },
+    "https://twitch.tv/ERy_ECy": {
+      "username": "ery_ecy",
+      "timestamp": 1754550558.7861714
+    },
+    "https://twitch.tv/7guts__": {
+      "username": "7guts__",
+      "timestamp": 1754550557.8818595
+    },
+    "https://twitch.tv/vRinsedMaxi": {
+      "username": "vrinsedmaxi",
+      "timestamp": 1754550559.5196872
+    },
+    "https://twitch.tv/yannifrl": {
+      "username": "yannifrl",
+      "timestamp": 1754550559.2748277
+    },
+    "https://twitch.tv/january": {
+      "username": "january",
+      "timestamp": 1754452308.7496305
+    },
+    "https://twitch.tv/SLOTHULAS": {
+      "username": "slothulas",
+      "timestamp": 1754550557.2535071
+    },
+    "https://twitch.tv/Sentinel": {
+      "username": "sentinel",
+      "timestamp": 1754550557.2610426
+    },
+    "https://twitch.tv/twitch": {
+      "username": "twitch",
+      "timestamp": 1754550557.346422
+    },
+    "https://twitch.tv/Yuge": {
+      "username": "yuge",
+      "timestamp": 1754452308.781974
+    },
+    "https://twitch.tv/FNATIC": {
+      "username": "fnatic",
+      "timestamp": 1754550558.0670924
+    },
+    "https://twitch.tv/lil_psd": {
+      "username": "lil_psd",
+      "timestamp": 1754550559.0668359
+    },
+    "https://twitch.tv/SEN_Riley": {
+      "username": "sen_riley",
+      "timestamp": 1754550557.4172575
+    },
+    "https://twitch.tv/ZIP_WeakQ": {
+      "username": "zip_weakq",
+      "timestamp": 1754452308.813551
+    },
+    "https://twitch.tv/Metsu": {
+      "username": "metsu",
+      "timestamp": 1754550558.4925697
+    },
+    "https://twitch.tv/Naoki": {
+      "username": "naoki",
+      "timestamp": 1754550558.8925061
+    },
+    "https://twitch.tv/TTXTR": {
+      "username": "ttxtr",
+      "timestamp": 1754550557.5536296
+    },
+    "https://twitch.tv/Apollonia": {
+      "username": "apollonia",
+      "timestamp": 1754550557.3116026
+    },
+    "https://twitch.tv/FPSMeri": {
+      "username": "fpsmeri",
+      "timestamp": 1754550557.5325015
+    },
+    "https://twitch.tv/Blinkzr": {
+      "username": "blinkzr",
+      "timestamp": 1754550557.368351
+    },
+    "https://twitch.tv/gent": {
+      "username": "gent",
+      "timestamp": 1754550557.382311
+    },
+    "https://twitch.tv/Neyaz": {
+      "username": "neyaz",
+      "timestamp": 1754550557.196499
+    },
+    "https://twitch.tv/script": {
+      "username": "script",
+      "timestamp": 1754452308.8863342
+    },
+    "https://twitch.tv/Blastsgg": {
+      "username": "blastsgg",
+      "timestamp": 1754550558.2028604
+    },
+    "https://twitch.tv/kuzpf": {
+      "username": "kuzpf",
+      "timestamp": 1754452308.906387
+    },
+    "https://twitch.tv/CcobraxX": {
+      "username": "ccobraxx",
+      "timestamp": 1754550558.484287
+    },
+    "https://twitch.tv/Takiumi": {
+      "username": "takiumi",
+      "timestamp": 1754550557.8660414
+    },
+    "https://twitch.tv/YY_LinDuHei": {
+      "username": "yy_linduhei",
+      "timestamp": 1754550558.6671803
+    },
+    "https://twitch.tv/OTL_Osivien": {
+      "username": "otl_osivien",
+      "timestamp": 1754452308.9297256
+    },
+    "https://twitch.tv/Kazakh": {
+      "username": "kazakh",
+      "timestamp": 1754452308.9346972
+    },
+    "https://twitch.tv/DC_doogiedoo": {
+      "username": "dc_doogiedoo",
+      "timestamp": 1754550557.2973976
+    },
+    "https://twitch.tv/TSM_Plexity": {
+      "username": "tsm_plexity",
+      "timestamp": 1754452308.9521112
+    },
+    "https://twitch.tv/code": {
+      "username": "code",
+      "timestamp": 1754550558.1339011
+    },
+    "https://twitch.tv/Sorrybaozai": {
+      "username": "sorrybaozai",
+      "timestamp": 1754550558.6108046
+    },
+    "https://twitch.tv/Vudo": {
+      "username": "vudo",
+      "timestamp": 1754550557.0935307
+    },
+    "https://twitch.tv/cates": {
+      "username": "cates",
+      "timestamp": 1754550558.4033787
+    },
+    "https://twitch.tv/foryxan": {
+      "username": "foryxan",
+      "timestamp": 1754452308.9810596
+    },
+    "https://twitch.tv/RT_Sze": {
+      "username": "rt_sze",
+      "timestamp": 1754452308.9871907
+    },
+    "https://twitch.tv/NOSR": {
+      "username": "nosr",
+      "timestamp": 1754550559.2157545
+    },
+    "https://twitch.tv/Shex": {
+      "username": "shex",
+      "timestamp": 1754550559.4021463
+    },
+    "https://twitch.tv/dices": {
+      "username": "dices",
+      "timestamp": 1754550558.346297
+    },
+    "https://twitch.tv/swezos": {
+      "username": "swezos",
+      "timestamp": 1754550558.5171566
+    },
+    "https://twitch.tv/Kernel": {
+      "username": "kernel",
+      "timestamp": 1754452309.0376506
+    },
+    "https://twitch.tv/LankzyFPS": {
+      "username": "lankzyfps",
+      "timestamp": 1754550558.8269148
+    },
+    "https://twitch.tv/FunFPS": {
+      "username": "funfps",
+      "timestamp": 1754550557.838618
+    },
+    "https://twitch.tv/nDodgee": {
+      "username": "ndodgee",
+      "timestamp": 1754452309.061969
+    },
+    "https://twitch.tv/Wesley_Pary": {
+      "username": "wesley_pary",
+      "timestamp": 1754550557.90207
+    },
+    "https://twitch.tv/Dystopia": {
+      "username": "dystopia",
+      "timestamp": 1754452309.073314
+    },
+    "https://twitch.tv/Mikasa": {
+      "username": "mikasa",
+      "timestamp": 1754550557.466611
+    },
+    "https://twitch.tv/aveckii": {
+      "username": "aveckii",
+      "timestamp": 1754550558.5251727
+    },
+    "https://twitch.tv/Darkiightttttttt": {
+      "username": "darkiightttttttt",
+      "timestamp": 1754452309.1086364
+    },
+    "https://twitch.tv/stellaapex": {
+      "username": "stellaapex",
+      "timestamp": 1754452309.1262374
+    },
+    "https://twitch.tv/Playerkay": {
+      "username": "playerkay",
+      "timestamp": 1754550558.2724128
+    },
+    "https://twitch.tv/OpTic": {
+      "username": "optic",
+      "timestamp": 1754452309.1434915
+    },
+    "https://twitch.tv/hitsua": {
+      "username": "hitsua",
+      "timestamp": 1754550557.2905805
+    },
+    "https://twitch.tv/BuMushhTTV": {
+      "username": "bumushhttv",
+      "timestamp": 1754452309.1537147
+    },
+    "https://twitch.tv/ConfusingQT": {
+      "username": "confusingqt",
+      "timestamp": 1754452309.15897
+    },
+    "https://twitch.tv/Kanata": {
+      "username": "kanata",
+      "timestamp": 1754550559.1584902
+    },
+    "https://twitch.tv/mike": {
+      "username": "mike",
+      "timestamp": 1754452309.1753373
+    },
+    "https://twitch.tv/Alliance_Hakis": {
+      "username": "alliance_hakis",
+      "timestamp": 1754550557.2796443
+    },
+    "https://twitch.tv/Gambit": {
+      "username": "gambit",
+      "timestamp": 1754550558.1800432
+    },
+    "https://twitch.tv/Heckchungus": {
+      "username": "heckchungus",
+      "timestamp": 1754452309.193537
+    },
+    "https://twitch.tv/Attack": {
+      "username": "attack",
+      "timestamp": 1754452309.2112443
+    },
+    "https://twitch.tv/fa_inkya": {
+      "username": "fa_inkya",
+      "timestamp": 1754452309.2171688
+    },
+    "https://twitch.tv/Ggod": {
+      "username": "ggod",
+      "timestamp": 1754550558.6263032
+    },
+    "https://twitch.tv/Yuhzu": {
+      "username": "yuhzu",
+      "timestamp": 1754550557.605345
+    },
+    "https://twitch.tv/Alliance_Effect": {
+      "username": "alliance_effect",
+      "timestamp": 1754550557.7657144
+    },
+    "https://twitch.tv/Zone_LoNg": {
+      "username": "zone_long",
+      "timestamp": 1754452309.2424605
+    },
+    "https://twitch.tv/Kuroton": {
+      "username": "kuroton",
+      "timestamp": 1754452309.2482736
+    },
+    "https://twitch.tv/BaByLoNs": {
+      "username": "babylons",
+      "timestamp": 1754452309.2596447
+    },
+    "https://twitch.tv/RRX_odangobro": {
+      "username": "rrx_odangobro",
+      "timestamp": 1754452309.266633
+    },
+    "https://twitch.tv/Cjracked": {
+      "username": "cjracked",
+      "timestamp": 1754452309.2723742
+    },
+    "https://twitch.tv/Golden": {
+      "username": "golden",
+      "timestamp": 1754452309.2780309
+    },
+    "https://twitch.tv/TempestND": {
+      "username": "tempestnd",
+      "timestamp": 1754452309.2838132
+    },
+    "https://twitch.tv/zkYuTq": {
+      "username": "zkyutq",
+      "timestamp": 1754452309.2896957
+    },
+    "https://twitch.tv/Lunix": {
+      "username": "lunix",
+      "timestamp": 1754550558.460368
+    },
+    "https://twitch.tv/Orbit": {
+      "username": "orbit",
+      "timestamp": 1754452309.312546
+    },
+    "https://twitch.tv/SLR_Tayko": {
+      "username": "slr_tayko",
+      "timestamp": 1754550558.023417
+    },
+    "https://twitch.tv/szamanka": {
+      "username": "szamanka",
+      "timestamp": 1754452309.3257363
+    },
+    "https://twitch.tv/dooplex": {
+      "username": "dooplex",
+      "timestamp": 1754550557.8896208
+    },
+    "https://twitch.tv/Jxmo": {
+      "username": "jxmo",
+      "timestamp": 1754550558.9008186
+    },
+    "https://twitch.tv/Lust": {
+      "username": "lust",
+      "timestamp": 1754452309.3456872
+    },
+    "https://twitch.tv/Beau": {
+      "username": "beau",
+      "timestamp": 1754550557.23278
+    },
+    "https://twitch.tv/Eclipse": {
+      "username": "eclipse",
+      "timestamp": 1754550559.3011658
+    },
+    "https://twitch.tv/jwvgmg": {
+      "username": "jwvgmg",
+      "timestamp": 1754452309.3704903
+    },
+    "https://twitch.tv/rst_ttv": {
+      "username": "rst_ttv",
+      "timestamp": 1754550557.967543
+    },
+    "https://twitch.tv/YalaHabebi": {
+      "username": "yalahabebi",
+      "timestamp": 1754550559.223707
+    },
+    "https://twitch.tv/John": {
+      "username": "john",
+      "timestamp": 1754550558.9792929
+    },
+    "https://twitch.tv/LGCY": {
+      "username": "lgcy",
+      "timestamp": 1754550558.0750496
+    },
+    "https://twitch.tv/didiDD": {
+      "username": "dididd",
+      "timestamp": 1754550559.3183963
+    },
+    "https://twitch.tv/Rxckedu": {
+      "username": "rxckedu",
+      "timestamp": 1754550558.6916842
+    },
+    "https://twitch.tv/vexaims": {
+      "username": "vexaims",
+      "timestamp": 1754550559.2318006
+    },
+    "https://twitch.tv/vein_NlP": {
+      "username": "vein_nlp",
+      "timestamp": 1754452309.4437547
+    },
+    "https://twitch.tv/NAVI": {
+      "username": "navi",
+      "timestamp": 1754550557.3751059
+    },
+    "https://twitch.tv/esdesu": {
+      "username": "esdesu",
+      "timestamp": 1754452309.4554942
+    },
+    "https://twitch.tv/Reon_Redsky_TTV": {
+      "username": "reon_redsky_ttv",
+      "timestamp": 1754452309.4675488
+    },
+    "https://twitch.tv/JamesFearless": {
+      "username": "jamesfearless",
+      "timestamp": 1754452309.4746578
+    },
+    "https://twitch.tv/CRUST": {
+      "username": "crust",
+      "timestamp": 1754452309.4807422
+    },
+    "https://twitch.tv/PVX_HammerDrill": {
+      "username": "pvx_hammerdrill",
+      "timestamp": 1754452309.487281
+    },
+    "https://twitch.tv/xiago": {
+      "username": "xiago",
+      "timestamp": 1754550558.7463324
+    },
+    "https://twitch.tv/Hardecki": {
+      "username": "hardecki",
+      "timestamp": 1754452309.5010645
+    },
+    "https://twitch.tv/SSSSSSS": {
+      "username": "sssssss",
+      "timestamp": 1754550557.4038863
+    },
+    "https://twitch.tv/RT_Xiaolin": {
+      "username": "rt_xiaolin",
+      "timestamp": 1754452309.5133865
+    },
+    "https://twitch.tv/Pstolzzz": {
+      "username": "pstolzzz",
+      "timestamp": 1754550558.034563
+    },
+    "https://twitch.tv/FEUDAFEUDAFEUDA": {
+      "username": "feudafeudafeuda",
+      "timestamp": 1754550558.2649689
+    },
+    "https://twitch.tv/Greek": {
+      "username": "greek",
+      "timestamp": 1754452309.5579345
+    },
+    "https://twitch.tv/Schizo": {
+      "username": "schizo",
+      "timestamp": 1754452309.564216
+    },
+    "https://twitch.tv/kirubie": {
+      "username": "kirubie",
+      "timestamp": 1754550558.9632719
+    },
+    "https://twitch.tv/Phahoniah": {
+      "username": "phahoniah",
+      "timestamp": 1754452309.5762362
+    },
+    "https://twitch.tv/LingXi": {
+      "username": "lingxi",
+      "timestamp": 1754452309.5823932
+    },
+    "https://twitch.tv/MaybornXD": {
+      "username": "maybornxd",
+      "timestamp": 1754452309.5885153
+    },
+    "https://twitch.tv/kick": {
+      "username": "kick",
+      "timestamp": 1754452309.5941448
+    },
+    "https://twitch.tv/MapleLeaf": {
+      "username": "mapleleaf",
+      "timestamp": 1754550559.17409
+    },
+    "https://twitch.tv/Taxington": {
+      "username": "taxington",
+      "timestamp": 1754550557.9755583
+    },
+    "https://twitch.tv/Faenex": {
+      "username": "faenex",
+      "timestamp": 1754550558.7945373
+    },
+    "https://twitch.tv/Treviimo": {
+      "username": "treviimo",
+      "timestamp": 1754452309.625637
+    },
+    "https://twitch.tv/IHatePlayAPEX": {
+      "username": "ihateplayapex",
+      "timestamp": 1754452309.631839
+    },
+    "https://twitch.tv/LLG_ShaoJie": {
+      "username": "llg_shaojie",
+      "timestamp": 1754550557.858784
+    },
+    "https://twitch.tv/prrrrrrrrrrrrrrr": {
+      "username": "prrrrrrrrrrrrrrr",
+      "timestamp": 1754452309.6459959
+    },
+    "https://twitch.tv/Razi": {
+      "username": "razi",
+      "timestamp": 1754550558.4210613
+    },
+    "https://twitch.tv/SpirtzyTV": {
+      "username": "spirtzytv",
+      "timestamp": 1754550557.9457693
+    },
+    "https://twitch.tv/ammo": {
+      "username": "ammo",
+      "timestamp": 1754550558.7543445
+    },
+    "https://twitch.tv/Thysiwi": {
+      "username": "thysiwi",
+      "timestamp": 1754452309.6725097
+    },
+    "https://twitch.tv/flashstepontheop": {
+      "username": "flashstepontheop",
+      "timestamp": 1754452309.6790395
+    },
+    "https://twitch.tv/Busanzywoo": {
+      "username": "busanzywoo",
+      "timestamp": 1754452309.6863456
+    },
+    "https://twitch.tv/Patience": {
+      "username": "patience",
+      "timestamp": 1754452309.699172
+    },
+    "https://twitch.tv/SyanaMu": {
+      "username": "syanamu",
+      "timestamp": 1754550558.1726363
+    },
+    "https://twitch.tv/Entity": {
+      "username": "entity",
+      "timestamp": 1754452309.7129488
+    },
+    "https://twitch.tv/GrandmasAimbot": {
+      "username": "grandmasaimbot",
+      "timestamp": 1754452309.7197988
+    },
+    "https://twitch.tv/Grvdgez": {
+      "username": "grvdgez",
+      "timestamp": 1754550559.14428
+    },
+    "https://twitch.tv/Minimamu_tomato": {
+      "username": "minimamu_tomato",
+      "timestamp": 1754550558.303652
+    },
+    "https://twitch.tv/rKusuri": {
+      "username": "rkusuri",
+      "timestamp": 1754452309.7408779
+    },
+    "https://twitch.tv/beno": {
+      "username": "beno",
+      "timestamp": 1754452309.747417
+    },
+    "https://twitch.tv/N_SIGU": {
+      "username": "n_sigu",
+      "timestamp": 1754452309.7539012
+    },
+    "https://twitch.tv/BeachBurgking": {
+      "username": "beachburgking",
+      "timestamp": 1754452309.7599401
+    },
+    "https://twitch.tv/Stompez": {
+      "username": "stompez",
+      "timestamp": 1754452309.7676384
+    },
+    "https://twitch.tv/Rounet": {
+      "username": "rounet",
+      "timestamp": 1754452309.7739873
+    },
+    "https://twitch.tv/BluKunVT": {
+      "username": "blukunvt",
+      "timestamp": 1754550558.5004752
+    },
+    "https://twitch.tv/kinsley": {
+      "username": "kinsley",
+      "timestamp": 1754452309.7878084
+    },
+    "https://twitch.tv/Dyvine": {
+      "username": "dyvine",
+      "timestamp": 1754452309.79473
+    },
+    "https://twitch.tv/oKyuubi": {
+      "username": "okyuubi",
+      "timestamp": 1754452309.8013666
+    },
+    "https://twitch.tv/Piiksxs": {
+      "username": "piiksxs",
+      "timestamp": 1754550558.043608
+    },
+    "https://twitch.tv/Ksimth": {
+      "username": "ksimth",
+      "timestamp": 1754452309.8214564
+    },
+    "https://twitch.tv/SBI_Mitarashi": {
+      "username": "sbi_mitarashi",
+      "timestamp": 1754452309.8290758
+    },
+    "https://twitch.tv/Primordial_CORE": {
+      "username": "primordial_core",
+      "timestamp": 1754550558.104548
+    },
+    "https://twitch.tv/Kitchan": {
+      "username": "kitchan",
+      "timestamp": 1754452309.843058
+    },
+    "https://twitch.tv/juxo_gg": {
+      "username": "juxo_gg",
+      "timestamp": 1754550557.2169595
+    },
+    "https://twitch.tv/Anthony": {
+      "username": "anthony",
+      "timestamp": 1754452309.8561463
+    },
+    "https://twitch.tv/iRo_ha_TPS": {
+      "username": "iro_ha_tps",
+      "timestamp": 1754550557.7519436
+    },
+    "https://twitch.tv/CrayonOverlord": {
+      "username": "crayonoverlord",
+      "timestamp": 1754550559.3263113
+    },
+    "https://twitch.tv/Kuro": {
+      "username": "kuro",
+      "timestamp": 1754550558.565616
+    },
+    "https://twitch.tv/luguan": {
+      "username": "luguan",
+      "timestamp": 1754452309.8888938
+    },
+    "https://twitch.tv/Heartzy": {
+      "username": "heartzy",
+      "timestamp": 1754550559.106667
+    },
+    "https://twitch.tv/TSM_QQ": {
+      "username": "tsm_qq",
+      "timestamp": 1754452309.9433305
+    },
+    "https://twitch.tv/ItzRyu_TTV": {
+      "username": "itzryu_ttv",
+      "timestamp": 1754550558.8762262
+    },
+    "https://twitch.tv/JoyconSweet": {
+      "username": "joyconsweet",
+      "timestamp": 1754550558.9168243
+    },
+    "https://twitch.tv/predator400": {
+      "username": "predator400",
+      "timestamp": 1754452309.9715414
+    },
+    "https://twitch.tv/predator410": {
+      "username": "predator410",
+      "timestamp": 1754452309.9859965
+    },
+    "https://twitch.tv/predator420": {
+      "username": "predator420",
+      "timestamp": 1754452309.9937048
+    },
+    "https://twitch.tv/predator440": {
+      "username": "predator440",
+      "timestamp": 1754452310.039439
+    },
+    "https://twitch.tv/FL_Curihara": {
+      "username": "fl_curihara",
+      "timestamp": 1754452310.0536468
+    },
+    "https://twitch.tv/inDespairr": {
+      "username": "indespairr",
+      "timestamp": 1754452310.0602238
+    },
+    "https://twitch.tv/predator460": {
+      "username": "predator460",
+      "timestamp": 1754452310.073379
+    },
+    "https://twitch.tv/predator480": {
+      "username": "predator480",
+      "timestamp": 1754452310.094549
+    },
+    "https://twitch.tv/predator490": {
+      "username": "predator490",
+      "timestamp": 1754452310.101681
+    },
+    "https://twitch.tv/yFeeds": {
+      "username": "yfeeds",
+      "timestamp": 1754452310.1090968
+    },
+    "https://twitch.tv/ZenzoAPEX": {
+      "username": "zenzoapex",
+      "timestamp": 1754452310.1158783
+    },
+    "https://twitch.tv/Noob_Nooooooob": {
+      "username": "noob_nooooooob",
+      "timestamp": 1754452310.122585
+    },
+    "https://twitch.tv/predator500": {
+      "username": "predator500",
+      "timestamp": 1754452310.1294022
+    },
+    "https://twitch.tv/BillCosbyNextVictim": {
+      "username": "billcosbynextvictim",
+      "timestamp": 1754453700.9912593
+    },
+    "https://twitch.tv/CloudEFFX": {
+      "username": "cloudeffx",
+      "timestamp": 1754453701.00842
+    },
+    "https://twitch.tv/Perfections": {
+      "username": "perfections",
+      "timestamp": 1754453701.0167708
+    },
+    "https://twitch.tv/joelvillaxD": {
+      "username": "joelvillaxd",
+      "timestamp": 1754453701.0252063
+    },
+    "https://twitch.tv/NevvtonX": {
+      "username": "nevvtonx",
+      "timestamp": 1754550558.715351
+    },
+    "https://twitch.tv/4boko": {
+      "username": "4boko",
+      "timestamp": 1754550558.27924
+    },
+    "https://twitch.tv/VaxlonOfflineHistory": {
+      "username": "vaxlonofflinehistory",
+      "timestamp": 1754550556.8783185
+    },
+    "https://twitch.tv/qkqh": {
+      "username": "qkqh",
+      "timestamp": 1754550556.9997716
+    },
+    "https://twitch.tv/zeddo": {
+      "username": "zeddo",
+      "timestamp": 1754550557.0352674
+    },
+    "https://twitch.tv/Deeds": {
+      "username": "deeds",
+      "timestamp": 1754550557.063308
+    },
+    "https://twitch.tv/SaltyHoekage": {
+      "username": "saltyhoekage",
+      "timestamp": 1754550557.0671933
+    },
+    "https://twitch.tv/DMAremovalservce": {
+      "username": "dmaremovalservce",
+      "timestamp": 1754550557.1284547
+    },
+    "https://twitch.tv/Vlorzy": {
+      "username": "vlorzy",
+      "timestamp": 1754550557.1499531
+    },
+    "https://twitch.tv/Pain": {
+      "username": "pain",
+      "timestamp": 1754550557.2497227
+    },
+    "https://twitch.tv/Ryu_a_qt": {
+      "username": "ryu_a_qt",
+      "timestamp": 1754550557.2759626
+    },
+    "https://twitch.tv/Zhepyer": {
+      "username": "zhepyer",
+      "timestamp": 1754550557.3188074
+    },
+    "https://twitch.tv/Renasci": {
+      "username": "renasci",
+      "timestamp": 1754550557.3257658
+    },
+    "https://twitch.tv/YingLing": {
+      "username": "yingling",
+      "timestamp": 1754550557.3539927
+    },
+    "https://twitch.tv/axis": {
+      "username": "axis",
+      "timestamp": 1754550557.3965495
+    },
+    "https://twitch.tv/YoteOliver": {
+      "username": "yoteoliver",
+      "timestamp": 1754550557.4106035
+    },
+    "https://twitch.tv/ioJinx": {
+      "username": "iojinx",
+      "timestamp": 1754550557.4515915
+    },
+    "https://twitch.tv/YZ_Relief": {
+      "username": "yz_relief",
+      "timestamp": 1754550557.4738739
+    },
+    "https://twitch.tv/Maverick": {
+      "username": "maverick",
+      "timestamp": 1754550557.482436
+    },
+    "https://twitch.tv/ducks": {
+      "username": "ducks",
+      "timestamp": 1754550557.5042534
+    },
+    "https://twitch.tv/PCAweogo": {
+      "username": "pcaweogo",
+      "timestamp": 1754550557.5113404
+    },
+    "https://twitch.tv/Tkaimz": {
+      "username": "tkaimz",
+      "timestamp": 1754550557.518193
+    },
+    "https://twitch.tv/CIMJ_ghostillas": {
+      "username": "cimj_ghostillas",
+      "timestamp": 1754550557.5255013
+    },
+    "https://twitch.tv/MinhQuvch": {
+      "username": "minhquvch",
+      "timestamp": 1754550557.5395756
+    },
+    "https://twitch.tv/INF_ACEBGremZ": {
+      "username": "inf_acebgremz",
+      "timestamp": 1754550557.5689745
+    },
+    "https://twitch.tv/xvnelly": {
+      "username": "xvnelly",
+      "timestamp": 1754550557.5984788
+    },
+    "https://twitch.tv/DoodleBobDiddlesMe": {
+      "username": "doodlebobdiddlesme",
+      "timestamp": 1754550557.6129203
+    },
+    "https://twitch.tv/kumaryu": {
+      "username": "kumaryu",
+      "timestamp": 1754550557.6201217
+    },
+    "https://twitch.tv/ILoveBellaPoarch": {
+      "username": "ilovebellapoarch",
+      "timestamp": 1754550557.6381848
+    },
+    "https://twitch.tv/Gyuismm": {
+      "username": "gyuismm",
+      "timestamp": 1754550557.6606379
+    },
+    "https://twitch.tv/YouSeeBIGGIRL": {
+      "username": "youseebiggirl",
+      "timestamp": 1754550557.676804
+    },
+    "https://twitch.tv/Its_Elegant": {
+      "username": "its_elegant",
+      "timestamp": 1754550557.6839292
+    },
+    "https://twitch.tv/akaColorz": {
+      "username": "akacolorz",
+      "timestamp": 1754550557.6937177
+    },
+    "https://twitch.tv/CalamitousVX": {
+      "username": "calamitousvx",
+      "timestamp": 1754550557.7006688
+    },
+    "https://twitch.tv/TWITCH": {
+      "username": "twitch",
+      "timestamp": 1754550557.7074761
+    },
+    "https://twitch.tv/ASIAZXD": {
+      "username": "asiazxd",
+      "timestamp": 1754550557.7303228
+    },
+    "https://twitch.tv/ACE_Lufka": {
+      "username": "ace_lufka",
+      "timestamp": 1754550557.794619
+    },
+    "https://twitch.tv/IamDisappearing": {
+      "username": "iamdisappearing",
+      "timestamp": 1754550557.8087819
+    },
+    "https://twitch.tv/headzzy_twitch": {
+      "username": "headzzy_twitch",
+      "timestamp": 1754550557.8157632
+    },
+    "https://twitch.tv/Forever": {
+      "username": "forever",
+      "timestamp": 1754550557.8233125
+    },
+    "https://twitch.tv/WHERE": {
+      "username": "where",
+      "timestamp": 1754550557.8449962
+    },
+    "https://twitch.tv/TuT_tracy": {
+      "username": "tut_tracy",
+      "timestamp": 1754550557.8520186
+    },
+    "https://twitch.tv/Fortnite": {
+      "username": "fortnite",
+      "timestamp": 1754550557.8730183
+    },
+    "https://twitch.tv/Frantically": {
+      "username": "frantically",
+      "timestamp": 1754550557.9235182
+    },
+    "https://twitch.tv/AZIA": {
+      "username": "azia",
+      "timestamp": 1754550557.9532964
+    },
+    "https://twitch.tv/sparking": {
+      "username": "sparking",
+      "timestamp": 1754550557.9831853
+    },
+    "https://twitch.tv/Nnytzu": {
+      "username": "nnytzu",
+      "timestamp": 1754550558.0055957
+    },
+    "https://twitch.tv/Steevyfox": {
+      "username": "steevyfox",
+      "timestamp": 1754550558.0127566
+    },
+    "https://twitch.tv/vicky": {
+      "username": "vicky",
+      "timestamp": 1754550558.0517309
+    },
+    "https://twitch.tv/xMovik": {
+      "username": "xmovik",
+      "timestamp": 1754550558.0897574
+    },
+    "https://twitch.tv/Porkie": {
+      "username": "porkie",
+      "timestamp": 1754550558.1120644
+    },
+    "https://twitch.tv/Evan_EmK": {
+      "username": "evan_emk",
+      "timestamp": 1754550558.1264796
+    },
+    "https://twitch.tv/mexsan": {
+      "username": "mexsan",
+      "timestamp": 1754550558.1497366
+    },
+    "https://twitch.tv/utilityspam": {
+      "username": "utilityspam",
+      "timestamp": 1754550558.1645865
+    },
+    "https://twitch.tv/riyo": {
+      "username": "riyo",
+      "timestamp": 1754550558.1875803
+    },
+    "https://twitch.tv/oCCo": {
+      "username": "occo",
+      "timestamp": 1754550558.195578
+    },
+    "https://twitch.tv/sherb": {
+      "username": "sherb",
+      "timestamp": 1754550558.210542
+    },
+    "https://twitch.tv/weakest": {
+      "username": "weakest",
+      "timestamp": 1754550558.2184436
+    },
+    "https://twitch.tv/Andoss": {
+      "username": "andoss",
+      "timestamp": 1754550558.2255285
+    },
+    "https://twitch.tv/RizzntSheCute": {
+      "username": "rizzntshecute",
+      "timestamp": 1754550558.242736
+    },
+    "https://twitch.tv/Crowzjo": {
+      "username": "crowzjo",
+      "timestamp": 1754550558.2578697
+    },
+    "https://twitch.tv/Chico": {
+      "username": "chico",
+      "timestamp": 1754550558.2863693
+    },
+    "https://twitch.tv/Gusuke": {
+      "username": "gusuke",
+      "timestamp": 1754550558.294329
+    },
+    "https://twitch.tv/BlEyun": {
+      "username": "bleyun",
+      "timestamp": 1754550558.3114395
+    },
+    "https://twitch.tv/garyy": {
+      "username": "garyy",
+      "timestamp": 1754550558.31903
+    },
+    "https://twitch.tv/Veydr": {
+      "username": "veydr",
+      "timestamp": 1754550558.3296723
+    },
+    "https://twitch.tv/_ttv": {
+      "username": "_ttv",
+      "timestamp": 1754550558.3373165
+    },
+    "https://twitch.tv/JustzDuke": {
+      "username": "justzduke",
+      "timestamp": 1754550558.3640008
+    },
+    "https://twitch.tv/penjiiiiiiii": {
+      "username": "penjiiiiiiii",
+      "timestamp": 1754550558.3718987
+    },
+    "https://twitch.tv/Firium": {
+      "username": "firium",
+      "timestamp": 1754550558.3798277
+    },
+    "https://twitch.tv/xIForget": {
+      "username": "xiforget",
+      "timestamp": 1754550558.4131684
+    },
+    "https://twitch.tv/this": {
+      "username": "this",
+      "timestamp": 1754550558.4370682
+    },
+    "https://twitch.tv/Cinap": {
+      "username": "cinap",
+      "timestamp": 1754550558.4524233
+    },
+    "https://twitch.tv/Yukx": {
+      "username": "yukx",
+      "timestamp": 1754550558.533628
+    },
+    "https://twitch.tv/Chnce": {
+      "username": "chnce",
+      "timestamp": 1754550558.5419693
+    },
+    "https://twitch.tv/Legatronn": {
+      "username": "legatronn",
+      "timestamp": 1754550558.5579317
+    },
+    "https://twitch.tv/spades": {
+      "username": "spades",
+      "timestamp": 1754550558.574261
+    },
+    "https://twitch.tv/Sweeeeeeeepy": {
+      "username": "sweeeeeeeepy",
+      "timestamp": 1754550558.5902693
+    },
+    "https://twitch.tv/dash": {
+      "username": "dash",
+      "timestamp": 1754550558.5979025
+    },
+    "https://twitch.tv/ttvMuLKX": {
+      "username": "ttvmulkx",
+      "timestamp": 1754550558.6063893
+    },
+    "https://twitch.tv/SEIGNEUR": {
+      "username": "seigneur",
+      "timestamp": 1754550558.617706
+    },
+    "https://twitch.tv/WGR_": {
+      "username": "wgr_",
+      "timestamp": 1754550558.635213
+    },
+    "https://twitch.tv/qusai_sal": {
+      "username": "qusai_sal",
+      "timestamp": 1754550558.6430142
+    },
+    "https://twitch.tv/CollinFPS": {
+      "username": "collinfps",
+      "timestamp": 1754550558.659152
+    },
+    "https://twitch.tv/moltenboii": {
+      "username": "moltenboii",
+      "timestamp": 1754550558.6750693
+    },
+    "https://twitch.tv/artea__ttv": {
+      "username": "artea__ttv",
+      "timestamp": 1754550558.6827517
+    },
+    "https://twitch.tv/Twitch_": {
+      "username": "twitch_",
+      "timestamp": 1754550558.699982
+    },
+    "https://twitch.tv/Ryle_al": {
+      "username": "ryle_al",
+      "timestamp": 1754550558.722813
+    },
+    "https://twitch.tv/VanillaBear": {
+      "username": "vanillabear",
+      "timestamp": 1754550558.730601
+    },
+    "https://twitch.tv/douy": {
+      "username": "douy",
+      "timestamp": 1754550558.7381437
+    },
+    "https://twitch.tv/SLL_xiaowei": {
+      "username": "sll_xiaowei",
+      "timestamp": 1754550558.7621741
+    },
+    "https://twitch.tv/Ludvik": {
+      "username": "ludvik",
+      "timestamp": 1754550558.777939
+    },
+    "https://twitch.tv/AlexFa": {
+      "username": "alexfa",
+      "timestamp": 1754550558.8024342
+    },
+    "https://twitch.tv/xdwellz": {
+      "username": "xdwellz",
+      "timestamp": 1754550558.810909
+    },
+    "https://twitch.tv/tubeazz": {
+      "username": "tubeazz",
+      "timestamp": 1754550558.8186817
+    },
+    "https://twitch.tv/CIMJ_Jomacs": {
+      "username": "cimj_jomacs",
+      "timestamp": 1754550558.8355124
+    },
+    "https://twitch.tv/MIMISHRIMP_OWO": {
+      "username": "mimishrimp_owo",
+      "timestamp": 1754550558.8436484
+    },
+    "https://twitch.tv/MoneyFlexxx": {
+      "username": "moneyflexxx",
+      "timestamp": 1754550558.85186
+    },
+    "https://twitch.tv/VcSama": {
+      "username": "vcsama",
+      "timestamp": 1754550558.8600643
+    },
+    "https://twitch.tv/cats": {
+      "username": "cats",
+      "timestamp": 1754550558.8844547
+    },
+    "https://twitch.tv/MIMIFOX_OWO": {
+      "username": "mimifox_owo",
+      "timestamp": 1754550558.908694
+    },
+    "https://twitch.tv/exotiicuh": {
+      "username": "exotiicuh",
+      "timestamp": 1754550558.9400208
+    },
+    "https://twitch.tv/imklutchzz": {
+      "username": "imklutchzz",
+      "timestamp": 1754550559.0187607
+    },
+    "https://twitch.tv/narukanii": {
+      "username": "narukanii",
+      "timestamp": 1754550559.0267112
+    },
+    "https://twitch.tv/pachi_jp": {
+      "username": "pachi_jp",
+      "timestamp": 1754550559.0422816
+    },
+    "https://twitch.tv/MDYB_BeiBeiS": {
+      "username": "mdyb_beibeis",
+      "timestamp": 1754550559.0505176
+    },
+    "https://twitch.tv/CHN_aimman": {
+      "username": "chn_aimman",
+      "timestamp": 1754550559.0826209
+    },
+    "https://twitch.tv/infintyEXILE": {
+      "username": "infintyexile",
+      "timestamp": 1754550559.0909522
+    },
+    "https://twitch.tv/itsjakesm": {
+      "username": "itsjakesm",
+      "timestamp": 1754550559.0989306
+    },
+    "https://twitch.tv/ueiheng": {
+      "username": "ueiheng",
+      "timestamp": 1754550559.1150246
+    },
+    "https://twitch.tv/DIHsaster": {
+      "username": "dihsaster",
+      "timestamp": 1754550559.129797
+    },
+    "https://twitch.tv/Alliance_Unlucky": {
+      "username": "alliance_unlucky",
+      "timestamp": 1754550559.1371415
+    },
+    "https://twitch.tv/Mimimumu": {
+      "username": "mimimumu",
+      "timestamp": 1754550559.1671374
+    },
+    "https://twitch.tv/George": {
+      "username": "george",
+      "timestamp": 1754550559.1821914
+    },
+    "https://twitch.tv/Fragrsz": {
+      "username": "fragrsz",
+      "timestamp": 1754550559.1908503
+    },
+    "https://twitch.tv/YeFunkySploinker": {
+      "username": "yefunkysploinker",
+      "timestamp": 1754550559.2400699
+    },
+    "https://twitch.tv/JeiiDiie": {
+      "username": "jeiidiie",
+      "timestamp": 1754550559.2490387
+    },
+    "https://twitch.tv/Rinko": {
+      "username": "rinko",
+      "timestamp": 1754550559.266145
+    },
+    "https://twitch.tv/CIMJ_LeoVichh": {
+      "username": "cimj_leovichh",
+      "timestamp": 1754550559.282929
+    },
+    "https://twitch.tv/Camo": {
+      "username": "camo",
+      "timestamp": 1754550559.2912192
+    },
+    "https://twitch.tv/Lycoris": {
+      "username": "lycoris",
+      "timestamp": 1754550559.342826
+    },
+    "https://twitch.tv/NocturnOwl": {
+      "username": "nocturnowl",
+      "timestamp": 1754550559.3511767
+    },
+    "https://twitch.tv/watage": {
+      "username": "watage",
+      "timestamp": 1754550559.359306
+    },
+    "https://twitch.tv/Delqure": {
+      "username": "delqure",
+      "timestamp": 1754550559.367835
+    },
+    "https://twitch.tv/MrFatCupCake": {
+      "username": "mrfatcupcake",
+      "timestamp": 1754550559.3763108
+    },
+    "https://twitch.tv/Gray": {
+      "username": "gray",
+      "timestamp": 1754550559.3933642
+    },
+    "https://twitch.tv/Joka": {
+      "username": "joka",
+      "timestamp": 1754550559.41104
+    },
+    "https://twitch.tv/sawada": {
+      "username": "sawada",
+      "timestamp": 1754550559.4195788
+    },
+    "https://twitch.tv/Sudeniseafood": {
+      "username": "sudeniseafood",
+      "timestamp": 1754550559.4275646
+    },
+    "https://twitch.tv/Inzoru": {
+      "username": "inzoru",
+      "timestamp": 1754550559.4356134
+    },
+    "https://twitch.tv/sooyaa": {
+      "username": "sooyaa",
+      "timestamp": 1754550559.4535127
+    },
+    "https://twitch.tv/Zhulik": {
+      "username": "zhulik",
+      "timestamp": 1754550559.4620385
+    },
+    "https://twitch.tv/Gennesis": {
+      "username": "gennesis",
+      "timestamp": 1754550559.4787881
+    },
+    "https://twitch.tv/PinoNolRkidsSweet": {
+      "username": "pinonolrkidssweet",
+      "timestamp": 1754550559.4864895
+    },
+    "https://twitch.tv/KDinxxxNorthStar": {
+      "username": "kdinxxxnorthstar",
+      "timestamp": 1754550559.4949365
+    },
+    "https://twitch.tv/Kasssa": {
+      "username": "kasssa",
+      "timestamp": 1754550559.503287
+    },
+    "https://twitch.tv/naruse": {
+      "username": "naruse",
+      "timestamp": 1754550559.511384
+    }
+  },
+  "last_updated": null
+}
