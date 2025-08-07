@@ -1542,10 +1542,10 @@
                         const checkComplete = () => {
                             loadedCount++;
                             if (loadedCount === totalFiles) {
-                                if (window.dataData && window.settingsData) {
+                                if (window.leaderboardData && window.predatorThresholds) {
                                     resolve({
-                                        leaderboardData: window.dataData.data,
-                                        predatorData: window.settingsData.data
+                                        leaderboardData: window.leaderboardData,
+                                        predatorData: window.predatorThresholds
                                     });
                                 } else {
                                     reject(new Error('Data not loaded properly'));
