@@ -13,19 +13,20 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 twitch_bp = Blueprint('twitch', __name__)
 
+# Cache file paths - Always define these regardless of import success
+CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cache', 'twitch')
+ACCESS_TOKENS_CACHE = os.path.join(CACHE_DIR, 'access_tokens.json')
+LIVE_STATUS_CACHE = os.path.join(CACHE_DIR, 'live_status.json')
+VODS_CACHE = os.path.join(CACHE_DIR, 'vods.json')
+USER_VALIDATION_CACHE = os.path.join(CACHE_DIR, 'user_validation.json')
+INVALID_USERNAMES_CACHE = os.path.join(CACHE_DIR, 'invalid_usernames.json')
+
 # Cache file paths - Updated for Vercel compatibility
 try:
     from vercel_cache import VercelCacheManager, load_cache_file, save_cache_file
     CACHE_MANAGER = VercelCacheManager()
 except ImportError:
     # Fallback for local development
-    CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cache', 'twitch')
-    ACCESS_TOKENS_CACHE = os.path.join(CACHE_DIR, 'access_tokens.json')
-    LIVE_STATUS_CACHE = os.path.join(CACHE_DIR, 'live_status.json')
-    VODS_CACHE = os.path.join(CACHE_DIR, 'vods.json')
-    USER_VALIDATION_CACHE = os.path.join(CACHE_DIR, 'user_validation.json')
-    INVALID_USERNAMES_CACHE = os.path.join(CACHE_DIR, 'invalid_usernames.json')
-    
     def load_cache_file(file_path):
         if os.path.exists(file_path):
             try:
