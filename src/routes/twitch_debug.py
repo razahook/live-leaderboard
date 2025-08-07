@@ -87,6 +87,54 @@ def debug_twitch_batch():
             "error_type": type(e).__name__
         })
 
+@twitch_debug_bp.route('/debug/leaderboard-sample', methods=['GET'])
+def debug_leaderboard_sample():
+    """Debug endpoint to show sample leaderboard data with Twitch info"""
+    try:
+        from routes.leaderboard_scraper import scrape_leaderboard
+        
+        # Get sample data (first 5 players only)
+        leaderboard_data = scrape_leaderboard(platform="PC", max_players=5)
+        
+        if not leaderboard_data or not leaderboard_data.get('players'):
+            return jsonify({
+                "success": False,
+                "error": "No leaderboard data returned",
+                "data": leaderboard_data
+            })
+        
+        players_sample = leaderboard_data['players'][:3]  # First 3 players only
+        
+        # Extract relevant debug info
+        debug_players = []
+        for player in players_sample:
+            debug_players.append({
+                "player_name": player.get('player_name'),
+                "has_twitch_live": 'twitch_live' in player,
+                "twitch_live_data": player.get('twitch_live', {}),
+                "has_stream": 'stream' in player and player['stream'] is not None,
+                "stream_data": player.get('stream'),
+                "twitch_link": player.get('twitch_link'),
+                "canonical_twitch_username": player.get('canonical_twitch_username')
+            })
+        
+        return jsonify({
+            "success": True,
+            "total_players": len(leaderboard_data['players']),
+            "sample_count": len(debug_players),
+            "players": debug_players,
+            "leaderboard_metadata": {
+                "last_updated": leaderboard_data.get('last_updated'),
+                "total_predators": leaderboard_data.get('total_predators')
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
+        })
+
 @twitch_debug_bp.route('/debug/test-player', methods=['GET'])
 def debug_test_player():
     """Test Twitch integration with a specific player"""
@@ -149,6 +197,54 @@ def debug_vercel_optimization():
                 "cache_manager_available": cache_available,
                 "cache_stats": cache_stats,
                 "blocked_usernames_count": len(BLOCKED_USERNAMES)
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
+        })
+
+@twitch_debug_bp.route('/debug/leaderboard-sample', methods=['GET'])
+def debug_leaderboard_sample():
+    """Debug endpoint to show sample leaderboard data with Twitch info"""
+    try:
+        from routes.leaderboard_scraper import scrape_leaderboard
+        
+        # Get sample data (first 5 players only)
+        leaderboard_data = scrape_leaderboard(platform="PC", max_players=5)
+        
+        if not leaderboard_data or not leaderboard_data.get('players'):
+            return jsonify({
+                "success": False,
+                "error": "No leaderboard data returned",
+                "data": leaderboard_data
+            })
+        
+        players_sample = leaderboard_data['players'][:3]  # First 3 players only
+        
+        # Extract relevant debug info
+        debug_players = []
+        for player in players_sample:
+            debug_players.append({
+                "player_name": player.get('player_name'),
+                "has_twitch_live": 'twitch_live' in player,
+                "twitch_live_data": player.get('twitch_live', {}),
+                "has_stream": 'stream' in player and player['stream'] is not None,
+                "stream_data": player.get('stream'),
+                "twitch_link": player.get('twitch_link'),
+                "canonical_twitch_username": player.get('canonical_twitch_username')
+            })
+        
+        return jsonify({
+            "success": True,
+            "total_players": len(leaderboard_data['players']),
+            "sample_count": len(debug_players),
+            "players": debug_players,
+            "leaderboard_metadata": {
+                "last_updated": leaderboard_data.get('last_updated'),
+                "total_predators": leaderboard_data.get('total_predators')
             }
         })
     except Exception as e:
