@@ -412,3 +412,121 @@ def get_predator_points():
             "success": False,
             "error": f"Server error: {str(e)}"
         }), 500
+
+def add_twitch_live_status(leaderboard_data):
+    """
+    Add Twitch live status to leaderboard data using efficient batched API calls.
+    """
+    try:
+        if not leaderboard_data or 'players' not in leaderboard_data:
+            return leaderboard_data
+        
+        safe_print("Starting batched Twitch username checks...")
+        
+        # 1. Build a canonical Twitch username cache for all players with Twitch links
+        canonical_usernames = {}
+        for i, player in enumerate(leaderboard_data['players']):
+            if player.get('twitch_link'):
+                username = extract_twitch_username(player['twitch_link'])
+                if username:
+                    canonical_usernames[i] = username.lower()
+                    player['canonical_twitch_username'] = username.lower()
+
+        # 2. Use canonical usernames for all Twitch checks
+        usernames = list(canonical_usernames.values())
+        username_to_player = {v: k for k, v in canonical_usernames.items()}
+
+        if not usernames:
+            safe_print("No valid Twitch usernames found")
+            return leaderboard_data
+
+        safe_print(f"Checking Twitch status for {len(usernames)} users in batches...")
+        from routes.twitch_integration import get_twitch_live_status_batch
+        live_status_results = get_twitch_live_status_batch(usernames, batch_size=50)
+
+        # Prepare headers for clips API
+        access_token = get_twitch_access_token()
+        client_id = os.environ.get('TWITCH_CLIENT_ID', '8hkxx5k2n0enyz36w3ea4n5e6xenrg')
+        headers = {
+            'Client-ID': client_id,
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        # First pass: Set live status for all users (fast)
+        live_users_for_vods = []
+        
+        for username, live_status in live_status_results.items():
+            if username in username_to_player:
+                player_index = username_to_player[username]
+                player = leaderboard_data['players'][player_index]
+                player['twitch_live'] = live_status
+                
+                # Populate 'stream' key for frontend
+                if live_status["is_live"]:
+                    player['stream'] = {
+                        "viewers": live_status["stream_data"].get("viewer_count", 0),
+                        "game": live_status["stream_data"].get("game_name", "Streaming"),
+                        "twitchUser": live_status["stream_data"].get("user_name", username)
+                    }
+                    # Only check VODs/clips for live users to speed up the process
+                    live_users_for_vods.append((username, player))
+                else:
+                    player['stream'] = None
+                
+                # Set default values for all users (will be updated for live users below)
+                player.update({
+                    'vods_enabled': False,
+                    'recent_videos': [],
+                    'hasClips': False,
+                    'recentClips': []
+                })
+        
+        # Second pass: Only check VODs and clips for live users (much faster!)
+        safe_print(f"Checking VODs and clips for {len(live_users_for_vods)} live users only...")
+        for username, player in live_users_for_vods:
+            # --- Check VODs for live users only ---
+            try:
+                from routes.twitch_clips import get_user_videos_cached, get_user_clips_cached
+                vods_data = get_user_videos_cached(username, headers, limit=3)
+                if vods_data and vods_data.get('has_vods', False):
+                    player.update({
+                        'vods_enabled': True,
+                        'recent_videos': vods_data.get('recent_videos', [])
+                    })
+                    safe_print(f"✅ VODs found for live user {username}")
+            except Exception as e:
+                safe_print(f"VOD error for live user {username}: {e}")
+            
+            # --- Check Clips for live users only ---
+            try:
+                clips_data = get_user_clips_cached(username, headers, limit=3)
+                player.update({
+                    'hasClips': clips_data.get('has_clips', False),
+                    'recentClips': clips_data.get('recent_clips', [])
+                })
+                if clips_data.get('has_clips', False):
+                    safe_print(f"✅ Clips found for live user {username}")
+            except Exception as e:
+                safe_print(f"Clips error for live user {username}: {e}")
+        
+        # Set default values for players without Twitch links
+        for player in leaderboard_data['players']:
+            if 'twitch_live' not in player:
+                player['twitch_live'] = {
+                    "is_live": False,
+                    "stream_data": None
+                }
+                player.update({
+                    'stream': None,
+                    'vods_enabled': False,
+                    'recent_videos': [],
+                    'hasClips': False,
+                    'recentClips': []
+                })
+
+        safe_print(f"✅ Finished Twitch integration for {len(leaderboard_data['players'])} players")
+        return leaderboard_data
+
+    except Exception as e:
+        safe_print(f"Error in add_twitch_live_status: {e}")
+        return leaderboard_data
