@@ -358,8 +358,8 @@ def add_twitch_live_status(leaderboard_data):
 
         # 1. Build a canonical Twitch username cache for all players with Twitch links
         canonical_usernames = {}
-        max_to_check = 50  # Increase to cover more ranks like 33 where 4rufq is
-        for i, player in enumerate(leaderboard_data['players'][:max_to_check]):
+        # Check ALL players for Twitch links - no limits
+        for i, player in enumerate(leaderboard_data['players']):
             if player.get('twitch_link'):
                 username = extract_twitch_username(player['twitch_link'])
                 if username:
