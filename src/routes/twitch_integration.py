@@ -598,6 +598,9 @@ def extract_twitch_username(twitch_link):
     
     # Extract username from various Twitch link formats
     patterns = [
+        # ApexLegendsStatus redirect format: apexlegendsstatus.com/core/out?type=twitch&id=USERNAME
+        r'apexlegendsstatus\.com/core/out\?type=twitch&id=([a-zA-Z0-9_]+)',
+        # Direct twitch.tv links
         r'twitch\.tv/([a-zA-Z0-9_]+)',
         r'twitch\.tv/([a-zA-Z0-9_]+)\?',
         r'twitch\.tv/([a-zA-Z0-9_]+)/',
