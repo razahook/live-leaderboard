@@ -207,105 +207,152 @@
             z-index: 1;
         }
         
-        /* Dashboard Layout */
+        /* Dashboard Layout - Fully Responsive Grid */
         .dashboard-layout {
             display: grid;
-            grid-template-columns: 280px 1fr 350px;
+            grid-template-columns: 1fr 2fr 1fr;
             gap: 24px;
-            max-width: none;
+            max-width: 100%;
             margin: 0;
             padding: 20px;
             min-height: 100vh;
+            box-sizing: border-box;
         }
         
-        .dashboard-sidebar-left {
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-        }
-        
-        .dashboard-main {
-            min-height: 100vh;
-            overflow-x: auto;
-        }
-        
+        .dashboard-sidebar-left,
         .dashboard-sidebar-right {
             position: sticky;
             top: 20px;
             height: fit-content;
+            min-width: 0; /* Prevent grid overflow */
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
         
+        .dashboard-main {
+            min-height: 100vh;
+            min-width: 0; /* Prevent grid overflow */
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+        
+        /* Ensure all content is adaptive */
+        .dashboard-layout * {
+            box-sizing: border-box;
+        }
+        
+        /* Responsive images and media */
+        .dashboard-layout img,
+        .dashboard-layout video {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Widget Cards - Improved responsive design */
         .widget-card {
             background: rgba(31, 41, 55, 0.8);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(75, 85, 99, 0.3);
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
         }
         
         .widget-title {
             color: #ffffff;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
         
-        /* Responsive adjustments - much more conservative */
-        @media (max-width: 1600px) {
-            .dashboard-layout {
-                grid-template-columns: 260px 1fr 320px;
-                gap: 20px;
-            }
-            
-            .widget-card {
-                padding: 14px;
-            }
-            
-            .widget-title {
-                font-size: 15px;
-            }
+        /* Text content adaptive styling */
+        .widget-card p,
+        .widget-card span,
+        .widget-card div {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
         }
         
-        @media (max-width: 1400px) {
-            .dashboard-layout {
-                grid-template-columns: 240px 1fr 300px;
-                gap: 16px;
-            }
+        /* Table responsiveness */
+        .dashboard-main table {
+            width: 100%;
+            overflow-x: auto;
+            display: block;
+            white-space: nowrap;
         }
         
+        .dashboard-main thead,
+        .dashboard-main tbody,
+        .dashboard-main tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+        
+        /* Mobile-first responsive breakpoint */
         @media (max-width: 1200px) {
-            .dashboard-layout {
-                grid-template-columns: 220px 1fr 280px;
-                gap: 12px;
-            }
-            
-            .widget-card {
-                padding: 12px;
-                margin-bottom: 12px;
-            }
-        }
-        
-        @media (max-width: 1000px) {
             .dashboard-layout {
                 grid-template-columns: 1fr;
                 gap: 20px;
+                padding: 16px;
             }
             
             .dashboard-sidebar-left,
             .dashboard-sidebar-right {
                 position: static;
+                order: 0;
+            }
+            
+            .dashboard-main {
+                order: 1;
+            }
+            
+            /* Arrange widgets in horizontal layout on mobile when possible */
+            .dashboard-sidebar-left,
+            .dashboard-sidebar-right {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
                 gap: 16px;
             }
             
             .widget-card {
                 padding: 16px;
+                margin-bottom: 16px;
+            }
+            
+            .widget-title {
+                font-size: 16px;
+                margin-bottom: 12px;
+            }
+            
+            /* Stack widgets vertically on very small screens */
+            @media (max-width: 768px) {
+                .dashboard-sidebar-left,
+                .dashboard-sidebar-right {
+                    grid-template-columns: 1fr;
+                }
+                
+                .dashboard-layout {
+                    padding: 12px;
+                    gap: 16px;
+                }
+                
+                .widget-card {
+                    padding: 12px;
+                    margin-bottom: 12px;
+                }
             }
         }
         .tab-content {
