@@ -294,8 +294,8 @@
                     <input id="pwEmail" type="email" placeholder="you@example.com" class="w-full px-3 py-2 rounded bg-gray-700 text-white mb-2" />
                     <input id="pwPassword" type="password" placeholder="password" class="w-full px-3 py-2 rounded bg-gray-700 text-white mb-2" />
                     <div class="flex items-center justify-between mb-3">
-                        <label class="text-xs text-gray-400 flex items-center gap-2"><input id="pwIsSignup" type="checkbox" class="accent-purple-600"/> Create account</label>
                         <button id="pwResetBtn" class="text-xs text-blue-400 hover:text-blue-300">Forgot your password?</button>
+                        <button id="pwSignupToggle" class="text-xs text-blue-400 hover:text-blue-300">Sign up</button>
                     </div>
                     <div id="pwMsg" class="hidden text-emerald-400 text-sm mb-3"></div>
                     <button id="pwSubmitBtn" class="w-full mb-4 px-3 py-2 rounded bg-purple-600 hover:bg-purple-700">Sign in</button>
@@ -906,10 +906,18 @@
 
             // Password auth events
             document.getElementById('pwCancelBtn').onclick = close;
+            let isSignup = false;
+            document.getElementById('pwSignupToggle').onclick = () => {
+                isSignup = !isSignup;
+                const btn = document.getElementById('pwSignupToggle');
+                btn.textContent = isSignup ? 'Back to sign in' : 'Sign up';
+                const primary = document.getElementById('pwSubmitBtn');
+                primary.textContent = isSignup ? 'Create account' : 'Sign in';
+            };
+
             document.getElementById('pwSubmitBtn').onclick = async () => {
                 const email = document.getElementById('pwEmail').value.trim();
                 const password = document.getElementById('pwPassword').value;
-                const isSignup = document.getElementById('pwIsSignup').checked;
                 const msgEl = document.getElementById('pwMsg');
                 msgEl.classList.add('hidden');
                 try {
