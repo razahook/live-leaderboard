@@ -589,13 +589,13 @@
                     <table class="w-full min-w-max text-sm text-left text-gray-400">
                         <thead class="text-xs text-gray-300 uppercase bg-gray-700/20">
                             <tr>
-                                <th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">Player</th><th scope="col" class="px-6 py-3">RP</th>
+                                <th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">Player</th><th scope="col" class="px-6 py-3">Legend</th><th scope="col" class="px-6 py-3">RP</th>
                                 <th scope="col" class="px-6 py-3">24h Change</th><th scope="col" class="px-6 py-3">Level</th><th scope="col" class="px-6 py-3">Status</th>
                                 <th scope="col" class="px-6 py-3">Stream</th>
                                 <th scope="col" class="px-6 py-3">AI Analysis</th>
                             </tr>
                         </thead>
-                        <tbody id="leaderboard-body" class="divide-y divide-gray-700/50"><tr><td colspan="8" class="text-center py-10 text-gray-400">Loading players...</td></tr></tbody>
+                        <tbody id="leaderboard-body" class="divide-y divide-gray-700/50"><tr><td colspan="9" class="text-center py-10 text-gray-400">Loading players...</td></tr></tbody>
                     </table>
                 </div>
 
@@ -1378,11 +1378,101 @@
             }
             return `<span class="text-gray-600">-</span>`;
         };
+
+        const getLegendHtml = (currentLegend, playerName) => {
+            if (currentLegend && currentLegend.name) {
+                return `<div class="flex flex-col">
+                    <span class="font-semibold text-purple-400">${currentLegend.name}</span>
+                    ${currentLegend.loading ? '<span class="text-xs text-gray-400">Loading...</span>' : ''}
+                </div>`;
+            } else if (currentLegend === 'loading') {
+                return `<div class="flex items-center">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500 mr-2"></div>
+                    <span class="text-xs text-gray-400">Loading...</span>
+                </div>`;
+            }
+            return `<button onclick="fetchPlayerLegend('${playerName}')" class="text-gray-500 hover:text-purple-400 text-xs transition-colors">
+                Load Legend
+            </button>`;
+        };
+
+        // Cache for legend data to avoid repeated API calls
+        const legendCache = new Map();
+
+        const getCurrentPagePlayers = () => {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            return filteredAndSortedPlayers.slice(startIndex, endIndex);
+        };
+
+        const fetchPlayerLegend = async (playerName) => {
+            // Check cache first
+            if (legendCache.has(playerName)) {
+                return legendCache.get(playerName);
+            }
+
+            // Find player in current data to update UI
+            const player = filteredAndSortedPlayers.find(p => p.name === playerName);
+            if (player) {
+                player.current_legend = 'loading';
+                renderLeaderboard(getCurrentPagePlayers());
+            }
+
+            try {
+                // Use MozambiqueHe.re API to get legend data
+                const mozambiqueApiUrl = `https://api.mozambiquehe.re/bridge?auth=${MOZAMBIQUE_API_KEY}&platform=PC&player=${encodeURIComponent(playerName)}`;
+                
+                const response = await fetch(mozambiqueApiUrl);
+                const data = await response.json();
+
+                let legendData = null;
+                if (data && data.legends && data.legends.selected) {
+                    legendData = {
+                        name: data.legends.selected.LegendName,
+                        image: data.legends.selected.ImgAssets?.banner
+                    };
+                }
+
+                // Cache the result
+                legendCache.set(playerName, legendData);
+
+                // Update player data and re-render
+                if (player) {
+                    player.current_legend = legendData;
+                    renderLeaderboard(getCurrentPagePlayers());
+                }
+
+                return legendData;
+            } catch (error) {
+                console.warn(`Failed to fetch legend for ${playerName}:`, error);
+                
+                // Update player data to show error
+                if (player) {
+                    player.current_legend = null;
+                    renderLeaderboard(getCurrentPagePlayers());
+                }
+                return null;
+            }
+        };
+
+        // Automatically load legends for top 10 players
+        const loadTopPlayerLegends = async () => {
+            const topPlayers = filteredAndSortedPlayers.slice(0, 10);
+            console.log(`Loading legends for top ${topPlayers.length} players...`);
+            
+            // Load legends with a small delay between requests to avoid rate limiting
+            for (let i = 0; i < topPlayers.length; i++) {
+                const player = topPlayers[i];
+                if (!legendCache.has(player.name)) {
+                    setTimeout(() => fetchPlayerLegend(player.name), i * 300); // 300ms delay between requests
+                }
+            }
+        };
         
         const renderLeaderboard = (playersToRender) => { 
             leaderboardBody.innerHTML = ''; 
             if (!Array.isArray(playersToRender) || playersToRender.length === 0) {
-                leaderboardBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">No players found.</td></tr>`; 
+                leaderboardBody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">No players found.</td></tr>`; 
                 return;
             }
             playersToRender.forEach(player => {
@@ -1394,9 +1484,11 @@
                 const favKey = (player.canonical_twitch_username || '').toLowerCase();
                 const isFav = favoritesSet.has(favKey);
                 const favBtn = `<button class="ml-2" title="Favorite" onclick="toggleFavorite('${favKey}')">${isFav ? '⭐' : '☆'}</button>`;
+                const legendHtml = getLegendHtml(player.current_legend, player.name);
                 row.innerHTML = `
                     <td class="px-6 py-4 font-medium text-gray-200">#${player.rank}</td>
                     <td class="px-6 py-4 font-bold text-white flex items-center">${flagHtml}${playerNameHtml}${favBtn}${inputIcon}</td>
+                    <td class="px-6 py-4">${legendHtml}</td>
                     <td class="px-6 py-4 font-semibold text-emerald-400">${player.rp.toLocaleString()}</td>
                     <td class="px-6 py-4">${getChangeHtml(player.change)}</td>
                     <td class="px-6 py-4">${player.level.toLocaleString()}</td>
@@ -2236,6 +2328,9 @@
                 filteredAndSortedPlayers = [...allPlayers]; 
                 currentPage = 1; 
                 updateLeaderboardAndPagination(); 
+
+                // Load legends for top players automatically
+                setTimeout(() => loadTopPlayerLegends(), 1000);
 
                 renderPredatorThresholds(predatorData);
                 renderRpDistributionChart(allPlayers);
