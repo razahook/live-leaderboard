@@ -985,10 +985,20 @@
         }
 
         const showTab = (tabId) => {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
-            document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`).classList.add('active');
+            try {
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                const tabElement = document.getElementById(tabId);
+                if (tabElement) {
+                    tabElement.classList.add('active');
+                }
+                document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+                const buttonElement = document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`);
+                if (buttonElement) {
+                    buttonElement.classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error in showTab:', error);
+            }
         };
 
         const showModal = (title, contentHtml) => {
@@ -4725,6 +4735,10 @@ ${(() => {
         }
         
         async function enhanceStreamersWithLeaderboardData(streamers, usernames) {
+            console.log('Enhancing streamers with leaderboard data...');
+            console.log('Available allPlayers:', allPlayers ? allPlayers.length : 'null');
+            console.log('Streamers to enhance:', streamers.map(s => s.username));
+            
             // Find matching leaderboard data for each streamer
             const enhancedStreamers = streamers.map(streamer => {
                 // Look for this streamer in the current leaderboard data
@@ -4734,10 +4748,18 @@ ${(() => {
                         // Extract username from player's twitch_link
                         if (player.twitch_link) {
                             const twitchUsername = extractTwitchUsernameFromUrl(player.twitch_link);
-                            return twitchUsername && twitchUsername.toLowerCase() === streamer.username.toLowerCase();
+                            const match = twitchUsername && twitchUsername.toLowerCase() === streamer.username.toLowerCase();
+                            if (match) {
+                                console.log(`Found leaderboard match: ${streamer.username} -> Rank #${player.rank}`);
+                            }
+                            return match;
                         }
                         return false;
                     });
+                }
+                
+                if (!leaderboardMatch) {
+                    console.log(`No leaderboard match found for: ${streamer.username}`);
                 }
                 
                 // Add leaderboard info to streamer
@@ -4887,9 +4909,6 @@ ${(() => {
         }
         
         function watchStream(username) {
-            // Switch to multistream tab and add the streamer
-            showTab('multistreamTab');
-            
             // Add the streamer to multistream if not already added
             if (!activeStreams.includes(username)) {
                 activeStreams.push(username);
@@ -4900,6 +4919,9 @@ ${(() => {
             } else {
                 enhancedFeatures.showToast(`${username} is already in multistream`, 'info');
             }
+            
+            // Open the multistream modal
+            showMultiStreamModal();
         }
         
         // Update the showTab function to refresh favorites when the tab is shown
