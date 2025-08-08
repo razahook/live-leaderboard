@@ -1404,8 +1404,62 @@
             </button>`;
         };
 
-        // Cache for legend data to avoid repeated API calls
-        const legendCache = new Map();
+        // Persistent 2-hour legend cache
+        const LEGEND_CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+        const LEGEND_CACHE_KEY = 'apex_legend_cache';
+        
+        // API rate limiting - max 2 requests per second
+        let lastApiCall = 0;
+        const MIN_API_INTERVAL = 500; // 500ms between calls (2/second)
+        const apiQueue = [];
+        let isProcessingQueue = false;
+
+        const getLegendCache = () => {
+            try {
+                const cached = localStorage.getItem(LEGEND_CACHE_KEY);
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    // Clean expired entries
+                    const now = Date.now();
+                    const cleaned = {};
+                    for (const [player, entry] of Object.entries(data)) {
+                        if (now - entry.timestamp < LEGEND_CACHE_DURATION) {
+                            cleaned[player] = entry;
+                        }
+                    }
+                    // Save cleaned cache
+                    localStorage.setItem(LEGEND_CACHE_KEY, JSON.stringify(cleaned));
+                    return cleaned;
+                }
+            } catch (e) {
+                console.warn('Error reading legend cache:', e);
+            }
+            return {};
+        };
+
+        const setLegendCache = (playerName, legendData) => {
+            try {
+                const cache = getLegendCache();
+                cache[playerName.toLowerCase()] = {
+                    data: legendData,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(LEGEND_CACHE_KEY, JSON.stringify(cache));
+                console.log(`Cached legend for ${playerName} (expires in 2h)`);
+            } catch (e) {
+                console.warn('Error saving legend cache:', e);
+            }
+        };
+
+        const getCachedLegend = (playerName) => {
+            const cache = getLegendCache();
+            const entry = cache[playerName.toLowerCase()];
+            if (entry && (Date.now() - entry.timestamp < LEGEND_CACHE_DURATION)) {
+                console.log(`Using 2h cached legend for ${playerName}`);
+                return entry.data;
+            }
+            return null;
+        };
 
         const getCurrentPagePlayers = () => {
             const startIndex = (currentPage - 1) * itemsPerPage;
@@ -1413,35 +1467,45 @@
             return filteredAndSortedPlayers.slice(startIndex, endIndex);
         };
 
-        const fetchPlayerLegend = async (playerName) => {
-            console.log(`Fetching legend for: ${playerName}`);
+        // Rate-limited API call processor
+        const processApiQueue = async () => {
+            if (isProcessingQueue || apiQueue.length === 0) return;
             
-            // Check cache first
-            if (legendCache.has(playerName)) {
-                console.log(`Using cached legend for ${playerName}:`, legendCache.get(playerName));
-                return legendCache.get(playerName);
+            isProcessingQueue = true;
+            while (apiQueue.length > 0) {
+                const { playerName, resolve, reject } = apiQueue.shift();
+                
+                // Respect rate limit
+                const now = Date.now();
+                const timeSinceLastCall = now - lastApiCall;
+                if (timeSinceLastCall < MIN_API_INTERVAL) {
+                    await new Promise(resolve => setTimeout(resolve, MIN_API_INTERVAL - timeSinceLastCall));
+                }
+                
+                try {
+                    const result = await fetchPlayerLegendImmediate(playerName);
+                    resolve(result);
+                } catch (error) {
+                    reject(error);
+                }
+                
+                lastApiCall = Date.now();
             }
+            isProcessingQueue = false;
+        };
 
-            // Find player in current data to update UI
-            const player = filteredAndSortedPlayers.find(p => p.name === playerName);
-            if (player) {
-                player.current_legend = 'loading';
-                renderLeaderboard(getCurrentPagePlayers());
-            }
-
+        // Immediate API call (bypasses queue - used internally)
+        const fetchPlayerLegendImmediate = async (playerName) => {
             try {
-                // Use MozambiqueHe.re API to get legend data
                 const mozambiqueApiUrl = `https://api.mozambiquehe.re/bridge?auth=${MOZAMBIQUE_API_KEY}&platform=PC&player=${encodeURIComponent(playerName)}`;
-                console.log(`Making API call to: ${mozambiqueApiUrl}`);
+                console.log(`Making rate-limited API call for: ${playerName}`);
                 
                 const response = await fetch(mozambiqueApiUrl);
                 const data = await response.json();
-                console.log(`API response for ${playerName}:`, data);
 
                 let legendData = null;
                 if (data && data.legends && data.legends.selected) {
                     const selected = data.legends.selected;
-                    console.log(`Found legend data for ${playerName}:`, selected);
                     
                     // Try multiple image sources
                     let imageUrl = selected.ImgAssets?.banner || 
@@ -1455,51 +1519,101 @@
                     };
                 }
 
-                console.log(`Final legend data for ${playerName}:`, legendData);
-
-                // Cache the result (even if null)
-                legendCache.set(playerName, legendData);
-
-                // Update player data and re-render
-                if (player) {
-                    player.current_legend = legendData;
-                    renderLeaderboard(getCurrentPagePlayers());
-                }
-
+                // Cache for 2 hours
+                setLegendCache(playerName, legendData);
                 return legendData;
             } catch (error) {
-                console.error(`Failed to fetch legend for ${playerName}:`, error);
-                
-                // Cache null result to avoid repeated failures
-                legendCache.set(playerName, null);
-                
-                // Update player data to show error
-                if (player) {
-                    player.current_legend = null;
-                    renderLeaderboard(getCurrentPagePlayers());
-                }
-                return null;
+                console.error(`API call failed for ${playerName}:`, error);
+                setLegendCache(playerName, null); // Cache failures too
+                throw error;
             }
         };
 
-        // Automatically load legends for top players
-        const loadTopPlayerLegends = async () => {
-            const topPlayers = filteredAndSortedPlayers.slice(0, 8); // Reduced to 8 to be safer
-            console.log(`Loading legends for top ${topPlayers.length} players:`, topPlayers.map(p => p.name));
+        const fetchPlayerLegend = async (playerName) => {
+            console.log(`Requesting legend for: ${playerName}`);
             
-            // Load legends with a small delay between requests to avoid rate limiting
-            for (let i = 0; i < topPlayers.length; i++) {
-                const player = topPlayers[i];
-                console.log(`Scheduling legend fetch for ${player.name} (${i + 1}/${topPlayers.length})`);
-                
-                if (!legendCache.has(player.name)) {
-                    setTimeout(async () => {
-                        console.log(`Auto-loading legend for: ${player.name}`);
-                        await fetchPlayerLegend(player.name);
-                    }, i * 500); // Increased delay to 500ms for better rate limiting
-                } else {
-                    console.log(`Legend already cached for: ${player.name}`);
+            // Check 2-hour cache first
+            const cached = getCachedLegend(playerName);
+            if (cached !== null) {
+                // Update UI immediately with cached data
+                const player = filteredAndSortedPlayers.find(p => p.name === playerName);
+                if (player) {
+                    player.current_legend = cached;
+                    renderLeaderboard(getCurrentPagePlayers());
                 }
+                return cached;
+            }
+
+            // Find player and show loading state
+            const player = filteredAndSortedPlayers.find(p => p.name === playerName);
+            if (player) {
+                player.current_legend = 'loading';
+                renderLeaderboard(getCurrentPagePlayers());
+            }
+
+            // Add to rate-limited queue
+            return new Promise((resolve, reject) => {
+                apiQueue.push({ playerName, resolve, reject });
+                processApiQueue().then(() => {
+                    // Update UI with result
+                    const cachedResult = getCachedLegend(playerName);
+                    if (player) {
+                        player.current_legend = cachedResult;
+                        renderLeaderboard(getCurrentPagePlayers());
+                    }
+                });
+            });
+        };
+
+        // Check if player legends are cached and show them immediately
+        const loadCachedLegends = () => {
+            const currentPlayers = getCurrentPagePlayers();
+            let updatedAny = false;
+            
+            for (const player of currentPlayers) {
+                if (!player.current_legend) {
+                    const cached = getCachedLegend(player.name);
+                    if (cached !== null) {
+                        player.current_legend = cached;
+                        updatedAny = true;
+                        console.log(`Loaded cached legend for ${player.name}: ${cached?.name || 'none'}`);
+                    }
+                }
+            }
+            
+            if (updatedAny) {
+                renderLeaderboard(currentPlayers);
+            }
+        };
+
+        // Automatically load legends for top players (respects 2h cache and rate limits)
+        const loadTopPlayerLegends = async () => {
+            // First, load any cached legends immediately
+            loadCachedLegends();
+            
+            const topPlayers = filteredAndSortedPlayers.slice(0, 6); // Reduced to 6 for rate limiting
+            console.log(`Checking legends for top ${topPlayers.length} players:`, topPlayers.map(p => p.name));
+            
+            // Only fetch uncached legends
+            const uncachedPlayers = topPlayers.filter(player => {
+                const cached = getCachedLegend(player.name);
+                return cached === null; // null means not cached (undefined means no legend found)
+            });
+            
+            if (uncachedPlayers.length === 0) {
+                console.log('All top players have cached legends');
+                return;
+            }
+            
+            console.log(`Need to fetch legends for ${uncachedPlayers.length} players:`, uncachedPlayers.map(p => p.name));
+            
+            // Add small delay between requests to respect rate limits
+            for (let i = 0; i < uncachedPlayers.length; i++) {
+                const player = uncachedPlayers[i];
+                setTimeout(async () => {
+                    console.log(`Auto-loading legend for: ${player.name}`);
+                    await fetchPlayerLegend(player.name);
+                }, i * 600); // 600ms delay for safety
             }
         };
         
@@ -2176,6 +2290,9 @@
             
             renderLeaderboard(playersToRender);
             updatePaginationControls();
+            
+            // Load cached legends for current page
+            setTimeout(() => loadCachedLegends(), 100);
         };
 
         prevPageBtn.addEventListener('click', () => {
@@ -2404,6 +2521,21 @@
                         return null;
                     }
                 };
+                window.debugLegendCache = () => {
+                    const cache = getLegendCache();
+                    console.log('Current legend cache:', cache);
+                    console.log('Cache size:', Object.keys(cache).length);
+                    for (const [player, entry] of Object.entries(cache)) {
+                        const age = Math.round((Date.now() - entry.timestamp) / 1000 / 60);
+                        console.log(`${player}: ${entry.data?.name || 'null'} (${age}m old)`);
+                    }
+                    return cache;
+                };
+                window.debugClearLegendCache = () => {
+                    localStorage.removeItem(LEGEND_CACHE_KEY);
+                    console.log('Legend cache cleared');
+                };
+                window.debugLoadCachedLegends = loadCachedLegends;
 
                 renderPredatorThresholds(predatorData);
                 renderRpDistributionChart(allPlayers);
