@@ -710,7 +710,7 @@ def get_twitch_username_from_player(player_data):
         return None
 
 # Flask routes
-@twitch_bp.route('/api/twitch/test-problematic-usernames')
+@twitch_bp.route('/twitch/test-problematic-usernames')
 def test_problematic_usernames():
     """Test individual usernames that were causing errors"""
     problematic_usernames = list(BLOCKED_USERNAMES)
@@ -728,7 +728,7 @@ def test_problematic_usernames():
     
     return jsonify(results)
 
-@twitch_bp.route('/api/twitch/cached-usernames')
+@twitch_bp.route('/twitch/cached-usernames')
 def get_cached_usernames():
     """Get all cached valid Twitch usernames"""
     try:
@@ -744,7 +744,7 @@ def get_cached_usernames():
             "error": str(e)
         }), 500
 
-@twitch_bp.route('/api/twitch-users-info', methods=['POST'])
+@twitch_bp.route('/twitch-users-info', methods=['POST'])
 def get_twitch_users_info_endpoint():
     """Get Twitch user info for multiple usernames (both online and offline)"""
     try:
