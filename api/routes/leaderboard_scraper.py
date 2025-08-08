@@ -414,9 +414,20 @@ def add_twitch_live_status(leaderboard_data):
                     'recentClips': []
                 })
         
-        # Second pass: Only check VODs and clips for live users (much faster!)
-        safe_print(f"Checking VODs and clips for {len(live_users_for_vods)} live users only...")
-        for username, player in live_users_for_vods:
+        # Second pass: Prefer live users; also sample up to 30 offline users who have Twitch links
+        safe_print(f"Checking VODs and clips for {len(live_users_for_vods)} live users + a sample of offline users...")
+        users_to_check = list(live_users_for_vods)
+        if len(users_to_check) < 30:
+            extra_needed = 30 - len(users_to_check)
+            for u, idx in username_to_player.items():
+                if extra_needed <= 0:
+                    break
+                player = leaderboard_data['players'][idx]
+                if not any(u == x[0] for x in users_to_check):
+                    users_to_check.append((u, player))
+                    extra_needed -= 1
+
+        for username, player in users_to_check:
             # --- Check VODs for live users only ---
             try:
                 vods_data = get_user_videos_cached(username, headers)
