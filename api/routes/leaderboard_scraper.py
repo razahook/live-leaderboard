@@ -73,12 +73,63 @@ except ImportError as e:
     safe_print(f"Import warning in leaderboard_scraper: {e}")
     # Fallback stubs for Vercel deployment
     def extract_twitch_username(url): return None
-    def get_twitch_access_token(): return None
+    # Minimal fallbacks to keep leaderboard checks alive on Vercel even if import fails
+    _APP_TOKEN = None
+    _APP_TOKEN_EXPIRES_AT = 0.0
+    def get_twitch_access_token():
+        import time, requests, os
+        global _APP_TOKEN, _APP_TOKEN_EXPIRES_AT
+        if _APP_TOKEN and time.time() < _APP_TOKEN_EXPIRES_AT - 60:
+            return _APP_TOKEN
+        client_id = os.environ.get('TWITCH_CLIENT_ID')
+        client_secret = os.environ.get('TWITCH_CLIENT_SECRET')
+        if not client_id or not client_secret:
+            return None
+        try:
+            resp = requests.post('https://id.twitch.tv/oauth2/token', data={
+                'client_id': client_id,
+                'client_secret': client_secret,
+                'grant_type': 'client_credentials'
+            }, timeout=10)
+            data = resp.json()
+            _APP_TOKEN = data.get('access_token')
+            _APP_TOKEN_EXPIRES_AT = time.time() + float(data.get('expires_in', 0))
+            return _APP_TOKEN
+        except Exception:
+            return None
     def load_cache_file(path): return {}
     def save_cache_file(path, data): pass
     def load_twitch_overrides(): return {}
-    def get_user_clips_cached(username, headers, limit=3): return {"has_clips": False, "recent_clips": []}
-    def get_user_videos_cached(username, headers, limit=3): return {"has_vods": False, "recent_videos": []}
+    def get_user_clips_cached(username, headers, limit=3):
+        import requests
+        from urllib.parse import quote_plus
+        try:
+            ur = requests.get(f"https://api.twitch.tv/helix/users?login={quote_plus(username)}", headers=headers, timeout=10)
+            if ur.status_code != 200: return {"has_clips": False, "recent_clips": []}
+            d = ur.json().get('data', [])
+            if not d: return {"has_clips": False, "recent_clips": []}
+            uid = d[0]['id']
+            cr = requests.get(f"https://api.twitch.tv/helix/clips?broadcaster_id={uid}&first={limit}", headers=headers, timeout=10)
+            if cr.status_code != 200: return {"has_clips": False, "recent_clips": []}
+            clips = cr.json().get('data', [])
+            return {"has_clips": len(clips) > 0, "recent_clips": clips[:limit]}
+        except Exception:
+            return {"has_clips": False, "recent_clips": []}
+    def get_user_videos_cached(username, headers, limit=3):
+        import requests
+        from urllib.parse import quote_plus
+        try:
+            ur = requests.get(f"https://api.twitch.tv/helix/users?login={quote_plus(username)}", headers=headers, timeout=10)
+            if ur.status_code != 200: return {"has_vods": False, "recent_videos": []}
+            d = ur.json().get('data', [])
+            if not d: return {"has_vods": False, "recent_videos": []}
+            uid = d[0]['id']
+            vr = requests.get(f"https://api.twitch.tv/helix/videos?user_id={uid}&first={limit}&type=archive", headers=headers, timeout=10)
+            if vr.status_code != 200: return {"has_vods": False, "recent_videos": []}
+            vids = vr.json().get('data', [])
+            return {"has_vods": len(vids) > 0, "recent_videos": vids[:limit]}
+        except Exception:
+            return {"has_vods": False, "recent_videos": []}
     def get_twitch_live_status_batch(usernames, batch_size=50): return {}
     CACHE_AVAILABLE = False
 
