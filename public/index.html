@@ -150,25 +150,29 @@
             font-size: 16px;
         }
         
-        /* Dynamic Background System */
-        body {
-            position: relative;
-            transition: background 0.5s ease;
-        }
+        /* Animated Background Options */
         
-        /* Background Theme: Apex Legends */
-        body.theme-apex {
+        /* Option 1: Apex Legends inspired gradient with subtle animation */
+        body {
             background: linear-gradient(-45deg, #0f0f1e, #1a1a2e, #16213e, #0f0f1e);
             background-size: 400% 400%;
             animation: gradientShift 15s ease infinite;
         }
         
-        /* Background Theme: Floating Particles */
-        body.theme-particles {
-            background: radial-gradient(ellipse at center, #0a0a15 0%, #1a0a2e 30%, #2a1a3e 70%, #0f0f1e 100%);
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
-        body.theme-particles::before {
+        /* Option 2: Floating particles overlay (uncomment to use instead) */
+        /*
+        body {
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f1e 100%);
+            position: relative;
+        }
+        
+        body::before {
             content: '';
             position: fixed;
             top: 0;
@@ -176,83 +180,43 @@
             width: 100%;
             height: 100%;
             background-image: 
-                radial-gradient(3px 3px at 25px 35px, rgba(100,200,255,0.4), transparent),
-                radial-gradient(2px 2px at 60px 80px, rgba(255,100,200,0.3), transparent),
-                radial-gradient(1px 1px at 120px 50px, rgba(200,255,100,0.3), transparent),
-                radial-gradient(2px 2px at 180px 120px, rgba(255,255,100,0.2), transparent),
-                radial-gradient(1px 1px at 220px 40px, rgba(100,100,255,0.3), transparent);
-            background-size: 300px 200px, 400px 250px, 350px 180px, 500px 300px, 250px 150px;
-            animation: particleFloat 25s linear infinite;
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.1), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.1), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.1), transparent);
+            background-size: 200px 100px, 300px 150px, 250px 120px;
+            animation: particleFloat 20s linear infinite;
             pointer-events: none;
             z-index: 0;
-        }
-        
-        
-        /* Animations */
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
         
         @keyframes particleFloat {
             0% { background-position: 0px 0px, 0px 0px, 0px 0px; }
             100% { background-position: 500px 1000px, -500px 1000px, 500px -1000px; }
         }
+        */
         
+        /* Option 3: Gaming RGB wave effect (uncomment to use instead) */
+        /*
+        body {
+            background: linear-gradient(-45deg, #ff006e, #8338ec, #3a86ff, #06ffa5);
+            background-size: 400% 400%;
+            animation: rgbWave 8s ease infinite;
+        }
+        
+        @keyframes rgbWave {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 50% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+        */
         
         /* Ensure content is above background */
         .main-container {
             position: relative;
             z-index: 1;
         }
-        
-        /* Dashboard Layout - Simple Single Column */
-        .dashboard-layout {
-            display: block;
-            max-width: 100%;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-        
-        .dashboard-main {
-            min-height: 100vh;
-            min-width: 0;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-        }
-        
-        /* Ensure all content is adaptive */
-        .dashboard-layout * {
-            box-sizing: border-box;
-        }
-        
-        /* Responsive images and media */
-        .dashboard-layout img,
-        .dashboard-layout video {
-            max-width: 100%;
-            height: auto;
-        }
-        
-        
-        /* Table responsiveness */
-        .dashboard-main table {
-            width: 100%;
-            overflow-x: auto;
-            display: block;
-            white-space: nowrap;
-        }
-        
-        .dashboard-main thead,
-        .dashboard-main tbody,
-        .dashboard-main tr {
-            display: table;
-            width: 100%;
-            table-layout: fixed;
-        }
-        
         .tab-content {
             display: none;
             padding-top: 1rem;
@@ -369,7 +333,7 @@
         }
     </style>
 </head>
-<body class="antialiased theme-apex">
+<body class="antialiased">
 
     <!-- Contact Banner -->
     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 text-center shadow-lg">
@@ -537,10 +501,7 @@
             </div>
             
             <!-- Main Content Area -->
-            <div class="flex-1 ml-64">
-                <div class="dashboard-layout">
-                    <!-- Main Content -->
-                    <div class="dashboard-main">
+            <div class="flex-1 ml-64 p-6">
 
         <!-- Leaderboard Tab Content -->
         <div id="leaderboardTab" class="tab-content active">
@@ -843,9 +804,7 @@
             </section>
         </div>
         
-                    </div> <!-- End Dashboard Main -->
-                </div> <!-- End Dashboard Layout -->
-            </div> <!-- End Main Content Area -->
+        </div> <!-- End Main Content Area -->
         </div> <!-- End Main Layout -->
 
     <div id="stream-preview"><div id="stream-preview-player"></div></div>
@@ -2283,9 +2242,6 @@
                 
                 // Update streamers count
                 updateStreamersCount();
-                
-                // Update dashboard widgets with new data
-                updateDashboardWidgets();
                 
                 // Load additional data
                 loadGameStatus();
@@ -5313,11 +5269,8 @@ ${(() => {
             }
         }
 
-        // Handle change password form submission and initialize settings
+        // Handle change password form submission
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize background theme settings
-            initializeBackgroundSettings();
-            
             const changePasswordForm = document.getElementById('changePasswordForm');
             if (changePasswordForm) {
                 changePasswordForm.addEventListener('submit', async (e) => {
@@ -5356,143 +5309,6 @@ ${(() => {
             }
         });
 
-        // Background Theme Management
-        function initializeBackgroundSettings() {
-            // Load saved theme from localStorage
-            const savedTheme = localStorage.getItem('backgroundTheme') || 'apex';
-            setBackgroundTheme(savedTheme);
-            
-            // Set radio button to match saved theme
-            const radioButton = document.querySelector(`input[name="backgroundTheme"][value="${savedTheme}"]`);
-            if (radioButton) {
-                radioButton.checked = true;
-            }
-            
-            // Add event listeners to radio buttons
-            document.querySelectorAll('input[name="backgroundTheme"]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    if (this.checked) {
-                        setBackgroundTheme(this.value);
-                        localStorage.setItem('backgroundTheme', this.value);
-                        enhancedFeatures.showToast(`Background changed to ${this.value}`, 'success');
-                    }
-                });
-            });
-        }
-        
-        function setBackgroundTheme(theme) {
-            // Remove all theme classes
-            document.body.classList.remove('theme-apex', 'theme-particles');
-            
-            // Add the selected theme class
-            document.body.classList.add(`theme-${theme}`);
-        }
-
-        // Dashboard Widgets Functions
-        function updateDashboardWidgets() {
-            if (allPlayers && allPlayers.length > 0) {
-                updateFeaturedStreamersWidget();
-                updateTopMoversWidget();
-                updateMyRankWidget();
-            }
-        }
-
-        function updateFeaturedStreamersWidget() {
-            const featuredWidget = document.getElementById('featuredStreamersWidget');
-            if (!featuredWidget) return;
-
-            // Get top 3 live streamers from leaderboard
-            const liveStreamers = allPlayers
-                .filter(player => player.stream && player.twitch_live?.is_live)
-                .slice(0, 3);
-
-            if (liveStreamers.length === 0) {
-                featuredWidget.innerHTML = `
-                    <div class="text-center py-4 text-gray-400">
-                        <p class="text-sm">No streamers currently live</p>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            liveStreamers.forEach(streamer => {
-                html += `
-                    <div class="flex items-center space-x-3 mb-3 p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700/70 cursor-pointer" onclick="watchStream('${streamer.stream.twitchUser}')">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                #${streamer.rank}
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm font-medium text-white truncate">${streamer.player_name}</p>
-                                <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                            </div>
-                            <p class="text-xs text-gray-400">${streamer.stream.viewers?.toLocaleString() || 0} viewers</p>
-                        </div>
-                    </div>
-                `;
-            });
-
-            featuredWidget.innerHTML = html;
-        }
-
-        function updateTopMoversWidget() {
-            const topMoversWidget = document.getElementById('topMoversWidget');
-            if (!topMoversWidget) return;
-
-            // Get top 5 players with highest RP gains in 24h
-            const topMovers = allPlayers
-                .filter(player => player.rp_change_24h > 0)
-                .sort((a, b) => b.rp_change_24h - a.rp_change_24h)
-                .slice(0, 5);
-
-            if (topMovers.length === 0) {
-                topMoversWidget.innerHTML = `
-                    <div class="text-center py-4 text-gray-400">
-                        <p class="text-sm">No positive movers today</p>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            topMovers.forEach((player, index) => {
-                const isStreaming = player.stream && player.twitch_live?.is_live;
-                html += `
-                    <div class="flex items-center justify-between mb-2 p-2 rounded hover:bg-gray-700/30">
-                        <div class="flex items-center space-x-2">
-                            <div class="text-yellow-400 font-bold text-sm w-6">${index + 1}.</div>
-                            <div class="flex items-center space-x-1">
-                                <span class="text-sm text-white font-medium">${player.player_name}</span>
-                                ${isStreaming ? '<div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>' : ''}
-                            </div>
-                        </div>
-                        <div class="text-green-400 text-sm font-semibold">+${player.rp_change_24h?.toLocaleString()}</div>
-                    </div>
-                `;
-            });
-
-            topMoversWidget.innerHTML = html;
-        }
-
-        function updateMyRankWidget() {
-            const myRankWidget = document.getElementById('myRankWidget');
-            if (!myRankWidget) return;
-
-            // For now, show placeholder - in future this could search for user's player name
-            // or connect with Apex API to show actual user stats
-            myRankWidget.innerHTML = `
-                <div class="text-center py-6 text-gray-400">
-                    <p class="text-sm mb-2">Connect your Apex account to track your rank here</p>
-                    <button onclick="showTab('playerStatsTab')" class="text-xs text-emerald-400 hover:text-emerald-300">
-                        Search Your Stats
-                    </button>
-                </div>
-            `;
-        }
-
         // Update the showTab function to refresh account data and favorites
         const originalShowTab = showTab;
         window.showTab = (tabId) => {
@@ -5500,10 +5316,6 @@ ${(() => {
             if (tabId === 'accountTab') {
                 updateAccountDisplay();
                 refreshFavorites();
-            }
-            if (tabId === 'leaderboardTab') {
-                // Small delay to ensure data is loaded
-                setTimeout(updateDashboardWidgets, 1000);
             }
         };
 
@@ -5629,43 +5441,11 @@ ${(() => {
         <!-- Theme Settings -->
         <div class="mb-6 p-4 bg-gray-700 rounded-lg">
             <h3 class="text-lg font-semibold text-white mb-4">Theme</h3>
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between">
                 <span class="text-gray-300">Dark Mode</span>
                 <div class="relative inline-block w-10 mr-2 align-middle select-none">
                     <input type="checkbox" id="darkModeToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-600 appearance-none cursor-pointer transition-transform duration-200 ease-in" checked/>
                     <label for="darkModeToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
-                </div>
-            </div>
-            
-            <!-- Background Selection -->
-            <div class="border-t border-gray-600 pt-4">
-                <label class="block text-gray-300 mb-3">Animated Background</label>
-                <div class="grid grid-cols-1 gap-3">
-                    <label class="flex items-center space-x-3 p-3 bg-gray-600 rounded-lg cursor-pointer hover:bg-gray-500 transition-colors">
-                        <input type="radio" name="backgroundTheme" value="apex" class="text-purple-600 focus:ring-purple-500 focus:ring-2" checked>
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-4 h-4 rounded-full bg-gradient-to-r from-blue-900 to-purple-900"></div>
-                                <span class="text-white font-medium">Apex Legends</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Subtle dark gradient with slow animation</p>
-                        </div>
-                    </label>
-                    
-                    <label class="flex items-center space-x-3 p-3 bg-gray-600 rounded-lg cursor-pointer hover:bg-gray-500 transition-colors">
-                        <input type="radio" name="backgroundTheme" value="particles" class="text-purple-600 focus:ring-purple-500 focus:ring-2">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-4 h-4 rounded-full bg-gradient-to-r from-gray-700 to-blue-800 relative">
-                                    <div class="absolute top-0.5 left-0.5 w-1 h-1 bg-white rounded-full opacity-60"></div>
-                                    <div class="absolute top-1.5 left-2.5 w-0.5 h-0.5 bg-white rounded-full opacity-40"></div>
-                                </div>
-                                <span class="text-white font-medium">Floating Particles</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Colorful floating particles with dynamic movement</p>
-                        </div>
-                    </label>
-                    
                 </div>
             </div>
         </div>
