@@ -4637,14 +4637,36 @@ ${(() => {
 
         // Favorites Tab Functions
         async function refreshFavorites() {
-            if (!supaUser) {
-                showFavoritesError();
+            showFavoritesLoading();
+            
+            // Check if Supabase is initialized
+            if (!supabase) {
+                console.error('Supabase not initialized');
+                showFavoritesError('Database connection not available. Please refresh the page.');
                 return;
             }
             
-            showFavoritesLoading();
-            
+            // Always re-check authentication state when loading favorites
             try {
+                console.log('Checking authentication state...');
+                const { data: authData, error: authError } = await supabase.auth.getUser();
+                if (authError) {
+                    console.error('Authentication check error:', authError);
+                    showFavoritesError('Authentication error. Please sign in again.');
+                    return;
+                }
+                
+                supaUser = authData?.user || null;
+                console.log('Favorites: Current user state:', supaUser ? 'authenticated' : 'not authenticated');
+                
+                if (!supaUser) {
+                    console.log('No authenticated user found');
+                    showFavoritesError();
+                    return;
+                }
+                
+                console.log('Loading favorites for user:', supaUser.id);
+                
                 // Get user's favorites from Supabase
                 const { data: favorites, error } = await supabase
                     .from('favorites')
@@ -4652,8 +4674,14 @@ ${(() => {
                     .eq('user_id', supaUser.id);
                 
                 if (error) {
-                    console.error('Error loading favorites:', error);
-                    showFavoritesError('Failed to load favorites');
+                    console.error('Error loading favorites from Supabase:', error);
+                    console.error('Error details:', {
+                        code: error.code,
+                        message: error.message,
+                        details: error.details,
+                        hint: error.hint
+                    });
+                    showFavoritesError(`Database error: ${error.message || 'Failed to load favorites'}`);
                     return;
                 }
                 
@@ -4683,7 +4711,14 @@ ${(() => {
                 
             } catch (error) {
                 console.error('Error in refreshFavorites:', error);
-                showFavoritesError('An error occurred while loading favorites');
+                console.error('Error stack:', error.stack);
+                if (error.name === 'TypeError' && error.message.includes('supabase')) {
+                    showFavoritesError('Supabase connection error. Please refresh the page.');
+                } else if (error.message.includes('fetch')) {
+                    showFavoritesError('Network error. Please check your connection.');
+                } else {
+                    showFavoritesError(`Error: ${error.message || 'An error occurred while loading favorites'}`);
+                }
             }
         }
         
