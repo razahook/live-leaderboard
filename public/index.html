@@ -1381,18 +1381,23 @@
 
         const getLegendHtml = (currentLegend, playerName) => {
             if (currentLegend && currentLegend.name) {
-                return `<div class="flex flex-col">
-                    <span class="font-semibold text-purple-400">${currentLegend.name}</span>
-                    ${currentLegend.loading ? '<span class="text-xs text-gray-400">Loading...</span>' : ''}
+                const imageUrl = currentLegend.image || 'https://cdn.apexlegendsstatus.com/legends/unknown.png';
+                return `<div class="flex items-center space-x-2">
+                    <img src="${imageUrl}" alt="${currentLegend.name}" class="w-8 h-8 rounded-full object-cover border border-purple-400" 
+                         onerror="this.src='https://via.placeholder.com/32x32/6b46c1/ffffff?text=${currentLegend.name.charAt(0)}'">
+                    <div class="flex flex-col">
+                        <span class="font-semibold text-purple-400 text-sm">${currentLegend.name}</span>
+                        <span class="text-xs text-gray-500">Current</span>
+                    </div>
                 </div>`;
             } else if (currentLegend === 'loading') {
-                return `<div class="flex items-center">
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500 mr-2"></div>
-                    <span class="text-xs text-gray-400">Loading...</span>
+                return `<div class="flex items-center space-x-2">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
+                    <span class="text-xs text-gray-400">Loading legend...</span>
                 </div>`;
             }
-            return `<button onclick="fetchPlayerLegend('${playerName}')" class="text-gray-500 hover:text-purple-400 text-xs transition-colors">
-                Load Legend
+            return `<button onclick="fetchPlayerLegend('${playerName}')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1 rounded-full transition-colors">
+                Show Legend
             </button>`;
         };
 
@@ -1406,8 +1411,11 @@
         };
 
         const fetchPlayerLegend = async (playerName) => {
+            console.log(`Fetching legend for: ${playerName}`);
+            
             // Check cache first
             if (legendCache.has(playerName)) {
+                console.log(`Using cached legend for ${playerName}:`, legendCache.get(playerName));
                 return legendCache.get(playerName);
             }
 
@@ -1421,19 +1429,32 @@
             try {
                 // Use MozambiqueHe.re API to get legend data
                 const mozambiqueApiUrl = `https://api.mozambiquehe.re/bridge?auth=${MOZAMBIQUE_API_KEY}&platform=PC&player=${encodeURIComponent(playerName)}`;
+                console.log(`Making API call to: ${mozambiqueApiUrl}`);
                 
                 const response = await fetch(mozambiqueApiUrl);
                 const data = await response.json();
+                console.log(`API response for ${playerName}:`, data);
 
                 let legendData = null;
                 if (data && data.legends && data.legends.selected) {
+                    const selected = data.legends.selected;
+                    console.log(`Found legend data for ${playerName}:`, selected);
+                    
+                    // Try multiple image sources
+                    let imageUrl = selected.ImgAssets?.banner || 
+                                  selected.ImgAssets?.icon || 
+                                  selected.ImgAssets?.portrait ||
+                                  `https://cdn.trackercdn.com/cdn/tracker.gg/apex-legends/legends/${selected.LegendName?.toLowerCase().replace(/\s+/g, '-')}.png`;
+                    
                     legendData = {
-                        name: data.legends.selected.LegendName,
-                        image: data.legends.selected.ImgAssets?.banner
+                        name: selected.LegendName,
+                        image: imageUrl
                     };
                 }
 
-                // Cache the result
+                console.log(`Final legend data for ${playerName}:`, legendData);
+
+                // Cache the result (even if null)
                 legendCache.set(playerName, legendData);
 
                 // Update player data and re-render
@@ -1444,7 +1465,10 @@
 
                 return legendData;
             } catch (error) {
-                console.warn(`Failed to fetch legend for ${playerName}:`, error);
+                console.error(`Failed to fetch legend for ${playerName}:`, error);
+                
+                // Cache null result to avoid repeated failures
+                legendCache.set(playerName, null);
                 
                 // Update player data to show error
                 if (player) {
@@ -1455,16 +1479,23 @@
             }
         };
 
-        // Automatically load legends for top 10 players
+        // Automatically load legends for top players
         const loadTopPlayerLegends = async () => {
-            const topPlayers = filteredAndSortedPlayers.slice(0, 10);
-            console.log(`Loading legends for top ${topPlayers.length} players...`);
+            const topPlayers = filteredAndSortedPlayers.slice(0, 8); // Reduced to 8 to be safer
+            console.log(`Loading legends for top ${topPlayers.length} players:`, topPlayers.map(p => p.name));
             
             // Load legends with a small delay between requests to avoid rate limiting
             for (let i = 0; i < topPlayers.length; i++) {
                 const player = topPlayers[i];
+                console.log(`Scheduling legend fetch for ${player.name} (${i + 1}/${topPlayers.length})`);
+                
                 if (!legendCache.has(player.name)) {
-                    setTimeout(() => fetchPlayerLegend(player.name), i * 300); // 300ms delay between requests
+                    setTimeout(async () => {
+                        console.log(`Auto-loading legend for: ${player.name}`);
+                        await fetchPlayerLegend(player.name);
+                    }, i * 500); // Increased delay to 500ms for better rate limiting
+                } else {
+                    console.log(`Legend already cached for: ${player.name}`);
                 }
             }
         };
@@ -2330,7 +2361,14 @@
                 updateLeaderboardAndPagination(); 
 
                 // Load legends for top players automatically
-                setTimeout(() => loadTopPlayerLegends(), 1000);
+                setTimeout(() => {
+                    console.log('Starting auto legend loading...');
+                    loadTopPlayerLegends();
+                }, 2000); // Increased delay to ensure leaderboard is fully rendered
+                
+                // Make functions available globally for debugging
+                window.debugFetchLegend = fetchPlayerLegend;
+                window.debugLoadTopLegends = loadTopPlayerLegends;
 
                 renderPredatorThresholds(predatorData);
                 renderRpDistributionChart(allPlayers);
