@@ -165,7 +165,7 @@
         
         /* Background Theme: Floating Particles */
         body.theme-particles {
-            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f1e 100%);
+            background: radial-gradient(ellipse at center, #0a0a15 0%, #1a0a2e 30%, #2a1a3e 70%, #0f0f1e 100%);
         }
         
         body.theme-particles::before {
@@ -176,21 +176,17 @@
             width: 100%;
             height: 100%;
             background-image: 
-                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.1), transparent),
-                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.1), transparent),
-                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.1), transparent);
-            background-size: 200px 100px, 300px 150px, 250px 120px;
-            animation: particleFloat 20s linear infinite;
+                radial-gradient(3px 3px at 25px 35px, rgba(100,200,255,0.4), transparent),
+                radial-gradient(2px 2px at 60px 80px, rgba(255,100,200,0.3), transparent),
+                radial-gradient(1px 1px at 120px 50px, rgba(200,255,100,0.3), transparent),
+                radial-gradient(2px 2px at 180px 120px, rgba(255,255,100,0.2), transparent),
+                radial-gradient(1px 1px at 220px 40px, rgba(100,100,255,0.3), transparent);
+            background-size: 300px 200px, 400px 250px, 350px 180px, 500px 300px, 250px 150px;
+            animation: particleFloat 25s linear infinite;
             pointer-events: none;
             z-index: 0;
         }
         
-        /* Background Theme: Gaming RGB */
-        body.theme-rgb {
-            background: linear-gradient(-45deg, #ff006e, #8338ec, #3a86ff, #06ffa5);
-            background-size: 400% 400%;
-            animation: rgbWave 8s ease infinite;
-        }
         
         /* Animations */
         @keyframes gradientShift {
@@ -204,18 +200,83 @@
             100% { background-position: 500px 1000px, -500px 1000px, 500px -1000px; }
         }
         
-        @keyframes rgbWave {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 100% 50%; }
-            50% { background-position: 100% 100%; }
-            75% { background-position: 50% 100%; }
-            100% { background-position: 0% 50%; }
-        }
         
         /* Ensure content is above background */
         .main-container {
             position: relative;
             z-index: 1;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 350px;
+            gap: 24px;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .dashboard-sidebar-left {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        
+        .dashboard-main {
+            min-height: 100vh;
+        }
+        
+        .dashboard-sidebar-right {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        
+        .widget-card {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .widget-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1400px) {
+            .dashboard-layout {
+                grid-template-columns: 260px 1fr 320px;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .dashboard-layout {
+                grid-template-columns: 240px 1fr 280px;
+                gap: 16px;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .dashboard-sidebar-left,
+            .dashboard-sidebar-right {
+                position: static;
+            }
         }
         .tab-content {
             display: none;
@@ -501,7 +562,46 @@
             </div>
             
             <!-- Main Content Area -->
-            <div class="flex-1 ml-64 p-6">
+            <div class="flex-1 ml-64">
+                <div class="dashboard-layout">
+                    <!-- Left Sidebar Widgets -->
+                    <div class="dashboard-sidebar-left">
+                        <!-- My Rank Widget -->
+                        <div class="widget-card">
+                            <div class="widget-title">
+                                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                My Rank
+                            </div>
+                            <div id="myRankWidget">
+                                <div class="text-center py-6 text-gray-400">
+                                    <p class="text-sm">Sign in to track your rank</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tracked Players Widget -->
+                        <div class="widget-card">
+                            <div class="widget-title">
+                                <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.196-2.12M17 20h-5v-2a3 3 0 00-5.196-2.12M17 20v-2a3 3 0 015.196-2.12m-5.196 0v-2a3 3 0 015.196-2.12M12 14a4 4 0 100-8 4 4 0 000 8zm-5 4h10a3 3 0 003-3v-1a5 5 0 00-5-5H7a5 5 0 00-5 5v1a3 3 0 003 3z"></path>
+                                </svg>
+                                Rivals & Friends
+                            </div>
+                            <div id="trackedPlayersWidget">
+                                <div class="text-center py-4 text-gray-400">
+                                    <p class="text-sm">No tracked players yet</p>
+                                    <button onclick="showTab('playerStatsTab')" class="mt-2 text-xs text-purple-400 hover:text-purple-300">
+                                        Search Players
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Content -->
+                    <div class="dashboard-main">
 
         <!-- Leaderboard Tab Content -->
         <div id="leaderboardTab" class="tab-content active">
@@ -804,7 +904,57 @@
             </section>
         </div>
         
-        </div> <!-- End Main Content Area -->
+                    </div> <!-- End Dashboard Main -->
+                    
+                    <!-- Right Sidebar Widgets -->
+                    <div class="dashboard-sidebar-right">
+                        <!-- Featured Streamers Widget -->
+                        <div class="widget-card">
+                            <div class="widget-title">
+                                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                Live Streamers
+                            </div>
+                            <div id="featuredStreamersWidget">
+                                <div class="text-center py-4 text-gray-400">
+                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-500 mx-auto mb-2"></div>
+                                    <p class="text-sm">Loading streamers...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Top Movers Widget -->
+                        <div class="widget-card">
+                            <div class="widget-title">
+                                <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                Top Movers (24h)
+                            </div>
+                            <div id="topMoversWidget">
+                                <div class="text-center py-4 text-gray-400">
+                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-500 mx-auto mb-2"></div>
+                                    <p class="text-sm">Calculating gains...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Game Status Widget -->
+                        <div class="widget-card">
+                            <div class="widget-title">
+                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Game Status
+                            </div>
+                            <div id="gameStatusWidget">
+                                <!-- This will be populated by existing game status code -->
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- End Dashboard Layout -->
+            </div> <!-- End Main Content Area -->
         </div> <!-- End Main Layout -->
 
     <div id="stream-preview"><div id="stream-preview-player"></div></div>
@@ -2242,6 +2392,9 @@
                 
                 // Update streamers count
                 updateStreamersCount();
+                
+                // Update dashboard widgets with new data
+                updateDashboardWidgets();
                 
                 // Load additional data
                 loadGameStatus();
@@ -5338,10 +5491,115 @@ ${(() => {
         
         function setBackgroundTheme(theme) {
             // Remove all theme classes
-            document.body.classList.remove('theme-apex', 'theme-particles', 'theme-rgb');
+            document.body.classList.remove('theme-apex', 'theme-particles');
             
             // Add the selected theme class
             document.body.classList.add(`theme-${theme}`);
+        }
+
+        // Dashboard Widgets Functions
+        function updateDashboardWidgets() {
+            if (allPlayers && allPlayers.length > 0) {
+                updateFeaturedStreamersWidget();
+                updateTopMoversWidget();
+                updateMyRankWidget();
+            }
+        }
+
+        function updateFeaturedStreamersWidget() {
+            const featuredWidget = document.getElementById('featuredStreamersWidget');
+            if (!featuredWidget) return;
+
+            // Get top 3 live streamers from leaderboard
+            const liveStreamers = allPlayers
+                .filter(player => player.stream && player.twitch_live?.is_live)
+                .slice(0, 3);
+
+            if (liveStreamers.length === 0) {
+                featuredWidget.innerHTML = `
+                    <div class="text-center py-4 text-gray-400">
+                        <p class="text-sm">No streamers currently live</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            liveStreamers.forEach(streamer => {
+                html += `
+                    <div class="flex items-center space-x-3 mb-3 p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700/70 cursor-pointer" onclick="watchStream('${streamer.stream.twitchUser}')">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                #${streamer.rank}
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center space-x-2">
+                                <p class="text-sm font-medium text-white truncate">${streamer.player_name}</p>
+                                <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                            </div>
+                            <p class="text-xs text-gray-400">${streamer.stream.viewers?.toLocaleString() || 0} viewers</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            featuredWidget.innerHTML = html;
+        }
+
+        function updateTopMoversWidget() {
+            const topMoversWidget = document.getElementById('topMoversWidget');
+            if (!topMoversWidget) return;
+
+            // Get top 5 players with highest RP gains in 24h
+            const topMovers = allPlayers
+                .filter(player => player.rp_change_24h > 0)
+                .sort((a, b) => b.rp_change_24h - a.rp_change_24h)
+                .slice(0, 5);
+
+            if (topMovers.length === 0) {
+                topMoversWidget.innerHTML = `
+                    <div class="text-center py-4 text-gray-400">
+                        <p class="text-sm">No positive movers today</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            topMovers.forEach((player, index) => {
+                const isStreaming = player.stream && player.twitch_live?.is_live;
+                html += `
+                    <div class="flex items-center justify-between mb-2 p-2 rounded hover:bg-gray-700/30">
+                        <div class="flex items-center space-x-2">
+                            <div class="text-yellow-400 font-bold text-sm w-6">${index + 1}.</div>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-sm text-white font-medium">${player.player_name}</span>
+                                ${isStreaming ? '<div class="w-1.5 h-1.5 bg-red-500 rounded-full"></div>' : ''}
+                            </div>
+                        </div>
+                        <div class="text-green-400 text-sm font-semibold">+${player.rp_change_24h?.toLocaleString()}</div>
+                    </div>
+                `;
+            });
+
+            topMoversWidget.innerHTML = html;
+        }
+
+        function updateMyRankWidget() {
+            const myRankWidget = document.getElementById('myRankWidget');
+            if (!myRankWidget) return;
+
+            // For now, show placeholder - in future this could search for user's player name
+            // or connect with Apex API to show actual user stats
+            myRankWidget.innerHTML = `
+                <div class="text-center py-6 text-gray-400">
+                    <p class="text-sm mb-2">Connect your Apex account to track your rank here</p>
+                    <button onclick="showTab('playerStatsTab')" class="text-xs text-emerald-400 hover:text-emerald-300">
+                        Search Your Stats
+                    </button>
+                </div>
+            `;
         }
 
         // Update the showTab function to refresh account data and favorites
@@ -5351,6 +5609,10 @@ ${(() => {
             if (tabId === 'accountTab') {
                 updateAccountDisplay();
                 refreshFavorites();
+            }
+            if (tabId === 'leaderboardTab') {
+                // Small delay to ensure data is loaded
+                setTimeout(updateDashboardWidgets, 1000);
             }
         };
 
@@ -5509,20 +5771,10 @@ ${(() => {
                                 </div>
                                 <span class="text-white font-medium">Floating Particles</span>
                             </div>
-                            <p class="text-sm text-gray-400">Sci-fi space theme with moving particles</p>
+                            <p class="text-sm text-gray-400">Colorful floating particles with dynamic movement</p>
                         </div>
                     </label>
                     
-                    <label class="flex items-center space-x-3 p-3 bg-gray-600 rounded-lg cursor-pointer hover:bg-gray-500 transition-colors">
-                        <input type="radio" name="backgroundTheme" value="rgb" class="text-purple-600 focus:ring-purple-500 focus:ring-2">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-4 h-4 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"></div>
-                                <span class="text-white font-medium">Gaming RGB</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Vibrant colors with fast wave animation</p>
-                        </div>
-                    </label>
                 </div>
             </div>
         </div>
