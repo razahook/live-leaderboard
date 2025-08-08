@@ -397,6 +397,12 @@
                             <span class="text-sm font-semibold text-emerald-400" id="live-count">0</span>
                             <span class="text-xs text-gray-400">live</span>
                         </div>
+                        <!-- Offline Streamers Counter -->
+                        <div id="streamers-offline" class="flex items-center space-x-2 bg-gray-800 px-3 py-2 rounded-lg border border-gray-700/50">
+                            <div class="w-2 h-2 bg-gray-500 rounded-full"></div>
+                            <span class="text-sm font-semibold text-gray-400" id="offline-count">0</span>
+                            <span class="text-xs text-gray-400">offline</span>
+                        </div>
                         <!-- Total Viewers Counter -->
                         <div class="flex items-center space-x-2 bg-gray-800 px-3 py-2 rounded-lg border border-gray-700/50">
                             <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -3037,11 +3043,16 @@
         // Streamers Count Function
         function updateStreamersCount() {
             const liveCountElement = document.getElementById('live-count');
+            const offlineCountElement = document.getElementById('offline-count');
             const totalViewersElement = document.getElementById('total-viewers');
-            if (!liveCountElement || !totalViewersElement) return;
+            if (!liveCountElement || !offlineCountElement || !totalViewersElement) return;
             
             const liveStreamers = allPlayers.filter(player => 
                 String(player.status).toLowerCase() === 'live'
+            );
+            
+            const offlineStreamers = allPlayers.filter(player => 
+                String(player.status).toLowerCase().includes('offline - has twitch')
             );
             
             const totalViewers = liveStreamers.reduce((total, player) => {
@@ -3049,6 +3060,7 @@
             }, 0);
             
             liveCountElement.textContent = liveStreamers.length;
+            offlineCountElement.textContent = offlineStreamers.length;
             totalViewersElement.textContent = totalViewers.toLocaleString();
         }
         
