@@ -212,9 +212,10 @@
             display: grid;
             grid-template-columns: 280px 1fr 350px;
             gap: 24px;
-            max-width: 1800px;
-            margin: 0 auto;
-            padding: 0 20px;
+            max-width: none;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
         }
         
         .dashboard-sidebar-left {
@@ -225,6 +226,7 @@
         
         .dashboard-main {
             min-height: 100vh;
+            overflow-x: auto;
         }
         
         .dashboard-sidebar-right {
@@ -238,36 +240,57 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(75, 85, 99, 0.3);
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 16px;
+            margin-bottom: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
         
         .widget-title {
             color: #ffffff;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
-        /* Responsive adjustments */
-        @media (max-width: 1400px) {
+        /* Responsive adjustments - much more conservative */
+        @media (max-width: 1600px) {
             .dashboard-layout {
                 grid-template-columns: 260px 1fr 320px;
+                gap: 20px;
+            }
+            
+            .widget-card {
+                padding: 14px;
+            }
+            
+            .widget-title {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 1400px) {
+            .dashboard-layout {
+                grid-template-columns: 240px 1fr 300px;
+                gap: 16px;
             }
         }
         
         @media (max-width: 1200px) {
             .dashboard-layout {
-                grid-template-columns: 240px 1fr 280px;
-                gap: 16px;
+                grid-template-columns: 220px 1fr 280px;
+                gap: 12px;
+            }
+            
+            .widget-card {
+                padding: 12px;
+                margin-bottom: 12px;
             }
         }
         
-        @media (max-width: 1024px) {
+        @media (max-width: 1000px) {
             .dashboard-layout {
                 grid-template-columns: 1fr;
                 gap: 20px;
@@ -276,6 +299,13 @@
             .dashboard-sidebar-left,
             .dashboard-sidebar-right {
                 position: static;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 16px;
+            }
+            
+            .widget-card {
+                padding: 16px;
             }
         }
         .tab-content {
