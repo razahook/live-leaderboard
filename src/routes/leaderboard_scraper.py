@@ -490,8 +490,8 @@ def add_twitch_live_status(leaderboard_data):
                     'recentClips': []
                 })
         
-        # Check VODs for all users with Twitch accounts (not just live ones)
-        safe_print(f"Checking VODs for users with Twitch accounts...")
+        # Skip VODs/clips checking for performance - only check for live users
+        safe_print(f"Checking VODs only for live users to maintain performance...")
         
         if CACHE_AVAILABLE:
             access_token = get_twitch_access_token()
@@ -503,23 +503,21 @@ def add_twitch_live_status(leaderboard_data):
                         'Client-Id': client_id
                     }
                     
-                    # Check VODs for all users with valid Twitch accounts
-                    for player in leaderboard_data['players']:
-                        if player.get('canonical_twitch_username'):
-                            username = player['canonical_twitch_username']
-                            try:
-                                vod_result = get_user_videos_cached(username, headers)
-                                player['vods_enabled'] = vod_result.get('has_vods', False)
-                                player['recent_videos'] = vod_result.get('recent_videos', [])
-                                
-                                # Also check clips
-                                clips_result = get_user_clips_cached(username, headers)
-                                player['hasClips'] = clips_result.get('has_clips', False)
-                                player['recentClips'] = clips_result.get('recent_clips', [])
-                                
-                            except Exception as e:
-                                safe_print(f"Error checking VODs/clips for {username}: {e}")
-                                continue
+                    # Only check VODs for live users to keep load times reasonable
+                    for username, player in live_users_for_vods:
+                        try:
+                            vod_result = get_user_videos_cached(username, headers)
+                            player['vods_enabled'] = vod_result.get('has_vods', False)
+                            player['recent_videos'] = vod_result.get('recent_videos', [])
+                            
+                            # Also check clips for live users
+                            clips_result = get_user_clips_cached(username, headers)
+                            player['hasClips'] = clips_result.get('has_clips', False)
+                            player['recentClips'] = clips_result.get('recent_clips', [])
+                            
+                        except Exception as e:
+                            safe_print(f"Error checking VODs/clips for {username}: {e}")
+                            continue
                 else:
                     safe_print("No Twitch Client ID available for VOD checking")
             else:
