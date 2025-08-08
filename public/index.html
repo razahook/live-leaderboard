@@ -265,6 +265,7 @@
                     <button id="authTabEmail" class="px-3 py-1.5 rounded bg-gray-700 text-sm">Email link</button>
                     <button id="authTabPassword" class="px-3 py-1.5 rounded bg-gray-700 text-sm">Email + password</button>
                     <button id="authTabGoogle" class="px-3 py-1.5 rounded bg-gray-700 text-sm">Google</button>
+                    <button id="authTabTwitch" class="px-3 py-1.5 rounded bg-gray-700 text-sm">Twitch</button>
                 </div>
                 <!-- Email Link -->
                 <div id="authEmailLinkSection">
@@ -296,6 +297,14 @@
                     <div class="flex gap-2 justify-end">
                         <button id="googleCancelBtn" class="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600">Cancel</button>
                         <button id="googleSignInBtn" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Continue with Google</button>
+                    </div>
+                </div>
+                <!-- Twitch OAuth -->
+                <div id="authTwitchSection" class="hidden">
+                    <p class="text-sm text-gray-400 mb-3">Continue with your Twitch account.</p>
+                    <div class="flex gap-2 justify-end">
+                        <button id="twitchCancelBtn" class="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600">Cancel</button>
+                        <button id="twitchSignInBtn" class="px-3 py-2 rounded bg-purple-600 hover:bg-purple-700">Continue with Twitch</button>
                     </div>
                 </div>
             </div>
@@ -856,9 +865,11 @@
             };
 
             // Tab buttons
-            document.getElementById('authTabEmail').onclick = () => { linkSection.classList.remove('hidden'); pwSection.classList.add('hidden'); googleSection.classList.add('hidden'); };
-            document.getElementById('authTabPassword').onclick = () => { pwSection.classList.remove('hidden'); linkSection.classList.add('hidden'); googleSection.classList.add('hidden'); };
-            document.getElementById('authTabGoogle').onclick = () => { googleSection.classList.remove('hidden'); linkSection.classList.add('hidden'); pwSection.classList.add('hidden'); };
+            const twitchSection = document.getElementById('authTwitchSection');
+            document.getElementById('authTabEmail').onclick = () => { linkSection.classList.remove('hidden'); pwSection.classList.add('hidden'); googleSection.classList.add('hidden'); twitchSection.classList.add('hidden'); };
+            document.getElementById('authTabPassword').onclick = () => { pwSection.classList.remove('hidden'); linkSection.classList.add('hidden'); googleSection.classList.add('hidden'); twitchSection.classList.add('hidden'); };
+            document.getElementById('authTabGoogle').onclick = () => { googleSection.classList.remove('hidden'); linkSection.classList.add('hidden'); pwSection.classList.add('hidden'); twitchSection.classList.add('hidden'); };
+            document.getElementById('authTabTwitch').onclick = () => { twitchSection.classList.remove('hidden'); linkSection.classList.add('hidden'); pwSection.classList.add('hidden'); googleSection.classList.add('hidden'); };
 
             // Password auth events
             document.getElementById('pwCancelBtn').onclick = close;
@@ -901,6 +912,12 @@
             document.getElementById('googleCancelBtn').onclick = close;
             document.getElementById('googleSignInBtn').onclick = async () => {
                 await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href.split('#')[0] } });
+            };
+
+            // Twitch OAuth (if enabled in Supabase)
+            document.getElementById('twitchCancelBtn').onclick = close;
+            document.getElementById('twitchSignInBtn').onclick = async () => {
+                await supabase.auth.signInWithOAuth({ provider: 'twitch', options: { redirectTo: window.location.href.split('#')[0] } });
             };
         }
 
