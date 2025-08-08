@@ -47,6 +47,8 @@ def load_oauth_data():
                 data = pickle.load(f)
                 return data.get('states', {}), data.get('tokens', {})
         return {}, {}
+    except Exception:
+        return {}, {}
 
 def save_oauth_data(states, tokens):
     """Save OAuth states and tokens using in-memory cache on Vercel, pickle locally."""
