@@ -2255,13 +2255,21 @@
                     let predatorData = null;
                     if (predatorResponse.status === 'fulfilled') {
                         try {
+                            console.log('Predator response status:', predatorResponse.value.status);
                             const predatorJson = await predatorResponse.value.json();
+                            console.log('Raw predator JSON response:', predatorJson);
+                            
                             if (predatorJson?.success && predatorJson.data) {
                                 predatorData = predatorJson.data;
+                                console.log('Extracted predator data:', predatorData);
+                            } else {
+                                console.warn('Predator API returned success=false or no data:', predatorJson);
                             }
                         } catch (e) {
-                            console.warn('Failed to parse predator data:', e);
+                            console.error('Failed to parse predator JSON:', e);
                         }
+                    } else {
+                        console.error('Predator request failed:', predatorResponse.reason);
                     }
                     
                     // Store in window for backward compatibility
@@ -2312,10 +2320,22 @@
                 const { leaderboardData, predatorData } = dataResult;
                 
                 if (!leaderboardData?.players) throw new Error("Invalid leaderboard data structure.");
-                if (!predatorData) throw new Error("Invalid predator thresholds data structure.");
                 
-                // Debug: Log the predator data
+                // Debug: Log the predator data (allow it to be null)
                 console.log('Predator Data received:', predatorData);
+                console.log('Predator Data type:', typeof predatorData);
+                console.log('Predator Data keys:', predatorData ? Object.keys(predatorData) : 'null');
+                
+                // Provide fallback data if predator data is missing
+                if (!predatorData) {
+                    console.warn('No predator data received, using fallback');
+                    predatorData = {
+                        PC: null,
+                        PS4: null, 
+                        X1: null,
+                        SWITCH: null
+                    };
+                }
 
                 allPlayers = leaderboardData.players.map(player => {
                     const isLive = player.twitch_live?.is_live === true;
@@ -2372,6 +2392,18 @@
                 // Make functions available globally for debugging
                 window.debugFetchLegend = fetchPlayerLegend;
                 window.debugLoadTopLegends = loadTopPlayerLegends;
+                window.debugPredatorAPI = async () => {
+                    try {
+                        console.log('Testing predator API...');
+                        const response = await fetch(`${API_BASE_URL}/api/predator-points`);
+                        const data = await response.json();
+                        console.log('Predator API test result:', data);
+                        return data;
+                    } catch (error) {
+                        console.error('Predator API test failed:', error);
+                        return null;
+                    }
+                };
 
                 renderPredatorThresholds(predatorData);
                 renderRpDistributionChart(allPlayers);
