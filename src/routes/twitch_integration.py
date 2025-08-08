@@ -359,6 +359,7 @@ def get_twitch_live_status_batch(usernames, batch_size=None):
         results[username] = {
             "is_live": False,
             "stream_data": None,
+            "user_data": {},
             "has_vods": False,
             "recent_videos": []
         }
@@ -376,6 +377,7 @@ def get_twitch_live_status_batch(usernames, batch_size=None):
                     results[username] = {
                         "is_live": False,
                         "stream_data": None,
+                        "user_data": {},
                         "has_vods": False,
                         "recent_videos": []
                     }
@@ -389,23 +391,36 @@ def get_twitch_live_status_batch(usernames, batch_size=None):
                 "Authorization": f"Bearer {access_token}"
             }
             
-            # Build query string for batch request
-            query_params = "&".join([f"user_login={quote_plus(username)}" for username in batch])
-            url = f"https://api.twitch.tv/helix/streams?{query_params}"
+            # First, get user data for all users to check if accounts exist
+            user_query_params = "&".join([f"login={quote_plus(username)}" for username in batch])
+            user_url = f"https://api.twitch.tv/helix/users?{user_query_params}"
             
-            response = requests.get(url, headers=headers)
+            user_response = requests.get(user_url, headers=headers)
+            user_data_map = {}
             
-            if response.status_code == 200:
-                data = response.json()
-                live_streams = {stream['user_login'].lower(): stream for stream in data.get('data', [])}
+            if user_response.status_code == 200:
+                user_data = user_response.json()
+                user_data_map = {user['login'].lower(): user for user in user_data.get('data', [])}
+            
+            # Then get stream data for live users
+            stream_query_params = "&".join([f"user_login={quote_plus(username)}" for username in batch])
+            stream_url = f"https://api.twitch.tv/helix/streams?{stream_query_params}"
+            
+            stream_response = requests.get(stream_url, headers=headers)
+            
+            if stream_response.status_code == 200:
+                stream_data = stream_response.json()
+                live_streams = {stream['user_login'].lower(): stream for stream in stream_data.get('data', [])}
                 
                 # Process results for each username in batch
                 for username in batch:
                     username_lower = username.lower()
+                    user_info = user_data_map.get(username_lower)
+                    
                     if username_lower in live_streams:
-                        stream_data = live_streams[username_lower]
-                        game_id = stream_data.get('game_id', '')
-                        game_name = stream_data.get('game_name', '').lower()
+                        stream_info = live_streams[username_lower]
+                        game_id = stream_info.get('game_id', '')
+                        game_name = stream_info.get('game_name', '').lower()
                         
                         # Only mark as live if streaming Apex Legends (game ID 511224)
                         is_streaming_apex = game_id == '511224' or 'apex' in game_name
@@ -414,45 +429,54 @@ def get_twitch_live_status_batch(usernames, batch_size=None):
                             # User is live and streaming Apex
                             results[username] = {
                                 "is_live": True,
-                                "stream_data": stream_data,
+                                "stream_data": stream_info,
+                                "user_data": user_info or {},
                                 "has_vods": False,
                                 "recent_videos": []
                             }
                         else:
-                            # User is live but not streaming Apex - treat as offline
+                            # User is live but not streaming Apex - treat as offline but include user data
                             results[username] = {
                                 "is_live": False,
                                 "stream_data": None,
+                                "user_data": user_info or {},
                                 "has_vods": False,
                                 "recent_videos": []
                             }
                     else:
-                        # User is offline - VODs handled in background now
+                        # User is offline but may have valid account
                         results[username] = {
                             "is_live": False,
                             "stream_data": None,
+                            "user_data": user_info or {},
                             "has_vods": False,
                             "recent_videos": []
                         }
                         
-            elif response.status_code == 400:
-                print(f"Error getting Twitch live status for batch: {response.status_code}")
-                print(f"Response: {response.text}")
-                # Set all users in batch to offline
+            elif stream_response.status_code == 400:
+                print(f"Error getting Twitch stream status for batch: {stream_response.status_code}")
+                print(f"Response: {stream_response.text}")
+                # Set all users in batch to offline but keep user data if available
                 for username in batch:
+                    username_lower = username.lower()
+                    user_info = user_data_map.get(username_lower)
                     results[username] = {
                         "is_live": False,
                         "stream_data": None,
+                        "user_data": user_info or {},
                         "has_vods": False,
                         "recent_videos": []
                     }
             else:
-                print(f"Error getting Twitch live status for batch: {response.status_code}")
-                # Set all users in batch to offline
+                print(f"Error getting Twitch stream status for batch: {stream_response.status_code}")
+                # Set all users in batch to offline but keep user data if available
                 for username in batch:
+                    username_lower = username.lower()
+                    user_info = user_data_map.get(username_lower)
                     results[username] = {
                         "is_live": False,
                         "stream_data": None,
+                        "user_data": user_info or {},
                         "has_vods": False,
                         "recent_videos": []
                     }
@@ -464,6 +488,7 @@ def get_twitch_live_status_batch(usernames, batch_size=None):
                 results[username] = {
                     "is_live": False,
                     "stream_data": None,
+                    "user_data": {},
                     "has_vods": False,
                     "recent_videos": []
                 }
