@@ -2,7 +2,7 @@ import requests
 import time
 import json
 import os
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from urllib.parse import quote_plus
 import re
 from dotenv import load_dotenv
@@ -717,6 +717,60 @@ def get_cached_usernames():
         return jsonify({
             "success": False,
             "error": str(e)
+        }), 500
+
+@twitch_bp.route('/api/twitch-users-info', methods=['POST'])
+def get_twitch_users_info_endpoint():
+    """Get Twitch user info for multiple usernames (both online and offline)"""
+    try:
+        data = request.get_json()
+        if not data or 'usernames' not in data:
+            return jsonify({
+                "success": False,
+                "error": "Missing usernames in request"
+            }), 400
+        
+        usernames = data['usernames']
+        if not isinstance(usernames, list) or len(usernames) == 0:
+            return jsonify({
+                "success": False,
+                "error": "Invalid usernames format"
+            }), 400
+        
+        # Use existing function to get live status and user data
+        twitch_data = get_twitch_live_status_batch(usernames)
+        
+        # Convert to the format expected by the frontend
+        result = []
+        for username, data in twitch_data.items():
+            user_data = data.get('user_data', {})
+            stream_data = data.get('stream_data', {})
+            is_live = data.get('is_live', False)
+            
+            result.append({
+                'id': user_data.get('id', ''),
+                'username': username,
+                'display_name': user_data.get('display_name', username),
+                'profile_image_url': user_data.get('profile_image_url', ''),
+                'description': user_data.get('description', ''),
+                'is_live': is_live,
+                'viewer_count': stream_data.get('viewer_count', 0) if is_live else 0,
+                'game_name': stream_data.get('game_name', '') if is_live else '',
+                'title': stream_data.get('title', '') if is_live else '',
+                'started_at': stream_data.get('started_at', '') if is_live else ''
+            })
+        
+        return jsonify({
+            "success": True,
+            "data": result,
+            "total": len(result)
+        })
+        
+    except Exception as e:
+        print(f"Error in get_twitch_users_info_endpoint: {e}")
+        return jsonify({
+            "success": False,
+            "error": f"Server error: {str(e)}"
         }), 500
 
 def get_twitch_user_id(username):

@@ -465,10 +465,22 @@ def add_twitch_live_status(leaderboard_data):
                     }
                     # CRITICAL FIX: Set status to "Live" for streaming players
                     player['status'] = "Live"
-                    # Only check VODs/clips for live users to speed up the process
+                    # Check VODs/clips for live users
                     live_users_for_vods.append((username, player))
                 else:
-                    player['stream'] = None
+                    # For offline users with valid Twitch accounts, show they have a Twitch channel
+                    user_data = live_status.get("user_data", {})
+                    if user_data.get("id"):  # Valid Twitch account exists
+                        player['stream'] = {
+                            "viewers": 0,
+                            "game": "Offline",
+                            "twitchUser": user_data.get("display_name", username)
+                        }
+                        player['status'] = "Offline - Has Twitch"
+                        # Also check VODs for offline users with Twitch accounts
+                        live_users_for_vods.append((username, player))
+                    else:
+                        player['stream'] = None
                 
                 # Set default values for all users (will be updated for live users below)
                 player.update({
@@ -478,8 +490,42 @@ def add_twitch_live_status(leaderboard_data):
                     'recentClips': []
                 })
         
-        # Skip VODs/clips checking for speed - focus on core live status only
-        safe_print(f"Skipping VODs/clips for speed optimization - {len(live_users_for_vods)} live users detected")
+        # Check VODs for all users with Twitch accounts (not just live ones)
+        safe_print(f"Checking VODs for users with Twitch accounts...")
+        
+        if CACHE_AVAILABLE:
+            access_token = get_twitch_access_token()
+            if access_token:
+                client_id = os.environ.get('TWITCH_CLIENT_ID')
+                if client_id:
+                    headers = {
+                        'Authorization': f'Bearer {access_token}',
+                        'Client-Id': client_id
+                    }
+                    
+                    # Check VODs for all users with valid Twitch accounts
+                    for player in leaderboard_data['players']:
+                        if player.get('canonical_twitch_username'):
+                            username = player['canonical_twitch_username']
+                            try:
+                                vod_result = get_user_videos_cached(username, headers)
+                                player['vods_enabled'] = vod_result.get('has_vods', False)
+                                player['recent_videos'] = vod_result.get('recent_videos', [])
+                                
+                                # Also check clips
+                                clips_result = get_user_clips_cached(username, headers)
+                                player['hasClips'] = clips_result.get('has_clips', False)
+                                player['recentClips'] = clips_result.get('recent_clips', [])
+                                
+                            except Exception as e:
+                                safe_print(f"Error checking VODs/clips for {username}: {e}")
+                                continue
+                else:
+                    safe_print("No Twitch Client ID available for VOD checking")
+            else:
+                safe_print("No Twitch access token available for VOD checking")
+        else:
+            safe_print("VOD checking not available - missing dependencies")
         
         # Set default values for players without Twitch links
         for player in leaderboard_data['players']:
