@@ -748,7 +748,7 @@
 
         // Supabase auth + favorites
         let supabase = null;
-        let currentUser = null;
+        let supaUser = null;
         let favoritesSet = new Set();
 
         async function initSupabase() {
@@ -756,8 +756,8 @@
                 if (window.__supabaseConfig?.url && window.__supabaseConfig?.anon && window.supabase) {
                     supabase = window.supabase.createClient(window.__supabaseConfig.url, window.__supabaseConfig.anon);
                     const { data } = await supabase.auth.getUser();
-                    currentUser = data?.user || null;
-                    if (currentUser) await loadFavorites();
+                    supaUser = data?.user || null;
+                    if (supaUser) await loadFavorites();
                     renderAuthControls();
                 }
             } catch (e) { console.warn('Supabase init skipped:', e); }
@@ -766,12 +766,12 @@
         function renderAuthControls() {
             const container = document.getElementById('authControls');
             if (!container) return;
-            if (currentUser) {
-                container.innerHTML = `<span class="text-xs text-gray-400 mr-2">${currentUser.email || 'Signed in'}</span>
+            if (supaUser) {
+                container.innerHTML = `<span class="text-xs text-gray-400 mr-2">${supaUser.email || 'Signed in'}</span>
                 <button id="signOutBtn" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded">Sign out</button>`;
                 document.getElementById('signOutBtn').onclick = async () => {
                     await supabase.auth.signOut();
-                    currentUser = null;
+                    supaUser = null;
                     favoritesSet.clear();
                     renderAuthControls();
                     updateLeaderboardAndPagination();
@@ -789,14 +789,14 @@
 
         async function loadFavorites() {
             favoritesSet.clear();
-            if (!supabase || !currentUser) return;
+            if (!supabase || !supaUser) return;
             const { data, error } = await supabase.from('favorites').select('twitch_username');
             if (!error && Array.isArray(data)) data.forEach(r => favoritesSet.add(String(r.twitch_username).toLowerCase()));
         }
 
         async function toggleFavorite(twitchUsername) {
             if (!supabase) return;
-            if (!currentUser) { alert('Please sign in to save favorites.'); return; }
+            if (!supaUser) { alert('Please sign in to save favorites.'); return; }
             const key = String(twitchUsername).toLowerCase();
             if (favoritesSet.has(key)) {
                 await supabase.from('favorites').delete().eq('twitch_username', key);
