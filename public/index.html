@@ -4704,7 +4704,9 @@ ${(() => {
                 console.log('Twitch data for favorites:', twitchData);
                 
                 if (twitchData.success) {
-                    renderFavoritesList(twitchData.data);
+                    // Enhance streamer data with leaderboard information
+                    const enhancedStreamers = await enhanceStreamersWithLeaderboardData(twitchData.data, usernames);
+                    renderFavoritesList(enhancedStreamers);
                 } else {
                     showFavoritesError('Failed to load streamer data');
                 }
@@ -4720,6 +4722,47 @@ ${(() => {
                     showFavoritesError(`Error: ${error.message || 'An error occurred while loading favorites'}`);
                 }
             }
+        }
+        
+        async function enhanceStreamersWithLeaderboardData(streamers, usernames) {
+            // Find matching leaderboard data for each streamer
+            const enhancedStreamers = streamers.map(streamer => {
+                // Look for this streamer in the current leaderboard data
+                let leaderboardMatch = null;
+                if (allPlayers && allPlayers.length > 0) {
+                    leaderboardMatch = allPlayers.find(player => {
+                        // Extract username from player's twitch_link
+                        if (player.twitch_link) {
+                            const twitchUsername = extractTwitchUsernameFromUrl(player.twitch_link);
+                            return twitchUsername && twitchUsername.toLowerCase() === streamer.username.toLowerCase();
+                        }
+                        return false;
+                    });
+                }
+                
+                // Add leaderboard info to streamer
+                return {
+                    ...streamer,
+                    leaderboard: leaderboardMatch ? {
+                        rank: leaderboardMatch.rank,
+                        rp: leaderboardMatch.rp,
+                        rp_change_24h: leaderboardMatch.rp_change_24h,
+                        level: leaderboardMatch.level,
+                        player_name: leaderboardMatch.player_name,
+                        status: leaderboardMatch.status,
+                        country_code: leaderboardMatch.country_code,
+                        input_device: leaderboardMatch.input_device
+                    } : null
+                };
+            });
+            
+            return enhancedStreamers;
+        }
+        
+        function extractTwitchUsernameFromUrl(url) {
+            if (!url) return null;
+            const match = url.match(/twitch\.tv\/([a-zA-Z0-9_]+)/i);
+            return match ? match[1].toLowerCase() : null;
         }
         
         function showFavoritesLoading() {
@@ -4763,6 +4806,43 @@ ${(() => {
                 const gameText = isLive && streamer.game_name ? 
                     `<p class="text-xs text-gray-400 mt-1">Playing: ${streamer.game_name}</p>` : '';
                 
+                // Add leaderboard information
+                const leaderboardInfo = streamer.leaderboard ? `
+                    <div class="mt-2 p-2 bg-gray-800/50 rounded border-l-2 border-emerald-500">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="text-center">
+                                    <div class="text-lg font-bold text-emerald-400">#${streamer.leaderboard.rank}</div>
+                                    <div class="text-xs text-gray-400">Rank</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-sm font-medium text-white">${streamer.leaderboard.rp?.toLocaleString() || 0}</div>
+                                    <div class="text-xs text-gray-400">RP</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-sm font-medium ${streamer.leaderboard.rp_change_24h > 0 ? 'text-green-400' : streamer.leaderboard.rp_change_24h < 0 ? 'text-red-400' : 'text-gray-400'}">
+                                        ${streamer.leaderboard.rp_change_24h > 0 ? '+' : ''}${streamer.leaderboard.rp_change_24h?.toLocaleString() || 0}
+                                    </div>
+                                    <div class="text-xs text-gray-400">24h</div>
+                                </div>
+                                ${streamer.leaderboard.level ? `
+                                <div class="text-center">
+                                    <div class="text-sm font-medium text-blue-400">Lvl ${streamer.leaderboard.level}</div>
+                                    <div class="text-xs text-gray-400">Level</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                            ${streamer.leaderboard.country_code ? `
+                            <div class="flex items-center space-x-2">
+                                <span class="flag-icon flag-icon-${streamer.leaderboard.country_code}" title="${streamer.leaderboard.country_code.toUpperCase()}"></span>
+                                ${streamer.leaderboard.input_device === 'controller' ? '<i class="fas fa-gamepad text-gray-400" title="Controller"></i>' : ''}
+                                ${streamer.leaderboard.input_device === 'kbm' ? '<i class="fas fa-mouse text-gray-400" title="Keyboard & Mouse"></i>' : ''}
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : '<div class="mt-2 text-xs text-gray-500 italic">Not currently on leaderboard</div>';
+                
                 html += `
                     <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600/50 hover:border-purple-500/50 transition-all duration-200">
                         <div class="flex items-center justify-between">
@@ -4770,7 +4850,7 @@ ${(() => {
                                 <img src="${streamer.profile_image_url || 'https://via.placeholder.com/40x40/6B7280/FFFFFF?text=?'}" 
                                      alt="${streamer.display_name}" 
                                      class="w-10 h-10 rounded-full">
-                                <div>
+                                <div class="flex-1">
                                     <h4 class="font-medium text-white">${streamer.display_name || streamer.username}</h4>
                                     <div class="flex items-center space-x-2">
                                         ${statusIcon}
@@ -4778,6 +4858,7 @@ ${(() => {
                                         ${viewerCount}
                                     </div>
                                     ${gameText}
+                                    ${leaderboardInfo}
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
@@ -4806,8 +4887,19 @@ ${(() => {
         }
         
         function watchStream(username) {
-            // Open stream in new tab
-            window.open(`https://twitch.tv/${username}`, '_blank');
+            // Switch to multistream tab and add the streamer
+            showTab('multistreamTab');
+            
+            // Add the streamer to multistream if not already added
+            if (!activeStreams.includes(username)) {
+                activeStreams.push(username);
+                updateMultiStreamDisplay();
+                
+                // Show success message
+                enhancedFeatures.showToast(`Added ${username} to multistream`, 'success');
+            } else {
+                enhancedFeatures.showToast(`${username} is already in multistream`, 'info');
+            }
         }
         
         // Update the showTab function to refresh favorites when the tab is shown
