@@ -812,7 +812,8 @@
             sendBtn.onclick = async () => {
                 const email = emailInput.value.trim();
                 if (!email) return;
-                await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
+                const redirectTo = window.location.href.split('#')[0];
+                await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
                 msg.classList.remove('hidden');
                 setTimeout(close, 2000);
             };
@@ -3328,6 +3329,10 @@ ${(() => {
             if (event.target == analysisModal) hideModal();
             if (event.target == overrideModal) hideOverrideModal();
             if (event.target == multiStreamModal) hideMultiStreamModal();
+            // Handle Supabase magic-link callback in hash fragment
+            if (location.hash.includes('access_token') && window.supabase && window.__supabaseConfig?.url) {
+                try { new URLSearchParams(location.hash.substring(1)); } catch { /* ignore */ }
+            }
         };
 
         // Twitch OAuth Login System
