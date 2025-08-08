@@ -207,11 +207,9 @@
             z-index: 1;
         }
         
-        /* Dashboard Layout - Fully Responsive Grid */
+        /* Dashboard Layout - Simple Single Column */
         .dashboard-layout {
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            gap: 24px;
+            display: block;
             max-width: 100%;
             margin: 0;
             padding: 20px;
@@ -219,19 +217,9 @@
             box-sizing: border-box;
         }
         
-        .dashboard-sidebar-left,
-        .dashboard-sidebar-right {
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-            min-width: 0; /* Prevent grid overflow */
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-        }
-        
         .dashboard-main {
             min-height: 100vh;
-            min-width: 0; /* Prevent grid overflow */
+            min-width: 0;
             overflow-wrap: break-word;
             word-wrap: break-word;
         }
@@ -248,42 +236,6 @@
             height: auto;
         }
         
-        /* Widget Cards - Improved responsive design */
-        .widget-card {
-            background: rgba(31, 41, 55, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(75, 85, 99, 0.3);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 100%;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            hyphens: auto;
-        }
-        
-        .widget-title {
-            color: #ffffff;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-        }
-        
-        /* Text content adaptive styling */
-        .widget-card p,
-        .widget-card span,
-        .widget-card div {
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            hyphens: auto;
-        }
         
         /* Table responsiveness */
         .dashboard-main table {
@@ -301,60 +253,6 @@
             table-layout: fixed;
         }
         
-        /* Mobile-first responsive breakpoint */
-        @media (max-width: 1200px) {
-            .dashboard-layout {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 16px;
-            }
-            
-            .dashboard-sidebar-left,
-            .dashboard-sidebar-right {
-                position: static;
-                order: 0;
-            }
-            
-            .dashboard-main {
-                order: 1;
-            }
-            
-            /* Arrange widgets in horizontal layout on mobile when possible */
-            .dashboard-sidebar-left,
-            .dashboard-sidebar-right {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 16px;
-            }
-            
-            .widget-card {
-                padding: 16px;
-                margin-bottom: 16px;
-            }
-            
-            .widget-title {
-                font-size: 16px;
-                margin-bottom: 12px;
-            }
-            
-            /* Stack widgets vertically on very small screens */
-            @media (max-width: 768px) {
-                .dashboard-sidebar-left,
-                .dashboard-sidebar-right {
-                    grid-template-columns: 1fr;
-                }
-                
-                .dashboard-layout {
-                    padding: 12px;
-                    gap: 16px;
-                }
-                
-                .widget-card {
-                    padding: 12px;
-                    margin-bottom: 12px;
-                }
-            }
-        }
         .tab-content {
             display: none;
             padding-top: 1rem;
@@ -641,42 +539,6 @@
             <!-- Main Content Area -->
             <div class="flex-1 ml-64">
                 <div class="dashboard-layout">
-                    <!-- Left Sidebar Widgets -->
-                    <div class="dashboard-sidebar-left">
-                        <!-- My Rank Widget -->
-                        <div class="widget-card">
-                            <div class="widget-title">
-                                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                My Rank
-                            </div>
-                            <div id="myRankWidget">
-                                <div class="text-center py-6 text-gray-400">
-                                    <p class="text-sm">Sign in to track your rank</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Tracked Players Widget -->
-                        <div class="widget-card">
-                            <div class="widget-title">
-                                <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.196-2.12M17 20h-5v-2a3 3 0 00-5.196-2.12M17 20v-2a3 3 0 015.196-2.12m-5.196 0v-2a3 3 0 015.196-2.12M12 14a4 4 0 100-8 4 4 0 000 8zm-5 4h10a3 3 0 003-3v-1a5 5 0 00-5-5H7a5 5 0 00-5 5v1a3 3 0 003 3z"></path>
-                                </svg>
-                                Rivals & Friends
-                            </div>
-                            <div id="trackedPlayersWidget">
-                                <div class="text-center py-4 text-gray-400">
-                                    <p class="text-sm">No tracked players yet</p>
-                                    <button onclick="showTab('playerStatsTab')" class="mt-2 text-xs text-purple-400 hover:text-purple-300">
-                                        Search Players
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <!-- Main Content -->
                     <div class="dashboard-main">
 
@@ -982,54 +844,6 @@
         </div>
         
                     </div> <!-- End Dashboard Main -->
-                    
-                    <!-- Right Sidebar Widgets -->
-                    <div class="dashboard-sidebar-right">
-                        <!-- Featured Streamers Widget -->
-                        <div class="widget-card">
-                            <div class="widget-title">
-                                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                </svg>
-                                Live Streamers
-                            </div>
-                            <div id="featuredStreamersWidget">
-                                <div class="text-center py-4 text-gray-400">
-                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-500 mx-auto mb-2"></div>
-                                    <p class="text-sm">Loading streamers...</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Top Movers Widget -->
-                        <div class="widget-card">
-                            <div class="widget-title">
-                                <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                </svg>
-                                Top Movers (24h)
-                            </div>
-                            <div id="topMoversWidget">
-                                <div class="text-center py-4 text-gray-400">
-                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-500 mx-auto mb-2"></div>
-                                    <p class="text-sm">Calculating gains...</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Game Status Widget -->
-                        <div class="widget-card">
-                            <div class="widget-title">
-                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Game Status
-                            </div>
-                            <div id="gameStatusWidget">
-                                <!-- This will be populated by existing game status code -->
-                            </div>
-                        </div>
-                    </div>
                 </div> <!-- End Dashboard Layout -->
             </div> <!-- End Main Content Area -->
         </div> <!-- End Main Layout -->
