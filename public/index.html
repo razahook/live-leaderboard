@@ -1734,10 +1734,10 @@
         function renderPredatorThresholds(data) {
             console.log('Rendering predator thresholds with data:', data);
             predatorThresholdsDiv.innerHTML = '';
-            const platformOrder = { PC: 'PC', PS4: 'PlayStation', X1: 'Xbox', SWITCH: 'Switch' };
+            const platformOrder = { PC: 'PC', PlayStation: 'PlayStation', Xbox: 'Xbox', Switch: 'Switch' };
             const platformColors = {
-                PC: 'border-blue-700/50', PS4: 'border-blue-700/50',
-                X1: 'border-green-700/50', SWITCH: 'border-red-700/50'
+                PC: 'border-blue-700/50', PlayStation: 'border-blue-700/50',
+                Xbox: 'border-green-700/50', Switch: 'border-red-700/50'
             };
 
             for (const key in platformOrder) {
