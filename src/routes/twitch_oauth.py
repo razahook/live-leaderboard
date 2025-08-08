@@ -3,6 +3,9 @@ import time
 import json
 import os
 import secrets
+import hmac
+import hashlib
+import base64
 from flask import Blueprint, jsonify, request, redirect, session
 from urllib.parse import urlencode
 from dotenv import load_dotenv
@@ -71,29 +74,68 @@ def save_oauth_data(states, tokens):
 # Load existing data
 oauth_states, user_tokens = load_oauth_data()
 
+# Stateless HMAC-signed state helpers (Vercel-safe)
+def _b64url_encode(raw: bytes) -> str:
+    return base64.urlsafe_b64encode(raw).decode('ascii').rstrip('=')
+
+def _b64url_decode(s: str) -> bytes:
+    padding = '=' * (-len(s) % 4)
+    return base64.urlsafe_b64decode(s + padding)
+
+def _sign_state_payload(payload_dict: dict) -> str:
+    secret = (os.environ.get('SECRET_KEY', 'test-secret-key')).encode('utf-8')
+    payload_json = json.dumps(payload_dict, separators=(',', ':'), sort_keys=True).encode('utf-8')
+    data = _b64url_encode(payload_json)
+    sig = hmac.new(secret, data.encode('utf-8'), hashlib.sha256).digest()
+    return f"{data}.{_b64url_encode(sig)}"
+
+def _verify_state(state: str, max_age_seconds: int = 600) -> bool:
+    try:
+        secret = (os.environ.get('SECRET_KEY', 'test-secret-key')).encode('utf-8')
+        data, sig = state.split('.')
+        expected_sig = hmac.new(secret, data.encode('utf-8'), hashlib.sha256).digest()
+        provided_sig = _b64url_decode(sig)
+        if not hmac.compare_digest(expected_sig, provided_sig):
+            return False
+        payload = json.loads(_b64url_decode(data))
+        ts = int(payload.get('ts', 0))
+        if ts <= 0:
+            return False
+        if time.time() - ts > max_age_seconds:
+            return False
+        return True
+    except Exception:
+        return False
+
 @twitch_oauth_bp.route('/session/start')
 def oauth_login():
     """Initiate OAuth flow for clip creation permissions"""
     from flask import request
     
     try:
-        # Generate random state for CSRF protection
-        state = secrets.token_urlsafe(32)
-        oauth_states[state] = {
-            'created_at': time.time(),
-            'used': False
+        # Generate state (stateless HMAC for Vercel; fallback cache for local)
+        payload = {
+            'ts': int(time.time()),
+            'nonce': secrets.token_urlsafe(16)
         }
-        # Save the new state
-        save_oauth_data(oauth_states, user_tokens)
+        state = _sign_state_payload(payload)
+        if not IS_SERVERLESS:
+            # Also track locally to aid dev debugging
+            oauth_states[state] = {'created_at': time.time(), 'used': False}
+            save_oauth_data(oauth_states, user_tokens)
         
-        # Determine the correct redirect URI based on the current_url parameter
-        current_url = request.args.get('current_url', '')
-        if 'ngrok' in current_url or 'ngrok-free.app' in current_url:
-            redirect_uri = "https://adapted-cunning-rhino.ngrok-free.app/api/session/complete"
-        elif 'vercel.app' in current_url or 'live-leaderboard-plum.vercel.app' in current_url:
+        # Simplify: always use Vercel redirect in production; otherwise fallback
+        if IS_SERVERLESS:
             redirect_uri = "https://live-leaderboard-plum.vercel.app/api/session/complete"
         else:
-            redirect_uri = REDIRECT_URI
+            # In dev, allow override via current_url for ngrok/local testing
+            current_url = request.args.get('current_url', '')
+            if 'ngrok' in current_url or 'ngrok-free.app' in current_url:
+                redirect_uri = "https://adapted-cunning-rhino.ngrok-free.app/api/session/complete"
+            elif 'vercel.app' in current_url or 'live-leaderboard-plum.vercel.app' in current_url:
+                redirect_uri = "https://live-leaderboard-plum.vercel.app/api/session/complete"
+            else:
+                redirect_uri = REDIRECT_URI
         
         # Build OAuth URL
         oauth_params = {
@@ -142,7 +184,18 @@ def oauth_callback():
             """, 400
         
         # Validate state parameter
-        if not state or state not in oauth_states or oauth_states[state]['used']:
+        # Verify state (HMAC), and accept cached state in local dev
+        if not state or not _verify_state(state):
+            if not IS_SERVERLESS and (state in oauth_states and not oauth_states[state]['used']):
+                pass
+            else:
+                return f"""
+                <html><body>
+                    <h2>❌ Invalid Request</h2>
+                    <p>Invalid or expired state parameter</p>
+                    <p><a href="javascript:window.close()">Close this window</a></p>
+                </body></html>
+                """, 400
             return f"""
             <html><body>
                 <h2>❌ Invalid Request</h2>
@@ -151,9 +204,10 @@ def oauth_callback():
             </body></html>
             """, 400
         
-        # Mark state as used
-        oauth_states[state]['used'] = True
-        save_oauth_data(oauth_states, user_tokens)
+        # Mark state as used in local dev cache
+        if not IS_SERVERLESS and state in oauth_states:
+            oauth_states[state]['used'] = True
+            save_oauth_data(oauth_states, user_tokens)
         
         if not code:
             return f"""
@@ -164,14 +218,17 @@ def oauth_callback():
             </body></html>
             """, 400
         
-        # Determine the correct redirect URI based on the current_url parameter
-        current_url = request.args.get('current_url', '')
-        if 'ngrok' in current_url or 'ngrok-free.app' in current_url:
-            redirect_uri = "https://adapted-cunning-rhino.ngrok-free.app/api/session/complete"
-        elif 'vercel.app' in current_url or 'live-leaderboard-plum.vercel.app' in current_url:
+        # Simplify: always use Vercel redirect in production; otherwise fallback
+        if IS_SERVERLESS:
             redirect_uri = "https://live-leaderboard-plum.vercel.app/api/session/complete"
         else:
-            redirect_uri = REDIRECT_URI
+            current_url = request.args.get('current_url', '')
+            if 'ngrok' in current_url or 'ngrok-free.app' in current_url:
+                redirect_uri = "https://adapted-cunning-rhino.ngrok-free.app/api/session/complete"
+            elif 'vercel.app' in current_url or 'live-leaderboard-plum.vercel.app' in current_url:
+                redirect_uri = "https://live-leaderboard-plum.vercel.app/api/session/complete"
+            else:
+                redirect_uri = REDIRECT_URI
         
         # Exchange authorization code for access token
         token_data = {
