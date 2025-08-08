@@ -149,6 +149,74 @@
         .nav-item span {
             font-size: 16px;
         }
+        
+        /* Animated Background Options */
+        
+        /* Option 1: Apex Legends inspired gradient with subtle animation */
+        body {
+            background: linear-gradient(-45deg, #0f0f1e, #1a1a2e, #16213e, #0f0f1e);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Option 2: Floating particles overlay (uncomment to use instead) */
+        /*
+        body {
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f1e 100%);
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.1), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.1), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.1), transparent);
+            background-size: 200px 100px, 300px 150px, 250px 120px;
+            animation: particleFloat 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes particleFloat {
+            0% { background-position: 0px 0px, 0px 0px, 0px 0px; }
+            100% { background-position: 500px 1000px, -500px 1000px, 500px -1000px; }
+        }
+        */
+        
+        /* Option 3: Gaming RGB wave effect (uncomment to use instead) */
+        /*
+        body {
+            background: linear-gradient(-45deg, #ff006e, #8338ec, #3a86ff, #06ffa5);
+            background-size: 400% 400%;
+            animation: rgbWave 8s ease infinite;
+        }
+        
+        @keyframes rgbWave {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 50% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+        */
+        
+        /* Ensure content is above background */
+        .main-container {
+            position: relative;
+            z-index: 1;
+        }
         .tab-content {
             display: none;
             padding-top: 1rem;
@@ -384,7 +452,7 @@
         </div>
 
         <!-- Main Layout with Sidebar -->
-        <div class="flex min-h-screen">
+        <div class="flex min-h-screen main-container">
             <!-- Twitter-Style Sidebar -->
             <div class="w-64 bg-gray-900/50 backdrop-blur-sm border-r border-gray-700/50 fixed h-full left-0 top-0 pt-20">
                 <div class="p-4">
