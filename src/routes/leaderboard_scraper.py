@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, make_response
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -519,13 +519,16 @@ def get_leaderboard(platform):
             
             if cached_data:
                 safe_print(f"Returning cached leaderboard data for {platform}")
-                return jsonify({
+                response = make_response(jsonify({
                     "success": True,
                     "cached": True,
                     "data": cached_data,
                     "last_updated": cached_data.get("last_updated"),
                     "source": "cache"
-                })
+                }))
+                # Cache for 60 seconds on CDN, stale-while-revalidate for 120s
+                response.headers['Cache-Control'] = 'public, max-age=60, stale-while-revalidate=120'
+                return response
         except Exception as e:
             safe_print(f"Cache check failed: {e}")
         
@@ -547,13 +550,16 @@ def get_leaderboard(platform):
             except Exception as e:
                 safe_print(f"Failed to cache data: {e}")
             
-            return jsonify({
+            response = make_response(jsonify({
                 "success": True,
                 "cached": False,
                 "data": leaderboard_data,
                 "last_updated": leaderboard_data["last_updated"],
                 "source": "apexlegendsstatus.com"
-            })
+            }))
+            # Cache for 60 seconds on CDN, stale-while-revalidate for 120s
+            response.headers['Cache-Control'] = 'public, max-age=60, stale-while-revalidate=120'
+            return response
         else:
             # No fallback data - return error if scraping fails
             safe_print("Scraping failed - no fake data generated")

@@ -830,8 +830,13 @@
                 });
                 
                 if (window.__supabaseConfig?.url && window.__supabaseConfig?.anon && window.supabase) {
-                    supabase = window.supabase.createClient(window.__supabaseConfig.url, window.__supabaseConfig.anon);
-                    console.log('Supabase client created');
+                    // Only create client if it doesn't exist
+                    if (!supabase) {
+                        supabase = window.supabase.createClient(window.__supabaseConfig.url, window.__supabaseConfig.anon);
+                        console.log('Supabase client created');
+                    } else {
+                        console.log('Supabase client already exists');
+                    }
                     
                     const { data, error } = await supabase.auth.getUser();
                     if (error) {
@@ -1016,16 +1021,22 @@
                         console.log('Removed favorite:', key);
                     }
                 } else {
-                    const { error } = await supabase.from('favorites').insert({ 
+                    const { data, error } = await supabase.from('favorites').insert({ 
                         twitch_username: key,
                         user_id: supaUser.id 
-                    });
+                    }).select();
                     if (error) {
                         console.error('Error adding favorite:', error);
-                        alert('Failed to add favorite. Check console for details.');
+                        alert(`Failed to add favorite: ${error.message}`);
                     } else {
                         favoritesSet.add(key);
-                        console.log('Added favorite:', key);
+                        console.log('Added favorite:', key, 'Response:', data);
+                        // Verify it was saved
+                        const { data: checkData, error: checkError } = await supabase
+                            .from('favorites')
+                            .select('*')
+                            .eq('user_id', supaUser.id);
+                        console.log('Verification check - all user favorites:', checkData, 'Error:', checkError);
                     }
                 }
                 updateLeaderboardAndPagination();
@@ -1838,6 +1849,44 @@
             try {
                 // Load data as JavaScript files to bypass ad blockers
                 const loadData = async () => {
+                    // Check localStorage cache first
+                    const cacheKey = 'leaderboard_cache';
+                    const cacheExpiry = 60000; // 1 minute cache
+                    const cached = localStorage.getItem(cacheKey);
+                    
+                    if (cached) {
+                        try {
+                            const { data, timestamp } = JSON.parse(cached);
+                            const age = Date.now() - timestamp;
+                            
+                            if (age < cacheExpiry) {
+                                console.log('Using cached leaderboard data, age:', Math.round(age/1000) + 's');
+                                // Use cached data immediately
+                                window.leaderboardData = data.leaderboardData;
+                                window.predatorThresholds = data.predatorData;
+                                
+                                // Still fetch fresh data in background
+                                fetch(`${API_BASE_URL}/api/leaderboard/PC`)
+                                    .then(r => r.json())
+                                    .then(fresh => {
+                                        if (fresh.success && fresh.data) {
+                                            // Update cache with fresh data
+                                            const newCache = {
+                                                data: { leaderboardData: fresh.data, predatorData: window.predatorThresholds },
+                                                timestamp: Date.now()
+                                            };
+                                            localStorage.setItem(cacheKey, JSON.stringify(newCache));
+                                            console.log('Updated cache with fresh data');
+                                        }
+                                    })
+                                    .catch(e => console.warn('Background refresh failed:', e));
+                                
+                                return data;
+                            }
+                        } catch (e) {
+                            console.warn('Cache parse error:', e);
+                        }
+                    }
                     // Start both requests in parallel
                     const [leaderboardResponse, predatorResponse] = await Promise.allSettled([
                         fetch(`${API_BASE_URL}/api/leaderboard/PC`),
@@ -1870,10 +1919,24 @@
                     window.leaderboardData = leaderboardJson.data;
                     window.predatorThresholds = predatorData;
                     
-                    return {
+                    const result = {
                         leaderboardData: leaderboardJson.data,
                         predatorData: predatorData
                     };
+                    
+                    // Cache the successful result
+                    try {
+                        const cacheData = {
+                            data: result,
+                            timestamp: Date.now()
+                        };
+                        localStorage.setItem('leaderboard_cache', JSON.stringify(cacheData));
+                        console.log('Cached leaderboard data');
+                    } catch (e) {
+                        console.warn('Failed to cache data:', e);
+                    }
+                    
+                    return result;
                 };
                 
                 // Fetch environment variables first (for Supabase)
