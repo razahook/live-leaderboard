@@ -3009,7 +3009,7 @@ ${(() => {
                                         String(playerData.status || '').toLowerCase().includes('match')
                                     );
                                     
-                                    if (isLive && playerData && playerData.hasClips) {
+                                    if (isLive) {
                                         // Live and clips enabled: Show Clip action
                                         return `<button onclick="createLiveClip('${canonicalTwitchUsername}', '${displayName}')" class="text-xs bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded transition-colors" title="Create clip of current live stream">
                                             📎 Clip
@@ -3018,11 +3018,6 @@ ${(() => {
                                         // Not live but has clips: Show latest clip
                                         return `<button onclick="window.open('${playerData.recentClips[0].url}', '_blank')" class="text-xs bg-gray-500 hover:bg-gray-600 px-3 py-1.5 rounded transition-colors" title="Watch latest clip (not live)">
                                             📹 Latest
-                                        </button>`;
-                                    } else if (isLive) {
-                                        // Live but clips disabled: disable Clip action
-                                        return `<button class="text-xs bg-gray-600 px-3 py-1.5 rounded transition-colors cursor-not-allowed" title="Clips are disabled for this channel" disabled>
-                                            📎 Clip
                                         </button>`;
                                     } else {
                                         // Not live and no clips: Disabled
@@ -3401,7 +3396,6 @@ ${(() => {
         const loadStreamClips = async (index) => {
             const clipsTab = document.getElementById(`tab-clips-${index}`);
             const streamer = clipsTab.dataset.streamer;
-            const hasClips = clipsTab.dataset.hasClips === 'true';
             const clipsContainer = document.getElementById(`clips-container-${index}`);
             const clipsLoading = document.getElementById(`clips-loading-${index}`);
 
@@ -3410,7 +3404,7 @@ ${(() => {
                 return;
             }
 
-            console.log(`Loading clips for ${streamer}, hasClips: ${hasClips}`);
+            console.log(`Loading clips for ${streamer}`);
             
             // Get player data to check if live
             const playerData = allPlayers.find(player => 
@@ -3434,31 +3428,18 @@ ${(() => {
                 // We keep the quick action button in the header row only.
                 const clipCreateButton = '';
 
-                // Try Twitch API clips first if streamer has clips enabled
-                if (hasClips) {
-                    console.log('Fetching Twitch API clips...');
-                    const response = await fetch(`/api/stream-clips/${streamer}`);
-                    const data = await response.json();
+                // Try Twitch API clips first regardless; fall back to rewind if none
+                console.log('Fetching Twitch API clips...');
+                const response = await fetch(`/api/stream-clips/${streamer}`);
+                const data = await response.json();
 
-                    if (data.success && data.data.has_clips && data.data.recent_clips.length > 0) {
-                        displayTwitchClips(index, data.data.recent_clips, clipCreateButton);
-                        clipsContainer.dataset.loaded = 'true';
-                        return;
-                    }
-
-                    // Clips are enabled but none to show; do not render rewind UI
-                    clipsContainer.innerHTML = `
-                        ${clipCreateButton}
-                        <div class="text-gray-300 text-sm">
-                            Clips are enabled for this channel. No recent clips found.
-                            Use the Clip button in the header to capture one.
-                        </div>
-                    `;
+                if (data.success && data.data.recent_clips && data.data.recent_clips.length > 0) {
+                    displayTwitchClips(index, data.data.recent_clips, clipCreateButton);
                     clipsContainer.dataset.loaded = 'true';
                     return;
                 }
 
-                // Only show rewind/HLS clipping when clips are NOT enabled
+                // Fallback to rewind/HLS clipping
                 console.log('Using rewind/HLS clipping fallback...');
                 await setupRewindClipping(index, streamer, clipCreateButton);
                 clipsContainer.dataset.loaded = 'true';
