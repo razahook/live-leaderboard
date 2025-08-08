@@ -870,7 +870,7 @@
             playersToRender.forEach(player => {
                 const row = document.createElement('tr');
                 row.className = 'border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors duration-200';
-                const flagHtml = player.country_code ? `<span class="fi fi-${player.country_code} mr-2"></span>` : '';
+                const flagHtml = player.country_code ? `<span class="inline-block mr-2 align-middle"><img src="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/flags/4x3/${player.country_code}.svg" alt="${player.country_code}" class="h-4 rounded-sm"/></span>` : '';
                 const inputIcon = player.input_device === 'controller' ? '<svg class="w-4 h-4 text-gray-400 ml-1" viewBox="0 0 24 24" fill="currentColor"><path d="M6 7h12a4 4 0 014 4v5a3 3 0 01-3 3h-1a3 3 0 01-2.12-.88L14 16h-4l-1.88 2.12A3 3 0 016 19H5a3 3 0 01-3-3v-5a4 4 0 014-4zM8 11H6v2h2v2h2v-2h2v-2h-2V9H8v2z"/></svg>' : (player.input_device === 'kbm' ? '<svg class="w-4 h-4 text-gray-400 ml-1" viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16a2 2 0 012 2v6H2V7a2 2 0 012-2zm0 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM6 8h2v2H6V8zm4 0h2v2h-2V8zm4 0h2v2h-2V8z"/></svg>' : '');
                 const playerNameHtml = player.twitchLink ? `<a href="${player.twitchLink}" target="_blank" class="hover:text-emerald-400 transition-colors">${player.name}</a>` : player.name;
                 row.innerHTML = `
@@ -1635,7 +1635,9 @@
                         recentClips: player.recentClips || [],
                         // ✅ ADD MISSING TWITCH_LIVE DATA
                         twitch_live: player.twitch_live,
-                        canonical_twitch_username: player.canonical_twitch_username
+                        canonical_twitch_username: player.canonical_twitch_username,
+                        country_code: player.country_code || null,
+                        input_device: player.input_device || null
                     };
                 });
                 
