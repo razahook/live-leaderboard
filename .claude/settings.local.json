@@ -14,7 +14,9 @@
       "Bash(tree:*)",
       "WebFetch(domain:live-leaderboard-plum.vercel.app)",
       "Bash(git reset:*)",
-      "WebFetch(domain:apexlegendsstatus.com)"
+      "WebFetch(domain:apexlegendsstatus.com)",
+      "Bash(git log:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }

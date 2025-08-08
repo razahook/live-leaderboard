@@ -822,14 +822,35 @@
 
         async function initSupabase() {
             try {
+                console.log('Initializing Supabase...', {
+                    hasConfig: !!window.__supabaseConfig,
+                    hasUrl: !!window.__supabaseConfig?.url,
+                    hasAnon: !!window.__supabaseConfig?.anon,
+                    hasLib: !!window.supabase
+                });
+                
                 if (window.__supabaseConfig?.url && window.__supabaseConfig?.anon && window.supabase) {
                     supabase = window.supabase.createClient(window.__supabaseConfig.url, window.__supabaseConfig.anon);
-                    const { data } = await supabase.auth.getUser();
+                    console.log('Supabase client created');
+                    
+                    const { data, error } = await supabase.auth.getUser();
+                    if (error) {
+                        console.error('Error getting user:', error);
+                    }
+                    
                     supaUser = data?.user || null;
-                    if (supaUser) await loadFavorites();
+                    console.log('Supabase user:', supaUser ? 'logged in' : 'not logged in');
+                    
+                    if (supaUser) {
+                        await loadFavorites();
+                    }
                     renderAuthControls();
+                } else {
+                    console.warn('Missing Supabase requirements');
                 }
-            } catch (e) { console.warn('Supabase init skipped:', e); }
+            } catch (e) {
+                console.error('Supabase init error:', e);
+            }
         }
 
         function renderAuthControls() {
@@ -955,24 +976,62 @@
         }
 
         async function loadFavorites() {
+            console.log('Loading favorites...', { supabase: !!supabase, supaUser: !!supaUser });
             favoritesSet.clear();
-            if (!supabase || !supaUser) return;
-            const { data, error } = await supabase.from('favorites').select('twitch_username');
-            if (!error && Array.isArray(data)) data.forEach(r => favoritesSet.add(String(r.twitch_username).toLowerCase()));
+            if (!supabase || !supaUser) {
+                console.log('Cannot load favorites - no supabase or user');
+                return;
+            }
+            const { data, error } = await supabase.from('favorites')
+                .select('twitch_username')
+                .eq('user_id', supaUser.id);
+            console.log('Favorites query result:', { data, error });
+            if (error) {
+                console.error('Error loading favorites:', error);
+            } else if (Array.isArray(data)) {
+                data.forEach(r => favoritesSet.add(String(r.twitch_username).toLowerCase()));
+                console.log('Loaded favorites:', Array.from(favoritesSet));
+            }
         }
 
         async function toggleFavorite(twitchUsername) {
-            if (!supabase) return;
-            if (!supaUser) { alert('Please sign in to save favorites.'); return; }
-            const key = String(twitchUsername).toLowerCase();
-            if (favoritesSet.has(key)) {
-                await supabase.from('favorites').delete().eq('twitch_username', key);
-                favoritesSet.delete(key);
-            } else {
-                await supabase.from('favorites').insert({ twitch_username: key });
-                favoritesSet.add(key);
+            console.log('Toggle favorite:', twitchUsername);
+            if (!supabase) {
+                console.error('No Supabase client');
+                return;
             }
-            updateLeaderboardAndPagination();
+            if (!supaUser) {
+                alert('Please sign in to save favorites.');
+                return;
+            }
+            const key = String(twitchUsername).toLowerCase();
+            try {
+                if (favoritesSet.has(key)) {
+                    const { error } = await supabase.from('favorites').delete().eq('twitch_username', key).eq('user_id', supaUser.id);
+                    if (error) {
+                        console.error('Error removing favorite:', error);
+                        alert('Failed to remove favorite. Check console for details.');
+                    } else {
+                        favoritesSet.delete(key);
+                        console.log('Removed favorite:', key);
+                    }
+                } else {
+                    const { error } = await supabase.from('favorites').insert({ 
+                        twitch_username: key,
+                        user_id: supaUser.id 
+                    });
+                    if (error) {
+                        console.error('Error adding favorite:', error);
+                        alert('Failed to add favorite. Check console for details.');
+                    } else {
+                        favoritesSet.add(key);
+                        console.log('Added favorite:', key);
+                    }
+                }
+                updateLeaderboardAndPagination();
+            } catch (e) {
+                console.error('Exception in toggleFavorite:', e);
+            }
         }
 
         const showTab = (tabId) => {
