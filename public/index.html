@@ -3440,9 +3440,20 @@ ${(() => {
                         clipsContainer.dataset.loaded = 'true';
                         return;
                     }
+
+                    // Clips are enabled but none to show; do not render rewind UI
+                    clipsContainer.innerHTML = `
+                        ${clipCreateButton}
+                        <div class="text-gray-300 text-sm">
+                            Clips are enabled for this channel. No recent clips found.
+                            Use the Clip button in the header to capture one.
+                        </div>
+                    `;
+                    clipsContainer.dataset.loaded = 'true';
+                    return;
                 }
 
-                // Fallback to rewind/HLS clipping
+                // Only show rewind/HLS clipping when clips are NOT enabled
                 console.log('Using rewind/HLS clipping fallback...');
                 await setupRewindClipping(index, streamer, clipCreateButton);
                 clipsContainer.dataset.loaded = 'true';
