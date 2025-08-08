@@ -879,9 +879,9 @@
             const pwSection = document.getElementById('authPasswordSection');
             const linkSection = document.getElementById('authEmailLinkSection');
             const googleSection = document.getElementById('authGoogleSection');
-            // default to email link tab
-            linkSection.classList.remove('hidden');
-            pwSection.classList.add('hidden');
+            // Default layout: password section visible, providers below
+            pwSection.classList.remove('hidden');
+            linkSection.classList.add('hidden');
             googleSection.classList.add('hidden');
             msg.classList.add('hidden');
             emailInput.value = '';
