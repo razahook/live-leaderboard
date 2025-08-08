@@ -776,26 +776,9 @@
         let currentPage = 1;
         const itemsPerPage = 50; 
         let previewTimeout;
-        // Dynamically detect the base URL for ngrok/localhost/vercel
-        const NGROK_BASE_URL = (() => {
-            const currentHost = window.location.hostname;
-            const currentProtocol = window.location.protocol;
-            const currentPort = window.location.port;
-            
-            // If accessing through ngrok (ngrok-free.app domain)
-            if (currentHost.includes('ngrok-free.app') || currentHost.includes('ngrok.io')) {
-                return `${currentProtocol}//${currentHost}`;
-            }
-            // If accessing through Vercel (vercel.app domain) or other production domains
-            else if (currentHost.includes('vercel.app') || currentHost.includes('netlify.app') || (!currentHost.includes('localhost') && !currentHost.includes('127.0.0.1'))) {
-                return `${currentProtocol}//${currentHost}`;
-            }
-            // If accessing locally
-            else {
-                return `${currentProtocol}//${currentHost}:8080`;
-            }
-        })(); 
-        const MOZAMBIQUE_API_KEY = '456c01cf240c13399563026f5604d777'; 
+        // Use current origin for API calls (works for Vercel deployment)
+        const API_BASE_URL = window.location.origin; 
+        // API key should be handled server-side via environment variables 
         const TRACKER_GG_API_KEY = 'c4cc3d18-adaf-487b-b3da-d47b924585c4'; 
         const GEMINI_API_KEY = "AIzaSyA_sdFUk6nrcC8sK3ZlnFbEexJgCTd8SqU"; 
         
@@ -1169,7 +1152,7 @@
             streamPreviewPlayer.innerHTML = ''; 
             new Twitch.Embed(streamPreviewPlayer, {
                 width: "100%", height: "100%", channel: twitchUser,
-                layout: "video", muted: false, autoplay: true, parent: ["localhost"],
+                layout: "video", muted: false, autoplay: true, parent: [window.location.hostname],
                 volume: 0.5
             });
             
@@ -1409,13 +1392,12 @@
                 return;
             }
 
-            const overrideApiUrl = `${NGROK_BASE_URL}/api/stream-override`;
+            const overrideApiUrl = `${API_BASE_URL}/api/stream-override`;
             try {
                                 const response = await fetch(overrideApiUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'ngrok-skip-browser-warning': 'true'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ player_name: playerName, twitch_username: twitchUsername })
                 });
@@ -1488,12 +1470,12 @@
                 let profileResponse, sessionsResponse;
 
                 if (selectedApi === 'tracker') {
-                                const trackerProfileUrl = `${NGROK_BASE_URL}/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=profile`;
-            const trackerSessionsUrl = `${NGROK_BASE_URL}/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=sessions`;
+                                const trackerProfileUrl = `${API_BASE_URL}/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=profile`;
+            const trackerSessionsUrl = `${API_BASE_URL}/api/tracker-stats?platform=${platformValue}&identifier=${encodeURIComponent(identifier)}&type=sessions`;
                     
                     [profileResponse, sessionsResponse] = await Promise.all([
-                        fetch(trackerProfileUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } }),
-                        fetch(trackerSessionsUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } })
+                        fetch(trackerProfileUrl),
+                        fetch(trackerSessionsUrl)
                     ]);
 
                     if (!profileResponse.ok) {
@@ -1796,52 +1778,67 @@
         async function initializeApp() {
             try {
                 // Load data as JavaScript files to bypass ad blockers
-                const loadData = () => {
-                    return new Promise((resolve, reject) => {
-                        let loadedCount = 0;
-                        const totalFiles = 1; // proceed as soon as leaderboard arrives
-                        
-                        const checkComplete = () => {
-                            loadedCount++;
-                            if (loadedCount === totalFiles) {
-                                if (window.leaderboardData && window.predatorThresholds) {
-                                    resolve({
-                                        leaderboardData: window.leaderboardData,
-                                        predatorData: window.predatorThresholds
-                                    });
-                                } else {
-                                    reject(new Error('Data not loaded properly'));
-                                }
+                const loadData = async () => {
+                    // Start both requests in parallel
+                    const [leaderboardResponse, predatorResponse] = await Promise.allSettled([
+                        fetch(`${API_BASE_URL}/api/leaderboard/PC`),
+                        fetch(`${API_BASE_URL}/api/predator-points`)
+                    ]);
+                    
+                    // Process leaderboard (required)
+                    if (leaderboardResponse.status === 'rejected') {
+                        throw new Error('Failed to load leaderboard data');
+                    }
+                    const leaderboardJson = await leaderboardResponse.value.json();
+                    if (!leaderboardJson.success || !leaderboardJson.data?.players) {
+                        throw new Error('Invalid leaderboard data format');
+                    }
+                    
+                    // Process predator data (optional - don't fail if it doesn't load)
+                    let predatorData = null;
+                    if (predatorResponse.status === 'fulfilled') {
+                        try {
+                            const predatorJson = await predatorResponse.value.json();
+                            if (predatorJson?.success && predatorJson.data) {
+                                predatorData = predatorJson.data;
                             }
-                        };
-                        
-                        // Load leaderboard data via API
-                        fetch(`${NGROK_BASE_URL}/api/leaderboard/PC`)
-                            .then(response => response.json())
-                            .then(data => {
-                if (data.success && data.data && data.data.players) {
-                                    window.leaderboardData = data.data; // Keep the full data object with players property
-                                    checkComplete();
-                                } else {
-                                    reject(new Error('Invalid leaderboard data format'));
-                                }
-                            })
-                            .catch(() => reject(new Error('Failed to load leaderboard data')));
-                        
-                        // Load predator thresholds in background; don't block initial render
-                        fetch(`${NGROK_BASE_URL}/api/predator-points`)
-                            .then(r => r.json())
-                            .then(d => { if (d?.success && d.data) window.predatorThresholds = d.data; })
-                            .catch(() => {});
-                    });
+                        } catch (e) {
+                            console.warn('Failed to parse predator data:', e);
+                        }
+                    }
+                    
+                    // Store in window for backward compatibility
+                    window.leaderboardData = leaderboardJson.data;
+                    window.predatorThresholds = predatorData;
+                    
+                    return {
+                        leaderboardData: leaderboardJson.data,
+                        predatorData: predatorData
+                    };
                 };
                 
-                const { leaderboardData, predatorData } = await loadData();
+                // Fetch environment variables first (for Supabase)
+                try {
+                    const envResponse = await fetch(`/api/public-env`);
+                    const envData = await envResponse.json();
+                    if (envData?.success && envData.data) {
+                        window.env = envData.data;
+                        window.__supabaseConfig = { 
+                            url: envData.data.NEXT_PUBLIC_SUPABASE_URL, 
+                            anon: envData.data.NEXT_PUBLIC_SUPABASE_ANON_KEY 
+                        };
+                    }
+                } catch (err) { 
+                    console.warn('Failed to fetch env vars:', err);
+                }
 
-                // Initialize Supabase (for auth + favorites)
-                const SUPABASE_URL = (window?.env?.NEXT_PUBLIC_SUPABASE_URL) || (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_URL : undefined) || undefined;
-                const SUPABASE_ANON = (window?.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY) || (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined) || undefined;
-                window.__supabaseConfig = { url: SUPABASE_URL, anon: SUPABASE_ANON };
+                // Load all critical data in parallel
+                const [dataResult] = await Promise.all([
+                    loadData(),
+                    initSupabase() // Initialize Supabase early for favorites
+                ]);
+                
+                const { leaderboardData, predatorData } = dataResult;
                 
                 if (!leaderboardData?.players) throw new Error("Invalid leaderboard data structure.");
                 if (!predatorData) throw new Error("Invalid predator thresholds data structure.");
@@ -1889,8 +1886,8 @@
                         input_device: player.input_device || null
                     };
                 });
-                // Load favorites early to render stars promptly
-                await initSupabase();
+                
+                // Favorites should already be loaded from earlier initSupabase()
                 filteredAndSortedPlayers = [...allPlayers]; 
                 currentPage = 1; 
                 updateLeaderboardAndPagination(); 
@@ -1904,19 +1901,6 @@
                 
                 // Load additional data
                 loadGameStatus();
-                
-                // Initialize auth last (fetch env if needed)
-                try {
-                    if (!window.__supabaseConfig?.url || !window.__supabaseConfig?.anon) {
-                        const r = await fetch(`/api/public-env`);
-                        const e = await r.json();
-                        if (e?.success && e.data) {
-                            window.env = e.data;
-                            window.__supabaseConfig = { url: e.data.NEXT_PUBLIC_SUPABASE_URL, anon: e.data.NEXT_PUBLIC_SUPABASE_ANON_KEY };
-                        }
-                    }
-                } catch (err) { /* ignore */ }
-                initSupabase();
                 
             } catch (error) {
                 console.error('Failed to initialize app:', error);
@@ -2454,11 +2438,10 @@
             searchResults.innerHTML = '<div class="spinner"></div><p class="text-center mt-2">Searching...</p>';
 
             try {
-                const response = await fetch(`${NGROK_BASE_URL}/api/stream-search`, {
+                const response = await fetch(`${API_BASE_URL}/api/stream-search`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'ngrok-skip-browser-warning': 'true'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ query })
                 });
@@ -2497,8 +2480,7 @@
             
             try {
                 // Get channel info
-                const channelResponse = await fetch(`${NGROK_BASE_URL}/api/stream-channel/${channelLogin}`, {
-                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                const channelResponse = await fetch(`${API_BASE_URL}/api/stream-channel/${channelLogin}`, {
                 });
                 const channelData = await channelResponse.json();
                 
@@ -2506,11 +2488,8 @@
                     renderChannelInfo(channelData.channel);
                     
                     // Get recent streams with hidden VODs (like the extension)
-                    const streamsResponse = await fetch(`${NGROK_BASE_URL}/api/stream-recent/${channelLogin}`, {
+                    const streamsResponse = await fetch(`${API_BASE_URL}/api/stream-recent/${channelLogin}`, {
                         method: 'GET',
-                        headers: {
-                            'ngrok-skip-browser-warning': 'true'
-                        }
                     });
                     const streamsData = await streamsResponse.json();
                     console.log('Recent streams data:', streamsData);
@@ -2536,8 +2515,7 @@
                     }
                     
                     // Check if live
-                    const liveResponse = await fetch(`${NGROK_BASE_URL}/api/stream-live/${channelLogin}`, {
-                        headers: { 'ngrok-skip-browser-warning': 'true' }
+                    const liveResponse = await fetch(`${API_BASE_URL}/api/stream-live/${channelLogin}`, {
                     });
                     const liveData = await liveResponse.json();
                     
@@ -2624,9 +2602,8 @@
             videoPlayer.innerHTML = '<div class="spinner"></div><p class="text-center mt-2">Loading video...</p>';
             
             try {
-                console.log('Fetching video info from:', `${NGROK_BASE_URL}/api/stream-video/${videoId}`);
-                const response = await fetch(`${NGROK_BASE_URL}/api/stream-video/${videoId}`, {
-                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                console.log('Fetching video info from:', `${API_BASE_URL}/api/stream-video/${videoId}`);
+                const response = await fetch(`${API_BASE_URL}/api/stream-video/${videoId}`, {
                 });
                 
                 console.log('Response status:', response.status);
@@ -2717,19 +2694,13 @@
                 const hlsStatus = document.getElementById('hlsStatus');
                 
                 // Use proxied M3U8 URL to bypass CORS - force HTTPS to avoid Mixed Content
-                const baseUrl = NGROK_BASE_URL.replace('http://', 'https://');
+                const baseUrl = API_BASE_URL.replace('http://', 'https://');
                 const proxiedUrl = `${baseUrl}/api/stream-proxy-m3u8?url=${encodeURIComponent(data.playlist_url)}`;
                 console.log('Using proxied M3U8 URL:', proxiedUrl);
                 
                 if (Hls.isSupported()) {
                     const hls = new Hls({
-                        debug: true,
-                        xhrSetup: function(xhr, url) {
-                            // Add ngrok header to bypass warning
-                            if (url.includes('ngrok-free.app')) {
-                                xhr.setRequestHeader('ngrok-skip-browser-warning', 'true');
-                            }
-                        }
+                        debug: true
                     });
                     
                     hls.loadSource(proxiedUrl);
@@ -2853,8 +2824,7 @@
             clipInfo.innerHTML = '<div class="spinner"></div><p class="text-center mt-2">Loading clip...</p>';
             
             try {
-                const response = await fetch(`${NGROK_BASE_URL}/api/stream-clip/${clipSlug}`, {
-                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                const response = await fetch(`${API_BASE_URL}/api/stream-clip/${clipSlug}`, {
                 });
                 const data = await response.json();
                 
@@ -2926,7 +2896,7 @@
             try {
                 console.log('Loading game status...');
                 
-                const mapResponse = await fetch(`${NGROK_BASE_URL}/api/map-rotation`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
+                const mapResponse = await fetch(`${API_BASE_URL}/api/map-rotation`);
                 
                 console.log('Map rotation response:', mapResponse.status, mapResponse.ok);
                 
@@ -3411,7 +3381,7 @@ ${(() => {
                     layout: "video",
                     muted: true, // Mute to avoid audio conflicts
                     autoplay: true,
-                    parent: [window.location.hostname, "localhost", "127.0.0.1"]
+                    parent: [window.location.hostname]
                 });
                 
                 // Remove loading indicator immediately when embed is created
@@ -3514,7 +3484,7 @@ ${(() => {
                     
                     // Verify the token is still valid with the server
                     try {
-                        const response = await fetch(`${NGROK_BASE_URL}/api/session/check?username=${encodeURIComponent(currentUser.username)}`);
+                        const response = await fetch(`${API_BASE_URL}/api/session/check?username=${encodeURIComponent(currentUser.username)}`);
                         const data = await response.json();
                         
                         if (data.success && data.authorized) {
@@ -3542,7 +3512,7 @@ ${(() => {
         const startTwitchLogin = async () => {
             try {
                 // Use the proper API endpoint for OAuth initiation
-                const response = await fetch(`${NGROK_BASE_URL}/api/session/start?current_url=${encodeURIComponent(window.location.href)}`);
+                const response = await fetch(`${API_BASE_URL}/api/session/start?current_url=${encodeURIComponent(window.location.href)}`);
                 const data = await response.json();
                 
                 if (data.success) {
@@ -3864,7 +3834,7 @@ ${(() => {
                 const notification = showNotification(`Creating clip for ${displayName}...`, 'orange', true);
                 
                 // Try to create clip via API first (use localhost for OAuth-enabled endpoints)
-                const response = await fetch(`${NGROK_BASE_URL}/api/stream-clips/create/${username}`, {
+                const response = await fetch(`${API_BASE_URL}/api/stream-clips/create/${username}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -4591,11 +4561,7 @@ ${(() => {
             }
         };
 
-        window.toggleFavorite = (streamIndex) => {
-            const favoriteBtn = document.getElementById(`favoriteBtn${streamIndex}`);
-            favoriteBtn.classList.toggle('favorited');
-            enhancedFeatures.trackAnalyticsEvent('favorites', 'toggle_favorite', streamIndex.toString());
-        };
+        // Removed duplicate toggleFavorite function - using the Supabase-integrated one above
 
         window.toggleMultiStreamFullscreen = () => {
             const modal = document.getElementById('multiStreamModal');

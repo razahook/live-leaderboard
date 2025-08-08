@@ -506,9 +506,28 @@ def add_twitch_live_status(leaderboard_data):
 @leaderboard_bp.route('/stats/<platform>', methods=['GET'])
 @rate_limit(max_requests=30, window=60)
 def get_leaderboard(platform):
-    """Get live ranked leaderboard for specified platform"""
+    """Get live ranked leaderboard for specified platform with caching"""
     try:
         safe_print(f"Getting leaderboard for platform: {platform}")
+        
+        # Check Vercel cache first
+        try:
+            from vercel_cache import VercelCacheManager
+            cache_manager = VercelCacheManager()
+            cache_key = f"leaderboard_{platform}"
+            cached_data = cache_manager.get(cache_key)
+            
+            if cached_data:
+                safe_print(f"Returning cached leaderboard data for {platform}")
+                return jsonify({
+                    "success": True,
+                    "cached": True,
+                    "data": cached_data,
+                    "last_updated": cached_data.get("last_updated"),
+                    "source": "cache"
+                })
+        except Exception as e:
+            safe_print(f"Cache check failed: {e}")
         
         # Try to scrape real data first - get ALL 750 players
         leaderboard_data = scrape_leaderboard(platform, 750)
@@ -520,6 +539,13 @@ def get_leaderboard(platform):
                 safe_print("Added Twitch live status to leaderboard data")
             except Exception as e:
                 safe_print(f"Warning: Failed to add Twitch live status: {e}")
+            
+            # Cache the successful result
+            try:
+                cache_manager.set(cache_key, leaderboard_data, ttl=120)  # 2 minute cache
+                safe_print(f"Cached leaderboard data for {platform}")
+            except Exception as e:
+                safe_print(f"Failed to cache data: {e}")
             
             return jsonify({
                 "success": True,
@@ -547,6 +573,7 @@ def get_leaderboard(platform):
 @rate_limit(max_requests=30, window=60)
 def get_leaderboard_alt(platform):
     """Alternative endpoint for leaderboard data - same as /stats/<platform>"""
+    # Use the main cached endpoint
     return get_leaderboard(platform)
 
 @leaderboard_bp.route('/leaderboard-test/<platform>', methods=['GET'])
