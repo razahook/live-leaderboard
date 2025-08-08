@@ -2436,7 +2436,7 @@
                     initSupabase() // Initialize Supabase early for favorites
                 ]);
                 
-                const { leaderboardData, predatorData } = dataResult;
+                let { leaderboardData, predatorData } = dataResult;
                 
                 if (!leaderboardData?.players) throw new Error("Invalid leaderboard data structure.");
                 
