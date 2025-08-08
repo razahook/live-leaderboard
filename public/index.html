@@ -922,7 +922,11 @@
                 msgEl.classList.add('hidden');
                 try {
                     if (isSignup) {
-                        const { error } = await supabase.auth.signUp({ email, password });
+                        const { error } = await supabase.auth.signUp({
+                            email,
+                            password,
+                            options: { emailRedirectTo: window.location.href.split('#')[0] }
+                        });
                         if (error) throw error;
                         msgEl.textContent = 'Check your email to confirm your account.';
                     } else {
