@@ -503,8 +503,11 @@ def add_twitch_live_status(leaderboard_data):
                         'Client-Id': client_id
                     }
                     
-                    # Only check VODs for live users to keep load times reasonable
-                    for username, player in live_users_for_vods:
+                    # Limit VOD checking to first 10 live users for speed
+                    live_users_limited = live_users_for_vods[:10]
+                    safe_print(f"Checking VODs for {len(live_users_limited)} live users (limited for performance)")
+                    
+                    for username, player in live_users_limited:
                         try:
                             vod_result = get_user_videos_cached(username, headers)
                             player['vods_enabled'] = vod_result.get('has_vods', False)

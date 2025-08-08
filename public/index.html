@@ -1087,7 +1087,15 @@
         };
         
         const getStreamHtml = (stream) => {
-            if (stream && stream.viewers) return `<div class="flex flex-col"><span class="font-semibold text-white">${stream.viewers.toLocaleString()} viewers</span><span class="text-xs text-gray-400">${stream.game || 'Streaming'}</span></div>`;
+            if (stream) {
+                if (stream.viewers > 0) {
+                    // Live streamer
+                    return `<div class="flex flex-col"><span class="font-semibold text-white">${stream.viewers.toLocaleString()} viewers</span><span class="text-xs text-gray-400">${stream.game || 'Streaming'}</span></div>`;
+                } else if (stream.game === 'Offline') {
+                    // Offline user with valid Twitch account
+                    return `<div class="flex flex-col"><span class="font-semibold text-gray-400">0 viewers</span><span class="text-xs text-gray-500">Has Twitch Account</span></div>`;
+                }
+            }
             return `<span class="text-gray-600">-</span>`;
         };
         
@@ -3512,6 +3520,12 @@ ${(() => {
             const loginButton = document.getElementById('twitchLoginButton');
             const loginStatus = document.getElementById('loginStatus');
             
+            // Check if elements exist before proceeding
+            if (!loginButton || !loginStatus) {
+                console.warn('Twitch login elements not found, skipping login initialization');
+                return;
+            }
+            
             // Check if user is already logged in
             checkTwitchLoginStatus();
             
@@ -3621,6 +3635,12 @@ ${(() => {
         const updateLoginUI = () => {
             const loginStatus = document.getElementById('loginStatus');
             const loginButton = document.getElementById('twitchLoginButton');
+            
+            // Check if elements exist before updating
+            if (!loginStatus || !loginButton) {
+                console.warn('Login UI elements not found, skipping UI update');
+                return;
+            }
             
             if (currentUser) {
                 loginStatus.textContent = `${currentUser.display_name}`;
