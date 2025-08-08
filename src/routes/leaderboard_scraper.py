@@ -777,30 +777,69 @@ def get_predator_points():
         safe_print(f"Predator API response keys: {list(api_data.keys()) if isinstance(api_data, dict) else 'not a dict'}")
         safe_print(f"Predator API full response: {api_data}")
         
+        # Check if API returned an error
+        if isinstance(api_data, dict) and 'error' in api_data:
+            safe_print(f"MozambiqueHe.re API returned error: {api_data.get('error')}")
+            return jsonify({
+                "success": False,
+                "error": f"MozambiqueHe.re API error: {api_data.get('error')}",
+                "debug": {
+                    "api_response": api_data
+                }
+            }), 500
+        
         # Transform API response to match frontend expectations
         predator_data = {}
+        
+        # The API returns data under an 'RP' key
+        rp_data = api_data.get('RP', {})
+        if not rp_data:
+            safe_print("ERROR: No 'RP' data found in API response!")
+            return jsonify({
+                "success": False,
+                "error": "No 'RP' data found in MozambiqueHe.re API response",
+                "debug": {
+                    "api_response": api_data,
+                    "api_response_keys": list(api_data.keys()) if isinstance(api_data, dict) else "not a dict"
+                }
+            }), 500
         
         # Map platform names from API to frontend format
         platform_mapping = {
             'PC': 'PC',
-            'PlayStation': 'PS4', 
-            'Xbox': 'X1',
-            'Switch': 'SWITCH'
+            'PS4': 'PlayStation', 
+            'X1': 'Xbox',
+            'SWITCH': 'Switch'
         }
         
+        platforms_found = 0
         for api_platform, frontend_platform in platform_mapping.items():
-            if api_platform in api_data:
-                platform_data = api_data[api_platform]
+            if api_platform in rp_data:
+                platform_data = rp_data[api_platform]
                 safe_print(f"Processing {api_platform} -> {frontend_platform}: {platform_data}")
                 
                 predator_data[frontend_platform] = {
-                    "predator_rp": platform_data.get('RP', 0),
+                    "predator_rp": platform_data.get('val', 0),
                     "current_players": 750,  # Always 750 predators
                     "masters_count": max(0, platform_data.get('totalMastersAndPreds', 0) - 750),  # Masters = total - preds, minimum 0
                     "rp_change_24h": 0  # API doesn't provide 24h change, set to 0
                 }
+                platforms_found += 1
             else:
-                safe_print(f"Platform {api_platform} not found in API response")
+                safe_print(f"Platform {api_platform} not found in RP data")
+        
+        if platforms_found == 0:
+            safe_print("ERROR: No platform data found in RP data!")
+            return jsonify({
+                "success": False,
+                "error": "No platform data found in MozambiqueHe.re RP data",
+                "debug": {
+                    "api_response": api_data,
+                    "rp_data": rp_data,
+                    "expected_platforms": list(platform_mapping.keys()),
+                    "found_keys": list(rp_data.keys()) if isinstance(rp_data, dict) else "not a dict"
+                }
+            }), 500
         
         predator_data["last_updated"] = datetime.now().isoformat()
         safe_print(f"Final predator data being returned: {predator_data}")
@@ -811,7 +850,8 @@ def get_predator_points():
             "source": "mozambiquehe.re",
             "debug": {
                 "api_response_keys": list(api_data.keys()) if isinstance(api_data, dict) else "not a dict",
-                "processed_platforms": list(predator_data.keys())
+                "processed_platforms": list(predator_data.keys()),
+                "platforms_found": platforms_found
             }
         })
         
