@@ -241,13 +241,11 @@
         </div>
     </div>
 
-    <!-- Twitch OAuth Login Tab (Top Right) -->
-    <div id="twitchLoginTab" class="fixed top-4 right-4 z-50">
-        <div id="twitchLoginButton" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-lg cursor-pointer transition-colors duration-200 flex items-center space-x-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11.571 4.714h1.715v5.143H11.57zm4.714 0h1.715v5.143h-1.715zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0H6zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714v9.429z"/>
-            </svg>
-            <span id="loginStatus">Login for Clips</span>
+    <!-- Account Button (Supabase Auth) -->
+    <div id="accountTab" class="fixed top-4 right-4 z-50">
+        <div id="accountButton" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-lg cursor-pointer transition-colors duration-200 flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 9a7 7 0 0114 0v1H5v-1z"/></svg>
+            <span id="accountStatus">Sign in</span>
         </div>
     </div>
 
@@ -779,11 +777,12 @@
 
         function renderAuthControls() {
             const container = document.getElementById('authControls');
-            if (!container) return;
+            const accountBtn = document.getElementById('accountButton');
+            const accountStatus = document.getElementById('accountStatus');
             if (supaUser) {
-                container.innerHTML = `<span class="text-xs text-gray-400 mr-2">${supaUser.email || 'Signed in'}</span>
-                <button id="signOutBtn" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded">Sign out</button>`;
-                document.getElementById('signOutBtn').onclick = async () => {
+                if (container) container.innerHTML = `<span class="text-xs text-gray-400 mr-2">${supaUser.email || 'Signed in'}</span>`;
+                if (accountStatus) accountStatus.textContent = 'Sign out';
+                if (accountBtn) accountBtn.onclick = async () => {
                     await supabase.auth.signOut();
                     supaUser = null;
                     favoritesSet.clear();
@@ -791,10 +790,9 @@
                     updateLeaderboardAndPagination();
                 };
             } else {
-                container.innerHTML = `<button id="signInBtn" class="text-xs bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded">Sign in</button>`;
-                document.getElementById('signInBtn').onclick = async () => {
-                    showEmailLoginModal();
-                };
+                if (container) container.innerHTML = '';
+                if (accountStatus) accountStatus.textContent = 'Sign in';
+                if (accountBtn) accountBtn.onclick = () => showEmailLoginModal();
             }
         }
 
