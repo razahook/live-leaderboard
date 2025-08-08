@@ -1747,8 +1747,8 @@
                 card.className = `p-5 rounded-xl shadow-2xl shadow-black/30 border ${platformColors[key] || 'border-gray-700/50'} bg-gray-800/50 backdrop-blur-sm`;
                 if (platformData) {
                     let mastersCount = platformData.masters_count;
-                    let predsCount = Math.min(mastersCount, 750);
-                    let mastersDisplay = (mastersCount - predsCount).toLocaleString();
+                    let predsCount = 750; // Always 750 predators
+                    let mastersDisplay = mastersCount.toLocaleString();
                     let mastersPredsDisplay = `${predsCount.toLocaleString()} Preds & ${mastersDisplay} Masters`;
 
                     card.innerHTML = `
