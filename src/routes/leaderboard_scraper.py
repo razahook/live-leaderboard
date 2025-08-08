@@ -757,11 +757,25 @@ def get_predator_points():
         predator_api_url = f"https://api.mozambiquehe.re/predator?auth={api_key}"
         safe_print(f"Fetching predator data from: {predator_api_url}")
         
-        response = requests.get(predator_api_url, timeout=10)
-        response.raise_for_status()
+        response = requests.get(predator_api_url, timeout=15)
+        safe_print(f"Predator API HTTP status: {response.status_code}")
+        safe_print(f"Predator API response headers: {dict(response.headers)}")
+        
+        if response.status_code != 200:
+            safe_print(f"Predator API error response: {response.text}")
+            return jsonify({
+                "success": False,
+                "error": f"API returned status {response.status_code}: {response.text}",
+                "debug": {
+                    "url": predator_api_url,
+                    "status": response.status_code,
+                    "response": response.text[:500]  # First 500 chars
+                }
+            }), 500
         
         api_data = response.json()
-        safe_print(f"Predator API response: {api_data}")
+        safe_print(f"Predator API response keys: {list(api_data.keys()) if isinstance(api_data, dict) else 'not a dict'}")
+        safe_print(f"Predator API full response: {api_data}")
         
         # Transform API response to match frontend expectations
         predator_data = {}
@@ -777,30 +791,49 @@ def get_predator_points():
         for api_platform, frontend_platform in platform_mapping.items():
             if api_platform in api_data:
                 platform_data = api_data[api_platform]
+                safe_print(f"Processing {api_platform} -> {frontend_platform}: {platform_data}")
+                
                 predator_data[frontend_platform] = {
                     "predator_rp": platform_data.get('RP', 0),
                     "current_players": 750,  # Always 750 predators
-                    "masters_count": platform_data.get('totalMastersAndPreds', 0) - 750,  # Masters = total - preds
+                    "masters_count": max(0, platform_data.get('totalMastersAndPreds', 0) - 750),  # Masters = total - preds, minimum 0
                     "rp_change_24h": 0  # API doesn't provide 24h change, set to 0
                 }
+            else:
+                safe_print(f"Platform {api_platform} not found in API response")
         
         predator_data["last_updated"] = datetime.now().isoformat()
+        safe_print(f"Final predator data being returned: {predator_data}")
         
         return jsonify({
             "success": True,
             "data": predator_data,
-            "source": "mozambiquehe.re"
+            "source": "mozambiquehe.re",
+            "debug": {
+                "api_response_keys": list(api_data.keys()) if isinstance(api_data, dict) else "not a dict",
+                "processed_platforms": list(predator_data.keys())
+            }
         })
         
     except requests.RequestException as e:
         safe_print(f"Error calling MozambiqueHe.re API: {e}")
         return jsonify({
             "success": False,
-            "error": f"API request failed: {str(e)}"
+            "error": f"API request failed: {str(e)}",
+            "debug": {
+                "url": predator_api_url,
+                "exception_type": type(e).__name__
+            }
         }), 500
     except Exception as e:
         safe_print(f"Error in get_predator_points: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             "success": False,
-            "error": f"Server error: {str(e)}"
+            "error": f"Server error: {str(e)}",
+            "debug": {
+                "exception_type": type(e).__name__,
+                "traceback": traceback.format_exc()
+            }
         }), 500

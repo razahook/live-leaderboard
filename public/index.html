@@ -1633,6 +1633,10 @@
                 const isFav = favoritesSet.has(favKey);
                 const favBtn = `<button class="ml-2" title="Favorite" onclick="toggleFavorite('${favKey}')">${isFav ? '⭐' : '☆'}</button>`;
                 const legendHtml = getLegendHtml(player.current_legend, player.name);
+                // Debug first few players
+                if (player.rank <= 3) {
+                    console.log(`Rendering player ${player.name} (rank ${player.rank}) with legend:`, player.current_legend, 'HTML:', legendHtml);
+                }
                 row.innerHTML = `
                     <td class="px-6 py-4 font-medium text-gray-200">#${player.rank}</td>
                     <td class="px-6 py-4 font-bold text-white flex items-center">${flagHtml}${playerNameHtml}${favBtn}${inputIcon}</td>
@@ -2503,8 +2507,15 @@
                 // Load legends for top players automatically
                 setTimeout(() => {
                     console.log('Starting auto legend loading...');
+                    console.log('Current filteredAndSortedPlayers:', filteredAndSortedPlayers.slice(0, 3).map(p => p.name));
                     loadTopPlayerLegends();
-                }, 2000); // Increased delay to ensure leaderboard is fully rendered
+                }, 3000); // Increased delay to ensure leaderboard is fully rendered
+                
+                // Also try loading cached legends immediately
+                setTimeout(() => {
+                    console.log('Loading cached legends immediately...');
+                    loadCachedLegends();
+                }, 500);
                 
                 // Make functions available globally for debugging
                 window.debugFetchLegend = fetchPlayerLegend;
