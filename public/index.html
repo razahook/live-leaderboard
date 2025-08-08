@@ -3009,8 +3009,8 @@ ${(() => {
                                         String(playerData.status || '').toLowerCase().includes('match')
                                     );
                                     
-                                    if (isLive) {
-                                        // Live: Create new clip button
+                                    if (isLive && playerData && playerData.hasClips) {
+                                        // Live and clips enabled: Show Clip action
                                         return `<button onclick="createLiveClip('${canonicalTwitchUsername}', '${displayName}')" class="text-xs bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded transition-colors" title="Create clip of current live stream">
                                             📎 Clip
                                         </button>`;
@@ -3019,8 +3019,13 @@ ${(() => {
                                         return `<button onclick="window.open('${playerData.recentClips[0].url}', '_blank')" class="text-xs bg-gray-500 hover:bg-gray-600 px-3 py-1.5 rounded transition-colors" title="Watch latest clip (not live)">
                                             📹 Latest
                                         </button>`;
+                                    } else if (isLive) {
+                                        // Live but clips disabled: disable Clip action
+                                        return `<button class="text-xs bg-gray-600 px-3 py-1.5 rounded transition-colors cursor-not-allowed" title="Clips are disabled for this channel" disabled>
+                                            📎 Clip
+                                        </button>`;
                                     } else {
-                                        // Not live, no clips: Disabled
+                                        // Not live and no clips: Disabled
                                         return `<button class="text-xs bg-gray-600 px-3 py-1.5 rounded transition-colors cursor-not-allowed" title="Not live - no clips to create" disabled>
                                             📎 Clip
                                         </button>`;
