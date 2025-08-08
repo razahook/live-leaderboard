@@ -1799,7 +1799,7 @@
                 const loadData = () => {
                     return new Promise((resolve, reject) => {
                         let loadedCount = 0;
-                        const totalFiles = 2;
+                        const totalFiles = 1; // proceed as soon as leaderboard arrives
                         
                         const checkComplete = () => {
                             loadedCount++;
@@ -1828,18 +1828,11 @@
                             })
                             .catch(() => reject(new Error('Failed to load leaderboard data')));
                         
-                        // Load predator thresholds data via API
+                        // Load predator thresholds in background; don't block initial render
                         fetch(`${NGROK_BASE_URL}/api/predator-points`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success && data.data) {
-                                    window.predatorThresholds = data.data;
-                                    checkComplete();
-                                } else {
-                                    reject(new Error('Invalid predator thresholds data format'));
-                                }
-                            })
-                            .catch(() => reject(new Error('Failed to load predator thresholds')));
+                            .then(r => r.json())
+                            .then(d => { if (d?.success && d.data) window.predatorThresholds = d.data; })
+                            .catch(() => {});
                     });
                 };
                 
@@ -1896,7 +1889,8 @@
                         input_device: player.input_device || null
                     };
                 });
-                
+                // Load favorites early to render stars promptly
+                await initSupabase();
                 filteredAndSortedPlayers = [...allPlayers]; 
                 currentPage = 1; 
                 updateLeaderboardAndPagination(); 
