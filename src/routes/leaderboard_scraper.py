@@ -250,7 +250,29 @@ def scrape_leaderboard(platform="PC", max_players=500):
                         if not player_name:
                             player_name = f"Player{rank}"
 
-                        # --- 4. Extract Twitch Link/Username ---
+                        # --- 4. Extract country flag and input device ---
+                        country_code = None
+                        try:
+                            flag_span = player_info_cell.find('span', class_=re.compile(r"flag-icon"))
+                            if flag_span and flag_span.get('class'):
+                                for cls in flag_span['class']:
+                                    m = re.match(r'flag-icon-([a-z]{2})', cls, re.IGNORECASE)
+                                    if m:
+                                        country_code = m.group(1).lower()
+                                        break
+                        except Exception:
+                            country_code = None
+
+                        input_device = None
+                        try:
+                            if player_info_cell.find('i', class_=re.compile(r'fa-gamepad|gamepad', re.IGNORECASE)):
+                                input_device = 'controller'
+                            elif player_info_cell.find('i', class_=re.compile(r'fa-mouse|mouse', re.IGNORECASE)):
+                                input_device = 'kbm'
+                        except Exception:
+                            input_device = None
+
+                        # --- 5. Extract Twitch Link/Username ---
                         twitch_link = ""
                         
                         # Strategy 1: Look for ApexLegendsStatus redirect links (both full and relative URLs)
@@ -300,7 +322,7 @@ def scrape_leaderboard(platform="PC", max_players=500):
                                 if username and len(username) > 0:
                                     twitch_link = f"https://twitch.tv/{username}"
 
-                        # --- 5. Extract Status ---
+                        # --- 6. Extract Status ---
                         status = "Unknown"
                         player_text_for_status = player_info_cell.get_text(separator=' ', strip=True)
                         if "In lobby" in player_text_for_status:
@@ -310,13 +332,13 @@ def scrape_leaderboard(platform="PC", max_players=500):
                         elif "Offline" in player_text_for_status:
                             status = "Offline"
                         
-                        # --- 6. Extract Level ---
+                        # --- 7. Extract Level ---
                         level = 0
                         level_match = re.search(r'Lvl\s*(\d+)', player_text_for_status)
                         if level_match:
                             level = int(level_match.group(1))
                         
-                        # --- 7. Extract RP and RP Change ---
+                        # --- 8. Extract RP and RP Change ---
                         rp = 0
                         rp_change_24h = 0
                         for cell in cells:
@@ -346,7 +368,9 @@ def scrape_leaderboard(platform="PC", max_players=500):
                                 "vods_enabled": False,
                                 "recent_videos": [],
                                 "hasClips": False,
-                                "recentClips": []
+                                "recentClips": [],
+                                "country_code": country_code,
+                                "input_device": input_device
                             })
                             
                             if len(all_players) % 50 == 0:
