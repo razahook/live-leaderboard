@@ -4739,6 +4739,17 @@ ${(() => {
             console.log('Available allPlayers:', allPlayers ? allPlayers.length : 'null');
             console.log('Streamers to enhance:', streamers.map(s => s.username));
             
+            // Debug: Show some sample leaderboard players with Twitch links
+            if (allPlayers && allPlayers.length > 0) {
+                const playersWithTwitch = allPlayers.filter(p => p.twitch_link).slice(0, 5);
+                console.log('Sample players with Twitch links:', playersWithTwitch.map(p => ({
+                    name: p.player_name,
+                    rank: p.rank,
+                    twitch_link: p.twitch_link,
+                    extracted_username: extractTwitchUsernameFromUrl(p.twitch_link)
+                })));
+            }
+            
             // Find matching leaderboard data for each streamer
             const enhancedStreamers = streamers.map(streamer => {
                 // Look for this streamer in the current leaderboard data
@@ -4909,19 +4920,35 @@ ${(() => {
         }
         
         function watchStream(username) {
-            // Add the streamer to multistream if not already added
-            if (!activeStreams.includes(username)) {
-                activeStreams.push(username);
-                updateMultiStreamDisplay();
-                
-                // Show success message
-                enhancedFeatures.showToast(`Added ${username} to multistream`, 'success');
-            } else {
-                enhancedFeatures.showToast(`${username} is already in multistream`, 'info');
-            }
-            
-            // Open the multistream modal
+            // Open the multistream modal first
             showMultiStreamModal();
+            
+            // Add the streamer to the first available dropdown
+            setTimeout(() => {
+                const streamer1 = document.getElementById('streamer1');
+                const streamer2 = document.getElementById('streamer2');
+                const streamer3 = document.getElementById('streamer3');
+                
+                if (streamer1 && streamer1.value === '') {
+                    streamer1.value = username;
+                    enhancedFeatures.showToast(`Added ${username} to Stream 1`, 'success');
+                } else if (streamer2 && streamer2.value === '') {
+                    streamer2.value = username;
+                    enhancedFeatures.showToast(`Added ${username} to Stream 2`, 'success');
+                } else if (streamer3 && streamer3.value === '') {
+                    streamer3.value = username;
+                    enhancedFeatures.showToast(`Added ${username} to Stream 3`, 'success');
+                } else {
+                    // If all slots are taken, replace the first one
+                    if (streamer1) {
+                        streamer1.value = username;
+                        enhancedFeatures.showToast(`Replaced Stream 1 with ${username}`, 'info');
+                    }
+                }
+                
+                // Automatically load the streams
+                loadMultiStreams();
+            }, 100); // Small delay to ensure modal is fully shown
         }
         
         // Update the showTab function to refresh favorites when the tab is shown
