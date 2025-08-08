@@ -1635,7 +1635,7 @@
                         fetch(`${NGROK_BASE_URL}/api/leaderboard/PC`)
                             .then(response => response.json())
                             .then(data => {
-                                if (data.success && data.data && data.data.players) {
+                if (data.success && data.data && data.data.players) {
                                     window.leaderboardData = data.data; // Keep the full data object with players property
                                     checkComplete();
                                 } else {
@@ -1662,8 +1662,8 @@
                 const { leaderboardData, predatorData } = await loadData();
 
                 // Initialize Supabase (for auth + favorites)
-                const SUPABASE_URL = (window?.NEXT_PUBLIC_SUPABASE_URL) || (window?.env?.NEXT_PUBLIC_SUPABASE_URL) || (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_URL : undefined) || '${NEXT_PUBLIC_SUPABASE_URL}'.replace('${','').replace('}','');
-                const SUPABASE_ANON = (window?.NEXT_PUBLIC_SUPABASE_ANON_KEY) || (window?.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY) || (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined) || '${NEXT_PUBLIC_SUPABASE_ANON_KEY}'.replace('${','').replace('}','');
+                const SUPABASE_URL = (window?.env?.NEXT_PUBLIC_SUPABASE_URL) || (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_URL : undefined) || undefined;
+                const SUPABASE_ANON = (window?.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY) || (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined) || undefined;
                 window.__supabaseConfig = { url: SUPABASE_URL, anon: SUPABASE_ANON };
                 
                 if (!leaderboardData?.players) throw new Error("Invalid leaderboard data structure.");
@@ -1727,7 +1727,17 @@
                 // Load additional data
                 loadGameStatus();
                 
-                // Initialize auth last
+                // Initialize auth last (fetch env if needed)
+                try {
+                    if (!window.__supabaseConfig?.url || !window.__supabaseConfig?.anon) {
+                        const r = await fetch(`/api/public-env`);
+                        const e = await r.json();
+                        if (e?.success && e.data) {
+                            window.env = e.data;
+                            window.__supabaseConfig = { url: e.data.NEXT_PUBLIC_SUPABASE_URL, anon: e.data.NEXT_PUBLIC_SUPABASE_ANON_KEY };
+                        }
+                    }
+                } catch (err) { /* ignore */ }
                 initSupabase();
                 
             } catch (error) {

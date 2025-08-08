@@ -139,6 +139,12 @@ except ImportError as e:
     logger.warning(f"Could not import twitch_import_debug routes: {e}")
 
 try:
+    from routes.env import env_bp
+    imported_blueprints.append(('env_bp', env_bp))
+except ImportError as e:
+    logger.warning(f"Could not import env routes: {e}")
+
+try:
     from routes.leaderboard_debug import leaderboard_debug_bp
     imported_blueprints.append(('leaderboard_debug_bp', leaderboard_debug_bp))
 except ImportError as e:
