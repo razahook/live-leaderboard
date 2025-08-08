@@ -1593,6 +1593,11 @@
                 };
                 
                 const { leaderboardData, predatorData } = await loadData();
+
+                // Initialize Supabase (for auth + favorites)
+                const SUPABASE_URL = (window?.NEXT_PUBLIC_SUPABASE_URL) || (window?.env?.NEXT_PUBLIC_SUPABASE_URL) || (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_URL : undefined) || '${NEXT_PUBLIC_SUPABASE_URL}'.replace('${','').replace('}','');
+                const SUPABASE_ANON = (window?.NEXT_PUBLIC_SUPABASE_ANON_KEY) || (window?.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY) || (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined) || '${NEXT_PUBLIC_SUPABASE_ANON_KEY}'.replace('${','').replace('}','');
+                window.__supabaseConfig = { url: SUPABASE_URL, anon: SUPABASE_ANON };
                 
                 if (!leaderboardData?.players) throw new Error("Invalid leaderboard data structure.");
                 if (!predatorData) throw new Error("Invalid predator thresholds data structure.");
