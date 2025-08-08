@@ -1384,7 +1384,10 @@
                 const imageUrl = currentLegend.image || 'https://cdn.apexlegendsstatus.com/legends/unknown.png';
                 return `<div class="flex items-center space-x-2">
                     <img src="${imageUrl}" alt="${currentLegend.name}" class="w-8 h-8 rounded-full object-cover border border-purple-400" 
-                         onerror="this.src='https://via.placeholder.com/32x32/6b46c1/ffffff?text=${currentLegend.name.charAt(0)}'">
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold border border-purple-400" style="display:none;">
+                        ${currentLegend.name.charAt(0)}
+                    </div>
                     <div class="flex flex-col">
                         <span class="font-semibold text-purple-400 text-sm">${currentLegend.name}</span>
                         <span class="text-xs text-gray-500">Current</span>

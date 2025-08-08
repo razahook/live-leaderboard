@@ -748,43 +748,56 @@ def get_leaderboard_test(platform):
 @leaderboard_bp.route('/predator-points', methods=['GET'])
 @rate_limit(max_requests=30, window=60)
 def get_predator_points():
-    """Get minimum RP for predator rank"""
+    """Get minimum RP for predator rank from MozambiqueHe.re API"""
     try:
-        # Sample predator points data - format to match frontend expectations
-        predator_data = {
-            "PC": {
-                "predator_rp": 15000,
-                "current_players": 750,
-                "masters_count": 10000,
-                "rp_change_24h": 150
-            },
-            "PS4": {
-                "predator_rp": 12000, 
-                "current_players": 750,
-                "masters_count": 8500,
-                "rp_change_24h": 120
-            },
-            "X1": {
-                "predator_rp": 11500,
-                "current_players": 750, 
-                "masters_count": 7200,
-                "rp_change_24h": 110
-            },
-            "SWITCH": {
-                "predator_rp": 10000,
-                "current_players": 750,
-                "masters_count": 5000,
-                "rp_change_24h": 80
-            },
-            "last_updated": datetime.now().isoformat()
+        # Get API key from environment
+        api_key = os.environ.get('MOZAMBIQUE_API_KEY', '456c01cf240c13399563026f5604d777')
+        
+        # Call MozambiqueHe.re predator API
+        predator_api_url = f"https://api.mozambiquehe.re/predator?auth={api_key}"
+        safe_print(f"Fetching predator data from: {predator_api_url}")
+        
+        response = requests.get(predator_api_url, timeout=10)
+        response.raise_for_status()
+        
+        api_data = response.json()
+        safe_print(f"Predator API response: {api_data}")
+        
+        # Transform API response to match frontend expectations
+        predator_data = {}
+        
+        # Map platform names from API to frontend format
+        platform_mapping = {
+            'PC': 'PC',
+            'PlayStation': 'PS4', 
+            'Xbox': 'X1',
+            'Switch': 'SWITCH'
         }
+        
+        for api_platform, frontend_platform in platform_mapping.items():
+            if api_platform in api_data:
+                platform_data = api_data[api_platform]
+                predator_data[frontend_platform] = {
+                    "predator_rp": platform_data.get('RP', 0),
+                    "current_players": 750,  # Always 750 predators
+                    "masters_count": platform_data.get('totalMastersAndPreds', 0) - 750,  # Masters = total - preds
+                    "rp_change_24h": 0  # API doesn't provide 24h change, set to 0
+                }
+        
+        predator_data["last_updated"] = datetime.now().isoformat()
         
         return jsonify({
             "success": True,
             "data": predator_data,
-            "source": "apex_legends_api"
+            "source": "mozambiquehe.re"
         })
         
+    except requests.RequestException as e:
+        safe_print(f"Error calling MozambiqueHe.re API: {e}")
+        return jsonify({
+            "success": False,
+            "error": f"API request failed: {str(e)}"
+        }), 500
     except Exception as e:
         safe_print(f"Error in get_predator_points: {e}")
         return jsonify({
