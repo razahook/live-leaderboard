@@ -1746,10 +1746,8 @@
                 const card = document.createElement('div');
                 card.className = `p-5 rounded-xl shadow-2xl shadow-black/30 border ${platformColors[key] || 'border-gray-700/50'} bg-gray-800/50 backdrop-blur-sm`;
                 if (platformData) {
-                    let mastersCount = platformData.masters_count;
-                    let predsCount = 750; // Always 750 predators
-                    let mastersDisplay = mastersCount.toLocaleString();
-                    let mastersPredsDisplay = `${predsCount.toLocaleString()} Preds & ${mastersDisplay} Masters`;
+                    let totalMastersAndPreds = platformData.total_masters_and_preds || 0;
+                    let mastersPredsDisplay = `${totalMastersAndPreds.toLocaleString()} Masters & Preds`;
 
                     card.innerHTML = `
                         <h3 class="font-semibold text-gray-300">${platformOrder[key]}</h3>

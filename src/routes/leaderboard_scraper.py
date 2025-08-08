@@ -818,10 +818,10 @@ def get_predator_points():
                 platform_data = rp_data[api_platform]
                 safe_print(f"Processing {api_platform} -> {frontend_platform}: {platform_data}")
                 
+                total_masters_and_preds = platform_data.get('totalMastersAndPreds', 0)
                 predator_data[frontend_platform] = {
                     "predator_rp": platform_data.get('val', 0),
-                    "current_players": 750,  # Always 750 predators
-                    "masters_count": max(0, platform_data.get('totalMastersAndPreds', 0) - 750),  # Masters = total - preds, minimum 0
+                    "total_masters_and_preds": total_masters_and_preds,
                     "rp_change_24h": 0  # API doesn't provide 24h change, set to 0
                 }
                 platforms_found += 1
