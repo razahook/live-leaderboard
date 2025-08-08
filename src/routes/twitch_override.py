@@ -20,7 +20,9 @@ def add_twitch_override():
         return jsonify({"success": False, "message": "Player name and Twitch username are required"}), 400
 
     overrides = {}
-    if os.path.exists(TWITCH_OVERRIDES_FILE):
+    # Vercel-safe: avoid filesystem writes/reads in serverless; accept but do not persist
+    is_serverless = bool(os.environ.get('VERCEL')) or '/var/task' in os.getcwd()
+    if not is_serverless and os.path.exists(TWITCH_OVERRIDES_FILE):
         try:
             with open(TWITCH_OVERRIDES_FILE, 'r', encoding='utf-8') as f:
                 overrides = json.load(f)
@@ -32,10 +34,14 @@ def add_twitch_override():
 
     overrides[player_name] = {"twitch_link": f"https://twitch.tv/{twitch_username}"}
 
-    try:
-        with open(TWITCH_OVERRIDES_FILE, 'w', encoding='utf-8') as f:
-            json.dump(overrides, f, indent=4)
-        return jsonify({"success": True, "message": "Twitch override saved successfully"}), 200
-    except Exception as e:
-        print(f"Error saving twitch_overrides.json: {e}")
-        return jsonify({"success": False, "message": "Server error saving override"}), 500
+    if not is_serverless:
+        try:
+            with open(TWITCH_OVERRIDES_FILE, 'w', encoding='utf-8') as f:
+                json.dump(overrides, f, indent=4)
+            return jsonify({"success": True, "message": "Twitch override saved successfully"}), 200
+        except Exception as e:
+            print(f"Error saving twitch_overrides.json: {e}")
+            return jsonify({"success": False, "message": "Server error saving override"}), 500
+    else:
+        # Accept in serverless but report non-persistence
+        return jsonify({"success": True, "message": "Override received (not persisted in serverless)"}), 200

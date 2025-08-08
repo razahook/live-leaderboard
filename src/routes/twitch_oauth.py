@@ -21,22 +21,46 @@ REDIRECT_URI = "https://live-leaderboard-plum.vercel.app/api/session/complete"
 # Required scopes for clip creation
 REQUIRED_SCOPES = "clips:edit"
 
-# Persistent storage for OAuth states and tokens
-import pickle
-import tempfile
+# Persistent storage for OAuth states and tokens (Vercel-safe)
+IS_SERVERLESS = bool(os.environ.get('VERCEL')) or '/var/task' in os.getcwd()
+
+try:
+    from vercel_cache import VercelCacheManager
+    _cache = VercelCacheManager
+except Exception:
+    _cache = None
 
 def load_oauth_data():
-    """Load OAuth states and tokens from file"""
+    """Load OAuth states and tokens using in-memory cache on Vercel, pickle locally."""
+    if IS_SERVERLESS and _cache is not None:
+        try:
+            states = _cache.get('oauth_states', cache_type='access_tokens') or {}
+            tokens = _cache.get('oauth_tokens', cache_type='access_tokens') or {}
+            return states, tokens
+        except Exception:
+            return {}, {}
+    # Local/dev fallback
     try:
-        with open('oauth_data.pkl', 'rb') as f:
-            data = pickle.load(f)
-            return data.get('states', {}), data.get('tokens', {})
-    except FileNotFoundError:
+        import pickle
+        if os.path.exists('oauth_data.pkl'):
+            with open('oauth_data.pkl', 'rb') as f:
+                data = pickle.load(f)
+                return data.get('states', {}), data.get('tokens', {})
         return {}, {}
 
 def save_oauth_data(states, tokens):
-    """Save OAuth states and tokens to file"""
+    """Save OAuth states and tokens using in-memory cache on Vercel, pickle locally."""
+    if IS_SERVERLESS and _cache is not None:
+        try:
+            _cache.set('oauth_states', states, cache_type='access_tokens', ttl=3600)
+            _cache.set('oauth_tokens', tokens, cache_type='access_tokens', ttl=3600)
+            return
+        except Exception as e:
+            print(f"Warning: Could not cache OAuth data: {e}")
+            return
+    # Local/dev fallback
     try:
+        import pickle
         with open('oauth_data.pkl', 'wb') as f:
             pickle.dump({'states': states, 'tokens': tokens}, f)
     except Exception as e:

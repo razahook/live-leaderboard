@@ -974,15 +974,9 @@ def get_recent_streams_with_vods(channel_login):
         print(f"Getting recent streams with VODs for channel: {channel_login}")
         
         # Method 1: Get VODs from Twitch API
-        import urllib.request
-        try:
-            vods_response = urllib.request.urlopen(f"http://localhost:5000/api/twitch/videos-with-tokens/{channel_login}")
-            vods_data = json.loads(vods_response.read().decode())
-            api_vods = vods_data.get('videos', []) if vods_data.get('success') else []
-            print(f"API VODs: {len(api_vods)} videos")
-        except:
-            api_vods = []
-            print("API VODs failed, continuing without them")
+        # Deprecated: localhost dependency is removed for Vercel
+        api_vods = []
+        print("Skipping localhost VOD API; proceeding with GQL + SullyGnome only")
         
         # Method 2: Extract hidden VODs using GraphQL (works for all channels)  
         hidden_vods = extract_hidden_vods_from_gql(channel_login)

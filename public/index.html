@@ -2058,7 +2058,7 @@
             const duration = document.getElementById('clipDuration').value;
             
             try {
-                const response = await fetch(`/twitch/create-clip/${currentLiveChannel}`, {
+                const response = await fetch(`/api/stream-create-clip/${currentLiveChannel}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

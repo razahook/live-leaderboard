@@ -12,7 +12,9 @@
       "Bash(mkdir:*)",
       "Bash(cp:*)",
       "Bash(tree:*)",
-      "WebFetch(domain:live-leaderboard-plum.vercel.app)"
+      "WebFetch(domain:live-leaderboard-plum.vercel.app)",
+      "Bash(git reset:*)",
+      "WebFetch(domain:apexlegendsstatus.com)"
     ],
     "deny": []
   }

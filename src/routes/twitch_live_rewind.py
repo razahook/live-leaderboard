@@ -632,26 +632,45 @@ def create_clip_from_buffer(channel_login):
                 'error': f'No segments available for the requested time range. Requested: {start_seconds}s ago for {duration}s. Available segments: {debug_info}. Time range searched: {start_time:.1f} to {end_time:.1f} (now: {now:.1f})'
             }), 404
             
-        # Create actual clip file by stitching segments
+        # Create clip bytes by stitching segments together (guard size for Vercel)
         clip_id = hashlib.md5(f"{channel_login}{start_time}{duration}".encode()).hexdigest()[:12]
         
-        # Create clips directory if it doesn't exist
-        clips_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'clips')
-        os.makedirs(clips_dir, exist_ok=True)
+        # Detect serverless (Vercel) where filesystem is read-only/ephemeral
+        current_dir = os.path.dirname(__file__)
+        is_serverless = any([
+            os.environ.get('VERCEL'),
+            '/var/task' in current_dir,
+        ])
         
-        clip_filename = f"clip_{clip_id}_{channel_login}.ts"
-        clip_path = os.path.join(clips_dir, clip_filename)
+        # Cap serverless clip duration to reduce memory and URL size
+        max_duration_serverless = 90
+        if is_serverless and duration > max_duration_serverless:
+            duration = max_duration_serverless
+
+        clip_bytes = bytearray()
+        for segment in clip_segments:
+            clip_bytes.extend(segment['data'])
+        clip_size = len(clip_bytes)
         
-        # Stitch segments together by concatenating the .ts files
-        print(f"Creating clip file: {clip_path}")
-        with open(clip_path, 'wb') as clip_file:
-            for segment in clip_segments:
-                clip_file.write(segment['data'])
-                
-        print(f"Clip created successfully: {clip_filename} ({os.path.getsize(clip_path)} bytes)")
-        
-        # Generate download URL
-        clip_url = f"/clips/{clip_filename}"
+        if not is_serverless:
+            # Local/dev path: write to static directory for download
+            clips_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'clips')
+            os.makedirs(clips_dir, exist_ok=True)
+            clip_filename = f"clip_{clip_id}_{channel_login}.ts"
+            clip_path = os.path.join(clips_dir, clip_filename)
+            print(f"Creating clip file: {clip_path}")
+            with open(clip_path, 'wb') as clip_file:
+                clip_file.write(clip_bytes)
+            print(f"Clip created successfully: {clip_filename} ({os.path.getsize(clip_path)} bytes)")
+            clip_url = f"/clips/{clip_filename}"
+            clip_data_url = None
+        else:
+            # Serverless path: return a data URL so the browser can download directly
+            import base64
+            b64 = base64.b64encode(bytes(clip_bytes)).decode('ascii')
+            # Note: data URLs can be large; frontend should treat as download-only
+            clip_data_url = f"data:video/MP2T;base64,{b64}"
+            clip_url = clip_data_url
         
         # Calculate actual clip timing
         actual_duration = 0
@@ -668,9 +687,10 @@ def create_clip_from_buffer(channel_login):
             'requested_duration': duration,
             'actual_duration': round(actual_duration, 1),
             'segments_count': len(clip_segments),
-            'clip_filename': clip_filename,
+            'clip_filename': f"clip_{clip_id}_{channel_login}.ts",
             'clip_url': clip_url,
-            'file_size': os.path.getsize(clip_path),
+            'clip_data_url': clip_data_url,
+            'file_size': clip_size,
             'message': f'Clip created! Requested: {duration}s, Actual: {actual_duration:.1f}s',
             'timing_note': f'Clip ends {start_seconds}s ago, spans {actual_duration:.1f}s backwards from that point'
         })

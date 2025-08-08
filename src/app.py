@@ -150,6 +150,8 @@ try:
 except ImportError as e:
     logger.warning(f"Could not import leaderboard_proxy routes: {e}")
 
+# Stream proxy is handled inside twitch_vod_downloader blueprint
+
 # Create Flask app - no static folder needed since Vercel handles static files
 app = Flask(__name__)
 
