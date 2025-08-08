@@ -3425,19 +3425,9 @@ ${(() => {
                 clipsContainer.classList.add('hidden');
                 
                 // Add Twitch live-clip button at the top if streamer is live
-                let clipCreateButton = '';
-                if (isLive) {
-                    clipCreateButton = `
-                        <div class="mb-4 p-3 bg-orange-900/50 border border-orange-600 rounded-lg">
-                            <h4 class="text-orange-400 font-semibold mb-2">🔴 Live Clip (Twitch)</h4>
-                            <button onclick="createLiveClip('${streamer}', '${displayName}')" 
-                                    class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition-colors">
-                                📎 Create Live Clip
-                            </button>
-                            <p class="text-xs text-gray-400 mt-2">Uses Twitch API. No buffering required.</p>
-                        </div>
-                    `;
-                }
+                // Avoid duplicating the Live Clip button inside the Clips tab.
+                // We keep the quick action button in the header row only.
+                const clipCreateButton = '';
 
                 // Try Twitch API clips first if streamer has clips enabled
                 if (hasClips) {
