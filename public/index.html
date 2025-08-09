@@ -1004,6 +1004,83 @@
                 alert('Could not add to Multi-Stream.');
             }
         }
+
+        // Queue for multi-stream: lets the user click multiple "Add" buttons, then confirm
+        let pendingMultiStreamQueue = [];
+        function queueMultiStreamUser(twitchUser, displayName) {
+            if (!twitchUser) return;
+            const exists = pendingMultiStreamQueue.some(u => u.toLowerCase() === twitchUser.toLowerCase());
+            if (!exists) pendingMultiStreamQueue.push(twitchUser);
+            showMultiStreamQueueToast(displayName || twitchUser);
+        }
+
+        function showMultiStreamQueueToast(label) {
+            let toast = document.getElementById('ms-queue-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'ms-queue-toast';
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.right = '20px';
+                toast.style.zIndex = '9999';
+                toast.style.background = 'rgba(31, 41, 55, 0.95)';
+                toast.style.border = '1px solid rgba(75,85,99,0.6)';
+                toast.style.color = '#e5e7eb';
+                toast.style.padding = '12px 14px';
+                toast.style.borderRadius = '8px';
+                toast.style.boxShadow = '0 10px 20px rgba(0,0,0,0.35)';
+                toast.innerHTML = `
+                    <div id="ms-queue-text" class="text-sm mb-2">Queued: ${label}</div>
+                    <div class="flex gap-2">
+                        <button id="ms-queue-view" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-white text-xs">Open Queue (${pendingMultiStreamQueue.length})</button>
+                        <button id="ms-queue-go" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded text-white text-xs">Load Now</button>
+                        <button id="ms-queue-clear" class="px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded text-white text-xs">Clear</button>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                document.getElementById('ms-queue-view').onclick = openQueueModal;
+                document.getElementById('ms-queue-go').onclick = loadQueueIntoMultistream;
+                document.getElementById('ms-queue-clear').onclick = () => { pendingMultiStreamQueue = []; removeQueueToast(); };
+            } else {
+                const text = document.getElementById('ms-queue-text');
+                if (text) text.textContent = `Queued: ${label}`;
+                const viewBtn = document.getElementById('ms-queue-view');
+                if (viewBtn) viewBtn.textContent = `Open Queue (${pendingMultiStreamQueue.length})`;
+            }
+        }
+
+        function removeQueueToast() {
+            const toast = document.getElementById('ms-queue-toast');
+            if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
+        }
+
+        function openQueueModal() {
+            showMultiStreamModal();
+            // Fill dropdowns from queue (non-destructively; existing selection kept)
+            const dropdowns = ['streamer1','streamer2','streamer3'].map(id => document.getElementById(id));
+            let q = [...pendingMultiStreamQueue];
+            dropdowns.forEach(sel => {
+                if (!sel) return;
+                if (!sel.value && q.length) {
+                    const user = q.shift();
+                    let opt = Array.from(sel.options).find(o => o.value.toLowerCase() === user.toLowerCase());
+                    if (!opt) {
+                        opt = document.createElement('option');
+                        opt.value = user;
+                        opt.textContent = user;
+                        sel.appendChild(opt);
+                    }
+                    sel.value = opt.value;
+                }
+            });
+        }
+
+        function loadQueueIntoMultistream() {
+            openQueueModal();
+            removeQueueToast();
+            loadMultiStreams();
+            pendingMultiStreamQueue = [];
+        }
         const modalTitle = document.getElementById('modalTitle');
         const modalContent = document.getElementById('modalContent');
 
@@ -1672,9 +1749,13 @@
                     <td class="px-6 py-4">${getStatusHtml(player.status, player.twitchLink, player.vods_enabled, player.recent_videos, player.hasClips, player.recentClips)}</td>
                     <td class="px-6 py-4">${getStreamHtml(player.stream)}</td>
                     <td class="px-6 py-4">
-                        ${String(player.status).toLowerCase() === 'live' && (player.stream?.twitchUser || (player.twitchLink ? extractUsernameFromLink(player.twitchLink) : '')) ? `
-                        <button onclick="addToMultiStream('${player.stream?.twitchUser || extractUsernameFromLink(player.twitchLink)}')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200">Add to Multi-Stream</button>
-                        ` : '<span class="text-gray-500 text-xs">—</span>'}
+                        ${(() => { 
+                            const live = String(player.status).toLowerCase() === 'live';
+                            const user = player.stream?.twitchUser || (player.twitchLink ? extractUsernameFromLink(player.twitchLink) : '');
+                            if (!live || !user) return '<span class="text-gray-500 text-xs">—</span>';
+                            const safeName = (player.name || '').replace(/"/g, '&quot;');
+                            return `<button onclick=\"queueMultiStreamUser('${user}','${safeName}')\" class=\"bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200\">Add to Multi-Stream</button>`;
+                        })()}
                     </td>
                 `;
                 row.addEventListener('mouseenter', (event) => handleMouseEnter(event, player));
@@ -3773,9 +3854,10 @@
                 return;
             }
             
-            // Create grid layout for all streams - 3 horizontal panels
+            // Create grid layout with resizable panels
             const gridContainer = document.createElement('div');
             gridContainer.className = 'grid grid-cols-1 xl:grid-cols-3 gap-4';
+            gridContainer.id = 'multistream-grid';
             
             streamers.forEach((streamer, index) => {
                 const dropdown = document.querySelector(`option[value="${streamer}"]`);
@@ -3899,8 +3981,9 @@
                 }
             
                 const streamDiv = document.createElement('div');
-                streamDiv.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700/50';
+                streamDiv.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700/50 relative resize-container';
                 streamDiv.innerHTML = `
+                    <div class="resize-handle" style="position:absolute;right:6px;bottom:6px;width:14px;height:14px;border-right:2px solid #6b7280;border-bottom:2px solid #6b7280;cursor:nwse-resize;opacity:0.8"></div>
                     <div class="bg-gradient-to-r from-gray-800 to-gray-700 text-white p-4 border-b border-gray-600">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-3">
@@ -4021,6 +4104,7 @@ ${(() => {
                     </div>
                 `;
                 gridContainer.appendChild(streamDiv);
+                makePanelResizable(streamDiv);
             });
             
             container.appendChild(gridContainer);
@@ -4107,6 +4191,36 @@ ${(() => {
                 }
             }
         };
+
+        // Simple drag-resize for each panel
+        function makePanelResizable(panel) {
+            const handle = panel.querySelector('.resize-handle');
+            if (!handle) return;
+            let isResizing = false;
+            let startX = 0, startY = 0, startW = 0, startH = 0;
+            handle.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                isResizing = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const rect = panel.getBoundingClientRect();
+                startW = rect.width;
+                startH = rect.height;
+                document.body.style.userSelect = 'none';
+            });
+            window.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                panel.style.width = Math.max(260, startW + dx) + 'px';
+                panel.style.height = Math.max(180, startH + dy) + 'px';
+            });
+            window.addEventListener('mouseup', () => {
+                if (!isResizing) return;
+                isResizing = false;
+                document.body.style.userSelect = '';
+            });
+        }
         
         const openInNewTab = (streamer) => {
             const dropdown = document.querySelector(`option[value="${streamer}"]`);
