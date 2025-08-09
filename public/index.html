@@ -592,7 +592,7 @@
                                 <th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">Player</th><th scope="col" class="px-6 py-3">Legend</th><th scope="col" class="px-6 py-3">RP</th>
                                 <th scope="col" class="px-6 py-3">24h Change</th><th scope="col" class="px-6 py-3">Level</th><th scope="col" class="px-6 py-3">Status</th>
                                 <th scope="col" class="px-6 py-3">Stream</th>
-                                <th id="aiAnalysisHeader" scope="col" class="px-6 py-3">AI Analysis</th>
+                                <th id="multiStreamHeader" scope="col" class="px-6 py-3">Multi-Stream</th>
                             </tr>
                         </thead>
                         <tbody id="leaderboard-body" class="divide-y divide-gray-700/50"><tr><td colspan="9" class="text-center py-10 text-gray-400">Loading players...</td></tr></tbody>
@@ -979,7 +979,31 @@
         const streamPreviewPlayer = document.getElementById('stream-preview-player');
         const predatorThresholdsDiv = document.getElementById('predator-thresholds'); 
         const analysisModal = document.getElementById('analysisModal');
-        const aiAnalysisHeader = document.getElementById('aiAnalysisHeader');
+        function addToMultiStream(twitchUser) {
+            try {
+                // Open the multistream modal and preselect the streamer in the first empty slot
+                showMultiStreamModal();
+                const slots = ['streamer1','streamer2','streamer3'];
+                const empty = slots.map(id => document.getElementById(id)).find(sel => sel && !sel.value);
+                if (empty) {
+                    // Ensure options are populated
+                    const option = Array.from(empty.options).find(o => o.value.toLowerCase() === twitchUser.toLowerCase());
+                    if (option) {
+                        empty.value = option.value;
+                    } else {
+                        // If streamer isn't in dropdown (edge case), append it
+                        const opt = document.createElement('option');
+                        opt.value = twitchUser;
+                        opt.textContent = twitchUser;
+                        empty.appendChild(opt);
+                        empty.value = twitchUser;
+                    }
+                }
+            } catch (e) {
+                console.warn('addToMultiStream failed:', e);
+                alert('Could not add to Multi-Stream.');
+            }
+        }
         const modalTitle = document.getElementById('modalTitle');
         const modalContent = document.getElementById('modalContent');
 
@@ -1647,7 +1671,11 @@
                     <td class="px-6 py-4">${player.level.toLocaleString()}</td>
                     <td class="px-6 py-4">${getStatusHtml(player.status, player.twitchLink, player.vods_enabled, player.recent_videos, player.hasClips, player.recentClips)}</td>
                     <td class="px-6 py-4">${getStreamHtml(player.stream)}</td>
-                    <td class="px-6 py-4 ai-analysis-cell"><button onclick="analyzePlayerPerformance('${player.name}', ${player.rp}, ${player.change}, ${player.level})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200">Analyze ✨</button></td>
+                    <td class="px-6 py-4">
+                        ${String(player.status).toLowerCase() === 'live' && (player.stream?.twitchUser || (player.twitchLink ? extractUsernameFromLink(player.twitchLink) : '')) ? `
+                        <button onclick="addToMultiStream('${player.stream?.twitchUser || extractUsernameFromLink(player.twitchLink)}')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200">Add to Multi-Stream</button>
+                        ` : '<span class="text-gray-500 text-xs">—</span>'}
+                    </td>
                 `;
                 row.addEventListener('mouseenter', (event) => handleMouseEnter(event, player));
                 row.addEventListener('mouseleave', handleMouseLeave);
@@ -2316,14 +2344,7 @@
 
         async function initializeApp() {
             try {
-                // Hide AI Analysis column by default; re-enable only if explicitly toggled
-                const hideAI = true;
-                if (hideAI) {
-                    const style = document.createElement('style');
-                    style.id = 'ai-analysis-hide-style';
-                    style.textContent = '.ai-analysis-cell, #aiAnalysisHeader { display: none !important; }';
-                    document.head.appendChild(style);
-                }
+                // No-op: AI Analysis fully removed and replaced by Multi-Stream column
                 // Load data as JavaScript files to bypass ad blockers
                 const loadData = async () => {
                     // Check localStorage cache first
