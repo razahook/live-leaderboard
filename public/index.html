@@ -494,7 +494,7 @@
                         </button>
                     </nav>
                 </div>
-            </div>
+        </div>
             
             <!-- Main Content Area -->
             <div class="flex-1 ml-64 p-6">
@@ -703,7 +703,7 @@
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
-                            </div>
+                    </div>
                             <div class="ml-4">
                                 <h3 class="text-lg font-semibold text-white">Account Status</h3>
                                 <p id="accountStatusText" class="text-sm text-gray-400">Not signed in</p>
@@ -720,8 +720,8 @@
                                 Sign In
                             </button>
                         </div>
-                    </div>
-                    
+                </div>
+
                     <!-- Quick Stats Card -->
                     <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-2xl shadow-black/30 border border-gray-700/50">
                         <h3 class="text-lg font-semibold text-white mb-4">Your Stats</h3>
@@ -735,8 +735,8 @@
                                 <span id="accountCreated" class="text-blue-400 font-medium">-</span>
                             </div>
                         </div>
-                    </div>
-                    
+                </div>
+
                     <!-- Preferences Card -->
                     <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-2xl shadow-black/30 border border-gray-700/50">
                         <h3 class="text-lg font-semibold text-white mb-4">Preferences</h3>
@@ -756,7 +756,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-2xl shadow-black/30 border border-gray-700/50 mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-gray-300">Favorite Streamers</h3>
@@ -766,21 +766,21 @@
                             </svg>
                             Refresh Status
                         </button>
-                    </div>
-                    
+                </div>
+
                     <div id="favoritesLoading" class="text-center py-8" style="display: none;">
                         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
                         <p class="text-gray-400 mt-2">Loading favorites...</p>
-                    </div>
-                    
+                </div>
+
                     <div id="favoritesError" class="text-center py-8 text-red-400" style="display: none;">
                         <p>Please sign in to view your favorite streamers.</p>
                         <div class="mt-4">
                             <button onclick="showAuthModal()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200">
                                 Sign In
                             </button>
-                        </div>
                     </div>
+                </div>
                     
                     <div id="favoritesEmpty" class="text-center py-8 text-gray-400" style="display: none;">
                         <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -791,14 +791,14 @@
                         <button onclick="showTab('leaderboardTab')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors duration-200">
                             Browse Leaderboard
                         </button>
-                    </div>
-                    
+        </div>
+
                     <div id="favoritesList" class="space-y-4">
                         <!-- Favorites will be populated here -->
                     </div>
                 </div>
             </section>
-        </div>
+    </div>
         
         </div> <!-- End Main Content Area -->
         </div> <!-- End Main Layout -->
@@ -894,7 +894,7 @@
                         </select>
                     </div>
                 </div>
-
+                
                 <!-- Stream Controls -->
                 <div class="flex justify-between items-center">
                     <div class="flex space-x-2">
@@ -918,14 +918,14 @@
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
                             <button id="aspectToggleBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleAspectLock()">Lock 16:9</button>
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="equalizeSplit()">Equal</button>
-                        </div>
+                    </div>
                     </div>
                 </div>
-        </div>
-
+            </div>
+            
         <div id="multiStreamContainer" class="min-h-[300px]">
-            <!-- Streams will be loaded here -->
-        </div>
+                <!-- Streams will be loaded here -->
+            </div>
     </section>
 
     <!-- AI Analysis Modal -->
@@ -1010,8 +1010,8 @@
         const analysisModal = document.getElementById('analysisModal');
         function addToMultiStream(twitchUser) {
             try {
-                // Open the multistream modal and preselect the streamer in the first empty slot
-                showMultiStreamModal();
+                // Open the multistream dock and preselect the streamer in the first empty slot
+                openMultiStreamDock();
                 const slots = ['streamer1','streamer2','streamer3'];
                 const empty = slots.map(id => document.getElementById(id)).find(sel => sel && !sel.value);
                 if (empty) {
@@ -1366,7 +1366,7 @@
         const showTab = (tabId) => {
             try {
                 // Hide all tab content
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
                 const tabElement = document.getElementById(tabId);
                 if (tabElement) {
                     tabElement.classList.add('active');
@@ -1374,7 +1374,7 @@
                 
                 // Update navigation active states
                 document.querySelectorAll('.nav-item').forEach(button => button.classList.remove('active'));
-                document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
                 
                 // Set active state for nav-item
                 const navElement = document.querySelector(`.nav-item[onclick="showTab('${tabId}')"]`);
@@ -2517,7 +2517,7 @@
                             if (predatorJson?.success && predatorJson.data) {
                                 predatorData = predatorJson.data;
                                 console.log('Extracted predator data:', predatorData);
-                            } else {
+                                } else {
                                 console.warn('Predator API returned success=false or no data:', predatorJson);
                             }
                         } catch (e) {
@@ -4692,14 +4692,14 @@ ${(() => {
                 const clipCreateButton = '';
 
                 // Try Twitch API clips first regardless; fall back to rewind if none
-                console.log('Fetching Twitch API clips...');
-                const response = await fetch(`/api/stream-clips/${streamer}`);
-                const data = await response.json();
+                    console.log('Fetching Twitch API clips...');
+                    const response = await fetch(`/api/stream-clips/${streamer}`);
+                    const data = await response.json();
 
                 if (data.success && data.data.recent_clips && data.data.recent_clips.length > 0) {
-                    displayTwitchClips(index, data.data.recent_clips, clipCreateButton);
-                    clipsContainer.dataset.loaded = 'true';
-                    return;
+                        displayTwitchClips(index, data.data.recent_clips, clipCreateButton);
+                        clipsContainer.dataset.loaded = 'true';
+                        return;
                 }
 
                 // Fallback to rewind/HLS clipping
@@ -5852,8 +5852,8 @@ ${(() => {
         }
         
         function watchStream(username) {
-            // Open the multistream modal first
-            showMultiStreamModal();
+            // Open the multistream dock first
+            openMultiStreamDock();
             
             // Add the streamer to the first available dropdown
             setTimeout(() => {
