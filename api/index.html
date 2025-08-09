@@ -5,7 +5,7 @@
     <!-- Application Structure Plan: A top-down dashboard structure was chosen for optimal information hierarchy, now enhanced with top-level tabbed navigation. The 'Leaderboard' tab provides an immediate snapshot of high-level key metrics (Predator Thresholds) and an interactive data table for detailed exploration (Leaderboard), equipped with search, filter, pagination, data visualizations, and Twitch override. A new 'Player Stats & Match History' tab offers a dedicated interface for individual player lookups, allowing users to query by name/UID and platform. This tab will display detailed player statistics. This tabbed approach provides clear functional separation, improving user understanding and ease of navigation by allowing users to switch contexts easily without leaving the single page. -->
     <!-- Visualization & Content Choices: 
         - Predator Thresholds -> Goal: Inform -> Presentation: 4-Card Layout -> Interaction: None -> Justification: Key metrics are best presented as prominent, easily scannable cards at the top.
-        - Leaderboard Data -> Goal: Organize/Compare/Explore -> Presentation: Interactive HTML Table with Pagination -> Interaction: Search, Live-Only Toggle, Hover for Twitch Preview, Click for AI Analysis, Pagination Controls (Next/Previous/Page Numbers) -> Justification: A table is essential for displaying detailed, multi-column data. The interactions allow users to drill down and find specific information efficiently, and pagination prevents overwhelming the user with too much data at once.
+        - Leaderboard Data -> Goal: Organize/Compare/Explore -> Presentation: Interactive HTML Table with Pagination -> Interaction: Search, Live-Only Toggle, Hover for Twitch Preview, Multi-Stream Actions, Pagination Controls (Next/Previous/Page Numbers) -> Justification: A table is essential for displaying detailed, multi-column data. The interactions allow users to drill down and find specific information efficiently, and pagination prevents overwhelming the user with too much data at once.
         - Top 20 Player RP -> Goal: Compare -> Presentation: Bar Chart (Chart.js) -> Interaction: Hover for Tooltip -> Justification: A bar chart provides a much faster and more intuitive way to compare the RP of top players than scanning a table column.
         - Masters & Predators by Platform -> Goal: Compare/Inform -> Presentation: Doughnut Chart (Chart.js) -> Interaction: Hover for Tooltip -> Justification: A doughnut chart is excellent for showing the proportional distribution of the player base across different platforms, offering a high-level summary.
         - Twitch Override Management -> Goal: Manage Data -> Presentation: Input Form within Modal -> Interaction: Text Input, Submit Button -> Justification: Provides direct user control over specific data points (Twitch links), making the application more dynamic and responsive to user needs.
@@ -354,7 +354,7 @@
                                 <th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">Player</th><th scope="col" class="px-6 py-3">RP</th>
                                 <th scope="col" class="px-6 py-3">24h Change</th><th scope="col" class="px-6 py-3">Level</th><th scope="col" class="px-6 py-3">Status</th>
                                 <th scope="col" class="px-6 py-3">Stream</th>
-                                <th scope="col" class="px-6 py-3">AI Analysis</th>
+                                <th scope="col" class="px-6 py-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="leaderboard-body" class="divide-y divide-gray-700/50"><tr><td colspan="8" class="text-center py-10 text-gray-400">Loading players...</td></tr></tbody>
@@ -640,17 +640,7 @@
         </div>
     </div>
 
-    <!-- AI Analysis Modal -->
-    <div id="analysisModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" onclick="hideModal()">&times;</span>
-            <h2 id="modalTitle" class="text-xl font-bold text-white mb-4">Player Performance Analysis</h2>
-            <div id="modalContent" class="text-gray-300">
-                <div class="spinner"></div>
-                <p class="text-center mt-2">Generating analysis...</p>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Twitch Override Modal -->
     <div id="overrideModal" class="modal">
@@ -699,17 +689,12 @@
         })(); 
         const MOZAMBIQUE_API_KEY = '456c01cf240c13399563026f5604d777'; 
         const TRACKER_GG_API_KEY = 'c4cc3d18-adaf-487b-b3da-d47b924585c4'; 
-        const GEMINI_API_KEY = "AIzaSyA_sdFUk6nrcC8sK3ZlnFbEexJgCTd8SqU"; 
-        
         const leaderboardBody = document.getElementById('leaderboard-body');
         const searchInput = document.getElementById('searchInput');
         const liveOnlyToggle = document.getElementById('liveOnlyToggle');
         const streamPreview = document.getElementById('stream-preview');
         const streamPreviewPlayer = document.getElementById('stream-preview-player');
-        const predatorThresholdsDiv = document.getElementById('predator-thresholds'); 
-        const analysisModal = document.getElementById('analysisModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalContent = document.getElementById('modalContent');
+        const predatorThresholdsDiv = document.getElementById('predator-thresholds');
 
         const overrideModal = document.getElementById('overrideModal');
         const overrideForm = document.getElementById('overrideForm');
@@ -741,15 +726,44 @@
             document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`).classList.add('active');
         };
 
-        const showModal = (title, contentHtml) => {
-            modalTitle.textContent = title;
-            modalContent.innerHTML = contentHtml;
-            analysisModal.classList.add('show');
+        // Helper function to generate action button HTML
+        const getActionButtonHtml = (player) => {
+            const twitchUsername = player.stream?.twitchUser || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
+            if (twitchUsername) {
+                return `<button onclick="addToMultiStream('${twitchUsername}', '${player.name}')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200">Quick Add</button>`;
+            }
+            return `<span class="text-gray-600">-</span>`;
         };
-
-        const hideModal = () => {
-            analysisModal.classList.remove('show');
-            modalContent.innerHTML = '<div class="spinner"></div><p class="text-center mt-2">Generating analysis...</p>';
+        
+        // Helper function to add player to multi-stream
+        const addToMultiStream = (twitchUsername, playerName) => {
+            showMultiStreamModal();
+            // Find first empty dropdown and populate it
+            const dropdowns = ['streamer1', 'streamer2', 'streamer3'];
+            for (const dropdownId of dropdowns) {
+                const dropdown = document.getElementById(dropdownId);
+                if (dropdown && dropdown.value === '') {
+                    // Check if this streamer is already in the dropdown options
+                    let optionExists = false;
+                    for (let i = 0; i < dropdown.options.length; i++) {
+                        if (dropdown.options[i].value === twitchUsername) {
+                            dropdown.value = twitchUsername;
+                            optionExists = true;
+                            break;
+                        }
+                    }
+                    // If option doesn't exist, create it
+                    if (!optionExists) {
+                        const option = document.createElement('option');
+                        option.value = twitchUsername;
+                        option.textContent = playerName;
+                        option.dataset.playerName = playerName;
+                        dropdown.appendChild(option);
+                        dropdown.value = twitchUsername;
+                    }
+                    break;
+                }
+            }
         };
 
         const showOverrideModal = () => {
@@ -764,7 +778,6 @@
         };
 
         window.onclick = (event) => {
-            if (event.target == analysisModal) hideModal();
             if (event.target == overrideModal) hideOverrideModal(); 
         };
 
@@ -869,7 +882,7 @@
                     <td class="px-6 py-4">${player.level.toLocaleString()}</td>
                     <td class="px-6 py-4">${getStatusHtml(player.status, player.twitchLink, player.vods_enabled, player.recent_videos, player.hasClips, player.recentClips)}</td>
                     <td class="px-6 py-4">${getStreamHtml(player.stream)}</td>
-                    <td class="px-6 py-4"><button onclick="analyzePlayerPerformance('${player.name}', ${player.rp}, ${player.change}, ${player.level})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200">Analyze ✨</button></td>
+                    <td class="px-6 py-4">${getActionButtonHtml(player)}</td>
                 `;
                 row.addEventListener('mouseenter', (event) => handleMouseEnter(event, player));
                 row.addEventListener('mouseleave', handleMouseLeave);
@@ -1074,59 +1087,7 @@
             });
         }
 
-        async function analyzePlayerPerformance(playerName, playerRp, rpChange24h, playerLevel) {
-            showModal(`Analyzing ${playerName}'s Performance`, '<div class="spinner"></div><p class="text-center mt-2">Generating analysis...</p>');
-            const prompt = `As an Apex Legends coach, provide **3-4 concise, actionable bullet points** of feedback for player ${playerName}. Their current RP is ${playerRp}, 24-hour RP change: ${rpChange24h}, Level: ${playerLevel}. Focus on clear strengths and 1-2 key areas for improvement. Use a direct, encouraging tone. Very brief, max 70 words.`;
-            
-            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error(`Gemini API error: ${response.status}`);
-                
-                const result = await response.json();
-                if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                    modalContent.innerHTML = `<p class="text-gray-300">${result.candidates[0].content.parts[0].text}</p>`;
-                } else {
-                    throw new Error("Invalid response structure from AI.");
-                }
-            } catch (error) {
-                modalContent.innerHTML = `<p class="text-red-500">Error generating analysis: ${error.message}</p>`;
-                console.error("Error calling Gemini API:", error);
-            }
-        }
-
-        async function getLegendTips(legendName) {
-            showModal(`Insights for ${legendName} ✨`, '<div class="spinner"></div><p class="text-center mt-2">Fetching legend insights...</p>');
-            const prompt = `Give me a **very brief lore bite** for ${legendName} from Apex Legends, then **3-4 super concise tactical tips** (bullet points) on using their abilities effectively. Max 60 words. Think quick, actionable advice.`;
-            
-            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error(`Gemini API error: ${response.status}`);
-                
-                const result = await response.json();
-                if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                    modalContent.innerHTML = `<p class="text-gray-300">${result.candidates[0].content.parts[0].text}</p>`;
-                } else {
-                    throw new Error("Invalid response structure from AI.");
-                }
-            } catch (error) {
-                modalContent.innerHTML = `<p class="text-red-500">Error fetching legend insights: ${error.message}</p>`;
-                console.error("Error calling Gemini API for legend tips:", error);
-            }
-        }
 
 
         async function submitTwitchOverride(event) {
@@ -3187,7 +3148,6 @@ ${(() => {
         
         // Close modal when clicking outside
         window.onclick = (event) => {
-            if (event.target == analysisModal) hideModal();
             if (event.target == overrideModal) hideOverrideModal();
             if (event.target == multiStreamModal) hideMultiStreamModal();
         };
