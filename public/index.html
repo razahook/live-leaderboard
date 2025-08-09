@@ -3820,42 +3820,19 @@
         // Open dock: populate controls and auto-load
         const openMultiStreamDock = () => {
             console.log('[MultiStream] Opening dock... Data loaded:', dataLoaded, 'Players count:', allPlayers?.length || 0);
+            console.log('[MultiStream] allPlayers exists:', !!allPlayers, 'is array:', Array.isArray(allPlayers));
             
-            // Check if player data is available
-            if (!dataLoaded || !allPlayers || allPlayers.length === 0) {
-                console.warn('[MultiStream] Data not ready, waiting for data... dataLoaded:', dataLoaded);
+            // SIMPLIFIED: Just check if allPlayers has any data, ignore dataLoaded flag for now
+            if (!allPlayers || !Array.isArray(allPlayers) || allPlayers.length === 0) {
+                console.warn('[MultiStream] No player data available, allPlayers:', allPlayers);
                 const container = document.getElementById('multiStreamContainer');
                 if (container) {
-                    container.innerHTML = '<div class="text-center text-gray-400 p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div><p>Loading streamer data...</p></div>';
+                    container.innerHTML = '<div class="text-center text-red-400 p-8"><p>No player data available. Please refresh the page.</p></div>';
                 }
-                
-                // Use a more persistent polling approach
-                let attempts = 0;
-                const maxAttempts = 10; // 10 seconds max wait
-                const checkData = () => {
-                    attempts++;
-                    console.log('[MultiStream] Checking data attempt', attempts, 'dataLoaded:', dataLoaded, 'players:', allPlayers?.length || 0);
-                    
-                    if (dataLoaded && allPlayers && allPlayers.length > 0) {
-                        console.log('[MultiStream] Data now available, retrying openMultiStreamDock');
-                        openMultiStreamDock();
-                        return;
-                    }
-                    
-                    if (attempts < maxAttempts) {
-                        setTimeout(checkData, 1000); // Check every second
-                    } else {
-                        console.error('[MultiStream] Gave up waiting for data after', maxAttempts, 'attempts');
-                        const container = document.getElementById('multiStreamContainer');
-                        if (container) {
-                            container.innerHTML = '<div class="text-center text-red-400 p-8"><p>Failed to load streamer data. Please refresh the page.</p></div>';
-                        }
-                    }
-                };
-                
-                setTimeout(checkData, 1000);
                 return;
             }
+            
+            console.log('[MultiStream] ✅ Data check passed, proceeding with population...');
             
             populateStreamerDropdowns();
             restoreMultiSelection();
@@ -3902,58 +3879,32 @@
                 hasClips: p.hasClips
             })));
             
-            // Include players who are live on Twitch or have streaming capability
-            const liveStreamers = allPlayers.filter(player => {
+            // SIMPLIFIED: Include ALL top players for now, we'll show live status in the dropdown
+            console.log('[MultiStream] Using simplified approach: showing top 50 players regardless of streaming status');
+            
+            const liveStreamers = allPlayers.slice(0, 50).map(player => {
+                // Check various Twitch indicators
                 const twitchLive = player.twitch_live?.is_live === true;
-                const statusLive = String(player.status || '').toLowerCase().includes('live');
-                const statusInMatch = String(player.status || '').toLowerCase().includes('match');
-                const hasStreamData = player.stream !== null && player.stream !== undefined;
-                const hasTwitchUser = player.stream?.twitchUser && player.stream.twitchUser.length > 0;
-                const hasTwitchLink = player.twitch_link && player.twitch_link.includes('twitch.tv');
-                const hasClips = player.hasClips === true;
-                
-                // NEW: Check for ANY Twitch-related data at all
                 const hasTwitchData = player.twitch_live !== null && player.twitch_live !== undefined;
-                const hasAnyTwitchProperty = player.twitch_link || player.twitch_live || player.stream;
+                const hasTwitchLink = player.twitch_link && player.twitch_link.includes('twitch.tv');
                 
-                // Debug each player's eligibility
-                const conditions = {
-                    twitchLive,
-                    statusLive,
-                    statusInMatch,
-                    hasStreamData,
-                    hasTwitchUser,
-                    hasTwitchLink,
-                    hasClips,
-                    hasTwitchData,
-                    hasAnyTwitchProperty
-                };
-                
-                // Be VERY inclusive - include anyone with ANY Twitch presence
-                const isEligible = twitchLive || 
-                                 statusLive || 
-                                 statusInMatch ||
-                                 hasStreamData ||
-                                 hasTwitchUser ||
-                                 hasTwitchLink ||
-                                 hasClips ||
-                                 hasTwitchData ||
-                                 hasAnyTwitchProperty;
-                
-                if (isEligible) {
-                    console.log(`✅ Including ${player.name || player.player_name}:`, conditions);
-                } else {
-                    // Debug first 5 non-eligible players to understand data structure
-                    const nonEligibleCount = allPlayers.filter(p => !p.twitch_live && !p.twitch_link && !p.stream).length;
-                    if (nonEligibleCount < 5) {
-                        console.log(`❌ Excluding ${player.name || player.player_name}:`, {
-                            player: player,
-                            conditions
-                        });
-                    }
+                // Determine display status
+                let statusIndicator = '';
+                if (twitchLive) {
+                    const viewers = player.twitch_live?.stream_data?.viewer_count || 0;
+                    statusIndicator = ` 🔴 (${viewers} viewers)`;
+                } else if (hasTwitchData || hasTwitchLink) {
+                    statusIndicator = ' 📺 (has Twitch)';
                 }
                 
-                return isEligible;
+                console.log(`Including ${player.name || player.player_name}${statusIndicator}`);
+                
+                return {
+                    ...player,
+                    displayName: (player.name || player.player_name) + statusIndicator,
+                    isLive: twitchLive,
+                    viewers: player.twitch_live?.stream_data?.viewer_count || 0
+                };
             });
             
             console.log('[MultiStream] Live streamers found:', liveStreamers.length);
@@ -6280,12 +6231,33 @@ ${(() => {
         };
 
         window.toggleMultiStreamFullscreen = () => {
-            const modal = document.getElementById('multiStreamModal');
+            const container = document.getElementById('multiStreamContainer');
+            if (!container) {
+                console.warn('Multi-Stream container not found');
+                return;
+            }
+            
             if (document.fullscreenElement) {
                 document.exitFullscreen();
             } else {
-                modal.requestFullscreen();
+                container.requestFullscreen().catch(err => {
+                    console.warn('Fullscreen request failed:', err);
+                });
             }
+        };
+        
+        window.toggleGlobalMute = () => {
+            console.log('[MultiStream] Toggle global mute');
+            const iframes = document.querySelectorAll('#multiStreamContainer iframe');
+            iframes.forEach((iframe, index) => {
+                try {
+                    // Note: Due to CORS restrictions, we can't directly control Twitch embed audio
+                    // This would need to be implemented using Twitch Embed API
+                    console.log(`Would toggle mute for stream ${index + 1}`);
+                } catch (error) {
+                    console.warn('Cannot control iframe audio:', error);
+                }
+            });
         };
 
         // Enhanced CSS Styles
