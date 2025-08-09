@@ -3793,6 +3793,12 @@
             multiStreamModal.classList.add('show');
             populateStreamerDropdowns();
             restoreMultiSelection();
+            // Auto-load immediately if any selection exists
+            const s1 = document.getElementById('streamer1')?.value;
+            const s2 = document.getElementById('streamer2')?.value;
+            const s3 = document.getElementById('streamer3')?.value;
+            const hasAny = [s1,s2,s3].some(v => v && v.trim().length > 0);
+            if (hasAny) loadMultiStreams();
         };
         
         const hideMultiStreamModal = () => {
@@ -4135,9 +4141,10 @@ ${(() => {
                 // Set initial width based on number of streams to reduce dead space
                 const count = streamers.length;
                 const basis = count === 1 ? '100%' : (count === 2 ? '49%' : '32%');
-                // Allow grow to fill container, while preserving basis
+                // Let Split.js control widths; set initial basis for first render
                 streamDiv.style.flex = `1 0 ${basis}`;
-                // Height follows aspect ratio via child container
+                // Ensure the outer gray container grows with content height
+                streamDiv.style.alignSelf = 'stretch';
                 gridContainer.appendChild(streamDiv);
                 makePanelResizable(streamDiv, index);
             });
@@ -4158,7 +4165,7 @@ ${(() => {
                 }, index * 500); // Reduced delay to 500ms
             });
 
-            // Initialize Split.js gutters after DOM paints
+            // Initialize Split.js gutters after DOM paints and container measured
             requestAnimationFrame(() => {
                 const ids = streamers.map((_, i) => `#pane-${i}`);
                 const panes = Array.from(gridContainer.children);
@@ -4171,10 +4178,11 @@ ${(() => {
                             minSize: 200,
                             gutterSize: 6,
                             snapOffset: 12,
-                            onDrag: () => ensureHostsFill(),
+                            onDrag: () => syncMultistreamContainerHeight(),
                             onDragEnd: (newSizes) => savePaneSizes(newSizes)
                         });
                         window.__msSplit = split;
+                        syncMultistreamContainerHeight();
                     } catch (e) { console.warn('Split.js init failed:', e); }
                 }
             });
@@ -4258,6 +4266,21 @@ ${(() => {
                 host.style.position = 'absolute'; host.style.inset = '0';
                 host.style.width = '100%'; host.style.height = '100%';
             });
+        }
+
+        // Keep the gray container sized to tallest pane content (prevents empty area)
+        function syncMultistreamContainerHeight(){
+            ensureHostsFill();
+            const grid = document.getElementById('multistream-grid');
+            if (!grid) return;
+            let maxH = 0;
+            grid.querySelectorAll('.resize-container').forEach(p => {
+                const h = p.getBoundingClientRect().height;
+                if (h > maxH) maxH = h;
+            });
+            // Gray container is the modal content section wrapping grid
+            const container = document.getElementById('multiStreamContainer');
+            if (container && maxH > 0) container.style.minHeight = Math.ceil(maxH + 40) + 'px';
         }
 
         // Aspect ratio lock to reduce black bars during manual resize
