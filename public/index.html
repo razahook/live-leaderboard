@@ -918,6 +918,7 @@
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
                             <button id="aspectToggleBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleAspectLock()">Lock 16:9</button>
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="equalizeSplit()">Equal</button>
+                            <button class="px-2 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded" onclick="loadMultiStreams()">Load</button>
                     </div>
                     </div>
                 </div>
@@ -3879,7 +3880,7 @@
             
             // Create flex layout with resizable panels (reduces dead space)
             const gridContainer = document.createElement('div');
-            gridContainer.className = 'flex flex-row gap-2 items-stretch';
+            gridContainer.className = 'flex flex-row flex-wrap gap-2 items-stretch';
             gridContainer.id = 'multistream-grid';
             
             streamers.forEach((streamer, index) => {
