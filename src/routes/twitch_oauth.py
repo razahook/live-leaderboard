@@ -20,6 +20,8 @@ TWITCH_CLIENT_ID = os.environ.get('TWITCH_CLIENT_ID')
 TWITCH_CLIENT_SECRET = os.environ.get('TWITCH_CLIENT_SECRET')
 # Default redirect URI for Vercel deployment
 REDIRECT_URI = "https://live-leaderboard-plum.vercel.app/api/session/complete"
+# Optional override to force a single base across preview/prod (avoids Twitch mismatch)
+REDIRECT_BASE_OVERRIDE = os.environ.get('TWITCH_REDIRECT_BASE')
 
 # Required scopes for clip creation
 REQUIRED_SCOPES = "clips:edit"
@@ -124,11 +126,13 @@ def oauth_login():
             oauth_states[state] = {'created_at': time.time(), 'used': False}
             save_oauth_data(oauth_states, user_tokens)
         
-        # In serverless (Vercel), use the SAME deployment domain as the caller
-        # so state is generated and verified within the same deployment (preview vs prod)
+        # In serverless (Vercel), prefer explicit override to avoid redirect_uri mismatch
         if IS_SERVERLESS:
-            base = request.host_url.rstrip('/')
-            redirect_uri = f"{base}/api/session/complete"
+            if REDIRECT_BASE_OVERRIDE:
+                redirect_uri = f"{REDIRECT_BASE_OVERRIDE.rstrip('/')}/api/session/complete"
+            else:
+                base = request.host_url.rstrip('/')
+                redirect_uri = f"{base}/api/session/complete"
         else:
             # In dev, allow override via current_url for ngrok/local testing
             current_url = request.args.get('current_url', '')
@@ -220,10 +224,13 @@ def oauth_callback():
             </body></html>
             """, 400
         
-        # In serverless (Vercel), use the SAME deployment domain as the caller
+        # In serverless (Vercel), prefer explicit override to avoid redirect_uri mismatch
         if IS_SERVERLESS:
-            base = request.host_url.rstrip('/')
-            redirect_uri = f"{base}/api/session/complete"
+            if REDIRECT_BASE_OVERRIDE:
+                redirect_uri = f"{REDIRECT_BASE_OVERRIDE.rstrip('/')}/api/session/complete"
+            else:
+                base = request.host_url.rstrip('/')
+                redirect_uri = f"{base}/api/session/complete"
         else:
             current_url = request.args.get('current_url', '')
             if 'ngrok' in current_url or 'ngrok-free.app' in current_url:
