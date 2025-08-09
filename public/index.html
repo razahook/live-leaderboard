@@ -924,7 +924,7 @@
                     </div>
                 </div>
                 
-            <div id="multiStreamContainer" class="min-h-[300px]">
+            <div id="multiStreamContainer" class="min-h-[280px] bg-gray-900/50 rounded-lg border border-gray-700/50 p-3">
                     <!-- Streams will be loaded here -->
                 </div>
             <div id="multiStreamExtras" class="mt-6 hidden">
@@ -3957,9 +3957,9 @@
                 return;
             }
             
-            // Create flex layout with resizable panels (reduces dead space)
+            // Create ultrathink flex layout with compact resizable panels
             const gridContainer = document.createElement('div');
-            gridContainer.className = 'flex flex-row flex-wrap gap-2 items-stretch';
+            gridContainer.className = 'flex flex-row flex-wrap gap-1 items-stretch';
             gridContainer.id = 'multistream-grid';
             
             streamers.forEach((streamer, index) => {
@@ -4182,7 +4182,7 @@ ${(() => {
                     </div>
                     
                     <!-- Stream Tab Content -->
-                    <div id="stream-content-${index}" class="stream-tab-content w-full bg-gray-900 relative" style="aspect-ratio: 16 / 9; overflow: hidden;">
+                    <div id="stream-content-${index}" class="stream-tab-content w-full bg-gray-900 relative" style="aspect-ratio: 16 / 7; overflow: hidden;">
                         <div id="loading-${index}" class="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900/80 z-10">
                             <div class="text-center">
                                 <div class="text-gray-300 mb-2 text-sm">Loading ${displayName}...</div>
@@ -4194,7 +4194,7 @@ ${(() => {
                     </div>
                     
                     <!-- Clips Tab Content -->
-                    <div id="clips-content-${index}" class="stream-tab-content w-full bg-gray-900 relative hidden" style="aspect-ratio: 16/9;">
+                    <div id="clips-content-${index}" class="stream-tab-content w-full bg-gray-900 relative hidden" style="aspect-ratio: 16/7;">
                         <div id="clips-loading-${index}" class="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900/80 z-10">
                             <div class="text-center">
                                 <div class="text-gray-300 mb-2 text-sm">Loading clips...</div>
@@ -4206,9 +4206,9 @@ ${(() => {
                         </div>
                     </div>
                 `;
-                // Set initial width based on number of streams to reduce dead space
+                // Set initial width based on number of streams for ultrathink layout
                 const count = streamers.length;
-                const basis = count === 1 ? '100%' : (count === 2 ? '49%' : '32%');
+                const basis = count === 1 ? '100%' : (count === 2 ? '48%' : '30%');
                 // Let Split.js control widths; set initial basis for first render
                 streamDiv.style.flex = `1 0 ${basis}`;
                 // Ensure the outer gray container grows with content height
@@ -4251,8 +4251,8 @@ ${(() => {
                         const sizes = getSavedPaneSizes(panes.length) || panes.map(() => 100 / panes.length);
                         const split = Split(ids, {
                             sizes,
-                            minSize: 200,
-                            gutterSize: 6,
+                            minSize: 150,
+                            gutterSize: 4,
                             snapOffset: 12,
                             onDrag: () => syncMultistreamContainerHeight(),
                             onDragEnd: (newSizes) => savePaneSizes(newSizes)
@@ -4288,7 +4288,7 @@ ${(() => {
                 window.__msSplit = null;
             }
             if (mode === 'grid') {
-                const basis = n === 1 ? '100%' : (n === 2 ? '49%' : '32%');
+                const basis = n === 1 ? '100%' : (n === 2 ? '48%' : '30%');
                 panels.forEach(p => set(p, basis));
             } else if (mode === 'row') {
                 panels.forEach(p => set(p, `${Math.floor(100/n)}%`));
@@ -6117,11 +6117,22 @@ ${(() => {
         const originalShowTab = showTab;
         window.showTab = (tabId) => {
             originalShowTab(tabId);
+            
+            // Scroll to top when switching tabs for better UX
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
             if (tabId === 'accountTab') {
                 updateAccountDisplay();
                 refreshFavorites();
             } else if (tabId === 'multiStreamTab') {
                 openMultiStreamDock();
+                // Additional scroll to ensure Multi-Stream controls are visible
+                setTimeout(() => {
+                    const multiStreamTab = document.getElementById('multiStreamTab');
+                    if (multiStreamTab) {
+                        multiStreamTab.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 100);
             }
         };
 
