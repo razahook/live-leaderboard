@@ -916,6 +916,7 @@
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus2')">Focus 2</button>
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
                             <button id="aspectToggleBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleAspectLock()">Lock 16:9</button>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="equalizeSplit()">Equal</button>
                         </div>
                     </div>
                 </div>
@@ -4186,6 +4187,10 @@ ${(() => {
                     else set(p, '32%');
                 });
             }
+        }
+
+        function equalizeSplit(){
+            setMultiLayout('grid');
         }
 
         // Aspect ratio lock to reduce black bars during manual resize
