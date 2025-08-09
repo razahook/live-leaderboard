@@ -4105,7 +4105,7 @@ ${(() => {
                     </div>
                     
                     <!-- Stream Tab Content -->
-                    <div id="stream-content-${index}" class="stream-tab-content w-full bg-gray-900 relative" style="height: 420px; min-height: 240px; overflow: hidden;">
+                    <div id="stream-content-${index}" class="stream-tab-content w-full bg-gray-900 relative" style="aspect-ratio: 16 / 9; overflow: hidden;">
                         <div id="loading-${index}" class="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900/80 z-10">
                             <div class="text-center">
                                 <div class="text-gray-300 mb-2 text-sm">Loading ${displayName}...</div>
@@ -4134,7 +4134,7 @@ ${(() => {
                 const basis = count === 1 ? '100%' : (count === 2 ? '49%' : '32%');
                 // Allow grow to fill container, while preserving basis
                 streamDiv.style.flex = `1 0 ${basis}`;
-                streamDiv.style.height = '520px';
+                // Height follows aspect ratio via child container
                 gridContainer.appendChild(streamDiv);
                 makePanelResizable(streamDiv, index);
             });
@@ -4176,14 +4176,14 @@ ${(() => {
             };
             if (mode === 'grid') {
                 const basis = n === 1 ? '100%' : (n === 2 ? '49%' : '32%');
-                panels.forEach(p => set(p, basis, '520px'));
+                panels.forEach(p => set(p, basis));
             } else if (mode === 'row') {
-                panels.forEach(p => set(p, `${Math.floor(100/n)}%`, '420px'));
+                panels.forEach(p => set(p, `${Math.floor(100/n)}%`));
             } else if (mode.startsWith('focus')) {
                 const idx = parseInt(mode.replace('focus',''), 10) - 1;
                 panels.forEach((p,i) => {
-                    if (i === idx) set(p, '66%', '580px');
-                    else set(p, '32%', '420px');
+                    if (i === idx) set(p, '66%');
+                    else set(p, '32%');
                 });
             }
         }
@@ -4328,16 +4328,11 @@ ${(() => {
                 if (!isResizing) return;
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
-                let newW = Math.max(300, startW + dx);
-                let newH = Math.max(180, startH + dy);
-                if (aspectLocked) {
-                    // maintain 16:9; prefer width change
-                    newH = Math.round((newW / 16) * 9);
-                }
+                let newW = Math.max(320, startW + dx);
                 panel.style.width = newW + 'px';
                 panel.style.flex = `0 0 ${newW}px`;
                 panel.style.flexBasis = newW + 'px';
-                panel.style.height = newH + 'px';
+                // Height derives from aspect-ratio; no manual height when locked
                 // Force Twitch iframe to fill the new size
                 const embedHost = panel.querySelector(`#stream-${index}`) || panel.querySelector('iframe');
                 if (embedHost) {
