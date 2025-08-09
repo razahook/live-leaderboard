@@ -3788,13 +3788,22 @@
         const MS_STORAGE_KEY = 'multistream_selection_v1';
         // Open dock: populate controls and auto-load
         const openMultiStreamDock = () => {
+            console.log('[MultiStream] Opening dock...');
             populateStreamerDropdowns();
             restoreMultiSelection();
-            const s1 = document.getElementById('streamer1')?.value;
-            const s2 = document.getElementById('streamer2')?.value;
-            const s3 = document.getElementById('streamer3')?.value;
-            const hasAny = [s1,s2,s3].some(v => v && v.trim().length > 0);
-            if (hasAny) loadMultiStreams();
+            
+            // After dropdowns are populated and restored, check if we should auto-load
+            setTimeout(() => {
+                const s1 = document.getElementById('streamer1')?.value;
+                const s2 = document.getElementById('streamer2')?.value;
+                const s3 = document.getElementById('streamer3')?.value;
+                const hasAny = [s1,s2,s3].some(v => v && v.trim().length > 0);
+                console.log('[MultiStream] Auto-load check:', { s1, s2, s3, hasAny });
+                if (hasAny) {
+                    console.log('[MultiStream] Auto-loading streams...');
+                    loadMultiStreams();
+                }
+            }, 100); // Small delay to ensure DOM is ready
         };
         
         const populateStreamerDropdowns = () => {
@@ -3815,18 +3824,29 @@
                     console.log(`Filtering out ${player.player_name || player.name}: twitchLive=${twitchLive}, hasStreamData=${hasStreamData}, hasViewers=${hasViewers}, hasTwitchUser=${hasTwitchUser}, statusIsLive=${statusIsLive}`);
                 }
                 
-                return twitchLive && hasStreamData && hasViewers && hasTwitchUser && statusIsLive;
+                // Be more inclusive - don't require all conditions
+                return (twitchLive || statusIsLive) && hasStreamData && hasTwitchUser;
             });
             
-            console.log('Live streamers found:', liveStreamers.length);
-            console.log('Live streamers:', liveStreamers.map(p => ({
-                name: p.name || p.player_name,
-                status: p.status,
-                twitch_live_status: p.twitch_live?.is_live,
-                has_stream: !!p.stream,
-                viewers: p.stream?.viewers || 0,
-                twitchUser: p.stream?.twitchUser || 'no_stream'
-            })));
+            console.log('[MultiStream] Live streamers found:', liveStreamers.length);
+            if (liveStreamers.length === 0) {
+                console.warn('[MultiStream] No live streamers found! Checking data...');
+                console.log('[MultiStream] Sample of all players:', allPlayers.slice(0, 5).map(p => ({
+                    name: p.name || p.player_name,
+                    status: p.status,
+                    twitch_live: p.twitch_live,
+                    stream: p.stream
+                })));
+            } else {
+                console.log('[MultiStream] Live streamers:', liveStreamers.slice(0, 10).map(p => ({
+                    name: p.name || p.player_name,
+                    status: p.status,
+                    twitch_live_status: p.twitch_live?.is_live,
+                    has_stream: !!p.stream,
+                    viewers: p.stream?.viewers || 0,
+                    twitchUser: p.stream?.twitchUser || 'no_stream'
+                })));
+            }
             
             const dropdowns = ['streamer1', 'streamer2', 'streamer3'];
             dropdowns.forEach(dropdownId => {
@@ -3864,17 +3884,23 @@
             const streamer2 = document.getElementById('streamer2').value;
             const streamer3 = document.getElementById('streamer3').value;
             
-            console.log('Selected streamers:', { streamer1, streamer2, streamer3 });
-            alert('Loading multistreams - check console for debug info');
+            console.log('[MultiStream] Selected streamers:', { streamer1, streamer2, streamer3 });
             
-            const streamers = [streamer1, streamer2, streamer3].filter(s => s);
-            console.log('Filtered streamers:', streamers);
+            // Validate that at least one streamer has a non-empty value
+            const streamers = [streamer1, streamer2, streamer3].filter(s => s && s.trim().length > 0);
+            console.log('[MultiStream] Filtered streamers:', streamers);
             
             const container = document.getElementById('multiStreamContainer');
+            if (!container) {
+                console.error('[MultiStream] Container not found!');
+                return;
+            }
+            
             container.innerHTML = '';
             
             if (streamers.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center text-gray-400">Please select at least one streamer</div>';
+                container.innerHTML = '<div class="col-span-full text-center text-gray-400 p-4">Please select at least one streamer from the dropdowns above</div>';
+                console.log('[MultiStream] No streamers selected, showing hint');
                 return;
             }
             
@@ -4146,12 +4172,20 @@ ${(() => {
                 localStorage.setItem(MS_STORAGE_KEY, JSON.stringify(payload));
             } catch {}
 
-            // Load all streams with delays to avoid conflicts and set initial basis once
+            // Load all streams with delays to avoid conflicts
             streamers.forEach((streamer, index) => {
                 setTimeout(() => {
-                    console.log(`Loading stream ${index + 1}: ${streamer} (Twitch username)`);
+                    console.log(`[MultiStream] Queueing stream ${index + 1}/${streamers.length}: ${streamer}`);
                     loadStreamEmbed(index, streamer);
-                }, index * 500); // Reduced delay to 500ms
+                }, index * 500); // Stagger to avoid rate limits
+            });
+            
+            // Log telemetry for debugging
+            console.log('[MultiStream] Initialization complete:', {
+                containerFound: !!container,
+                streamerCount: streamers.length,
+                streamers: streamers,
+                timestamp: new Date().toISOString()
             });
 
             // Initialize Split.js gutters after DOM paints and container measured
@@ -4262,14 +4296,25 @@ ${(() => {
             ensureHostsFill();
             const grid = document.getElementById('multistream-grid');
             if (!grid) return;
-            let maxH = 0;
-            grid.querySelectorAll('.resize-container').forEach(p => {
-                const h = p.getBoundingClientRect().height;
-                if (h > maxH) maxH = h;
+            
+            // Find the tallest pane dynamically
+            let maxHeight = 0;
+            const panes = grid.querySelectorAll('.resize-container');
+            
+            panes.forEach(pane => {
+                const rect = pane.getBoundingClientRect();
+                if (rect.height > maxHeight) {
+                    maxHeight = rect.height;
+                }
             });
-            // Gray container is the modal content section wrapping grid
+            
+            // Update container min-height to fit tallest pane
             const container = document.getElementById('multiStreamContainer');
-            if (container && maxH > 0) container.style.minHeight = Math.ceil(maxH + 40) + 'px';
+            if (container && maxHeight > 0) {
+                const newHeight = Math.ceil(maxHeight + 40);
+                container.style.minHeight = newHeight + 'px';
+                console.log('[MultiStream] Container height synced to', newHeight, 'px');
+            }
         }
 
         // Aspect ratio lock to reduce black bars during manual resize
@@ -4330,6 +4375,27 @@ ${(() => {
                 console.log('Twitch embed parent hostname:', window.location.hostname);
                 console.log('Full location:', window.location.href);
                 
+                // Dynamically determine parent domains based on current environment
+                const hostname = window.location.hostname;
+                const parentDomains = [hostname];
+                
+                // If on Vercel, add wildcard for preview deployments
+                if (hostname.includes('vercel.app')) {
+                    // Get the base domain for Vercel previews
+                    const parts = hostname.split('.');
+                    if (parts.length >= 3) {
+                        // Add wildcard for all subdomains
+                        parentDomains.push(`*.${parts.slice(-2).join('.')}`);
+                    }
+                }
+                
+                // If localhost, add both localhost and 127.0.0.1
+                if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                    parentDomains.push('localhost', '127.0.0.1');
+                }
+                
+                console.log('[MultiStream] Using parent domains:', parentDomains);
+                
                 // Create the Twitch embed
                 const embed = new Twitch.Embed(`stream-${index}`, {
                     width: "100%",
@@ -4338,15 +4404,16 @@ ${(() => {
                     layout: "video",
                     muted: true, // Mute to avoid audio conflicts
                     autoplay: true,
-                    parent: [window.location.hostname]
+                    parent: parentDomains
                 });
                 
-                // Remove loading indicator immediately when embed is created
+                // Hide loading indicator after embed is created
                 setTimeout(() => {
                     if (loadingElement) {
-                        loadingElement.remove();
+                        loadingElement.style.display = 'none';
                     }
-                }, 500); // Very fast removal
+                    console.log(`[MultiStream] Stream ${index} loaded: ${canonicalTwitchUsername}`);
+                }, 500);
                 
                 // Also remove loading on embed ready event if available
                 if (embed && embed.addEventListener) {
@@ -4371,15 +4438,26 @@ ${(() => {
                 }
                 
             } catch (error) {
-                console.error(`Failed to load stream for ${streamer}:`, error);
+                console.error(`[MultiStream] Failed to load stream ${index}:`, error);
+                
+                // Hide loading indicator
                 if (loadingElement) {
-                    loadingElement.innerHTML = `
-                        <div class="text-center p-4">
-                            <div class="text-red-400 mb-2 font-semibold">Failed to load stream</div>
-                            <div class="text-gray-400 mb-3 text-sm">${error.message}</div>
-                            <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
-                                Watch on Twitch
-                            </a>
+                    loadingElement.style.display = 'none';
+                }
+                
+                // Show error in stream container
+                const embedContainer = document.getElementById(`stream-${index}`);
+                if (embedContainer) {
+                    const errorMessage = error.message || 'Unknown error';
+                    embedContainer.innerHTML = `
+                        <div class="flex items-center justify-center h-full bg-gray-900 text-gray-300">
+                            <div class="text-center p-4">
+                                <div class="text-red-400 mb-2 font-semibold">Failed to load stream</div>
+                                <div class="text-gray-400 mb-3 text-sm">${errorMessage}</div>
+                                <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors">
+                                    Watch on Twitch
+                                </a>
+                            </div>
                         </div>
                     `;
                 }
