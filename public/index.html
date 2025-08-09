@@ -3933,9 +3933,9 @@
                 return;
             }
             
-            // Create flex layout with resizable panels (reduces dead space)
+            // Simple row layout (no drag/resize)
             const gridContainer = document.createElement('div');
-            gridContainer.className = 'flex flex-row gap-2 items-stretch';
+            gridContainer.className = 'flex flex-row gap-4 items-stretch';
             gridContainer.id = 'multistream-grid';
             
             streamers.forEach((streamer, index) => {
@@ -4062,7 +4062,6 @@
                 const streamDiv = document.createElement('div');
                 streamDiv.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700/50 relative resize-container';
                 streamDiv.innerHTML = `
-                    <div class="resize-handle" style="position:absolute;right:6px;bottom:6px;width:16px;height:16px;border-right:2px solid #9ca3af;border-bottom:2px solid #9ca3af;cursor:nwse-resize;opacity:0.95;z-index:20"></div>
                     <div class="bg-gradient-to-r from-gray-800 to-gray-700 text-white p-4 border-b border-gray-600">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-3">
@@ -4194,13 +4193,12 @@ ${(() => {
             
             container.appendChild(gridContainer);
             
-            // Apply default multistream layout from edge flags
+            // Equal layout: distribute evenly
             try {
-                const flags = window.__edgeFlags || {};
-                const raw = (flags.multistream_default_layout || 'equal').toString().toLowerCase();
-                const layout = raw === 'row' ? 'row' : (raw.startsWith('focus3') ? 'focus3' : (raw.startsWith('focus2') ? 'focus2' : (raw.startsWith('focus1') ? 'focus1' : 'grid')));
-                setMultiLayout(layout);
-            } catch (e) { /* no-op */ }
+                const panels = Array.from(gridContainer.children);
+                const basis = panels.length === 1 ? '100%' : (panels.length === 2 ? '50%' : '33.3333%');
+                panels.forEach(p => { p.style.flex = `0 0 ${basis}`; p.style.flexBasis = basis; });
+            } catch (e) { }
             
             // Persist selection
             try {
@@ -4216,26 +4214,7 @@ ${(() => {
                 }, index * 500); // Reduced delay to 500ms
             });
 
-            // Initialize Split.js gutters after DOM paints
-            requestAnimationFrame(() => {
-                const ids = streamers.map((_, i) => `#pane-${i}`);
-                const panes = Array.from(gridContainer.children);
-                panes.forEach((p, i) => p.id = `pane-${i}`);
-                if (window.Split && panes.length > 1) {
-                    try {
-                        const sizes = getSavedPaneSizes(panes.length) || panes.map(() => 100 / panes.length);
-                        const split = Split(ids, {
-                            sizes,
-                            minSize: 200,
-                            gutterSize: 6,
-                            snapOffset: 12,
-                            onDrag: () => ensureHostsFill(),
-                            onDragEnd: (newSizes) => savePaneSizes(newSizes)
-                        });
-                        window.__msSplit = split;
-                    } catch (e) { console.warn('Split.js init failed:', e); }
-                }
-            });
+            // No Split.js when drag is disabled
         };
 
         // Layout presets
@@ -4273,25 +4252,7 @@ ${(() => {
                     else set(p, '32%');
                 });
             }
-            // Recreate split gutters after layout
-            requestAnimationFrame(() => {
-                const panes = Array.from(grid.children);
-                const ids = panes.map((_, i) => `#pane-${i}`);
-                panes.forEach((p, i) => p.id = `pane-${i}`);
-                if (window.Split && panes.length > 1) {
-                    try {
-                        const sizes = getSavedPaneSizes(panes.length) || panes.map(() => 100 / panes.length);
-                        window.__msSplit = Split(ids, {
-                            sizes,
-                            minSize: 200,
-                            gutterSize: 6,
-                            snapOffset: 12,
-                            onDrag: () => ensureHostsFill(),
-                            onDragEnd: (newSizes) => savePaneSizes(newSizes)
-                        });
-                    } catch (e) { console.warn('Split.js reinit failed:', e); }
-                }
-            });
+                // Drag disabled: nothing to reinit
         }
 
         function equalizeSplit(){
@@ -4447,51 +4408,8 @@ ${(() => {
             }
         };
 
-        // Simple drag-resize for each panel
-        function makePanelResizable(panel, index) {
-            const handle = panel.querySelector('.resize-handle');
-            if (!handle) return;
-            // Ensure panel is positioned/visible for pointer events
-            panel.style.position = panel.style.position || 'relative';
-            panel.style.cursor = 'default';
-            let isResizing = false;
-            let startX = 0, startY = 0, startW = 0, startH = 0;
-            handle.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                isResizing = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                const rect = panel.getBoundingClientRect();
-                startW = rect.width;
-                startH = rect.height;
-                document.body.style.userSelect = 'none';
-                // Lock flex-basis so width changes take effect
-                panel.style.flex = `0 0 ${rect.width}px`;
-                panel.setAttribute('data-resizing', '1');
-            });
-            window.addEventListener('mousemove', (e) => {
-                if (!isResizing) return;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                let newW = Math.max(320, startW + dx);
-                panel.style.width = newW + 'px';
-                panel.style.flex = `0 0 ${newW}px`;
-                panel.style.flexBasis = newW + 'px';
-                // Height derives from aspect-ratio; no manual height when locked
-                // Force Twitch iframe to fill the new size
-                const embedHost = panel.querySelector(`#stream-${index}`) || panel.querySelector('iframe');
-                if (embedHost) {
-                    embedHost.style.width = '100%';
-                    embedHost.style.height = '100%';
-                }
-            });
-            window.addEventListener('mouseup', () => {
-                if (!isResizing) return;
-                isResizing = false;
-                document.body.style.userSelect = '';
-                panel.removeAttribute('data-resizing');
-            });
-        }
+        // Drag-resize disabled by request
+        function makePanelResizable(panel, index) { /* no-op */ }
         
         const openInNewTab = (streamer) => {
             const dropdown = document.querySelector(`option[value="${streamer}"]`);
