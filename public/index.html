@@ -1084,7 +1084,7 @@
         }
 
         function openQueueModal() {
-            showMultiStreamModal();
+            openMultiStreamDock();
             // Fill dropdowns from queue (non-destructively; existing selection kept)
             const dropdowns = ['streamer1','streamer2','streamer3'].map(id => document.getElementById(id));
             let q = [...pendingMultiStreamQueue];
