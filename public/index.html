@@ -3812,6 +3812,25 @@
         // Open dock: populate controls and auto-load
         const openMultiStreamDock = () => {
             console.log('[MultiStream] Opening dock...');
+            console.log('[MultiStream] AllPlayers available:', allPlayers ? allPlayers.length : 'undefined');
+            
+            // Check if player data is available
+            if (!allPlayers || allPlayers.length === 0) {
+                console.warn('[MultiStream] No player data available, waiting for data...');
+                // Show a message in the Multi-Stream area
+                const container = document.getElementById('multiStreamContainer');
+                if (container) {
+                    container.innerHTML = '<div class="text-center text-gray-400 p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div><p>Loading streamer data...</p></div>';
+                }
+                // Try again after a short delay
+                setTimeout(() => {
+                    if (allPlayers && allPlayers.length > 0) {
+                        openMultiStreamDock();
+                    }
+                }, 2000);
+                return;
+            }
+            
             populateStreamerDropdowns();
             restoreMultiSelection();
             
@@ -3837,8 +3856,8 @@
         };
         
         const populateStreamerDropdowns = () => {
-            console.log('=== POPULATING STREAMER DROPDOWNS ===');
-            console.log('Total players available:', allPlayers.length);
+            console.log('[MultiStream] === POPULATING STREAMER DROPDOWNS ===');
+            console.log('[MultiStream] Total players available:', allPlayers.length);
             
             // Only show players who are actually live on Twitch (not just in-game status)
             const liveStreamers = allPlayers.filter(player => {
@@ -3877,6 +3896,8 @@
                     twitchUser: p.stream?.twitchUser || 'no_stream'
                 })));
             }
+            
+            console.log('[MultiStream] Populating dropdowns with', liveStreamers.length, 'streamers');
             
             const dropdowns = ['streamer1', 'streamer2', 'streamer3'];
             dropdowns.forEach(dropdownId => {
