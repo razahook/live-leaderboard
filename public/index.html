@@ -478,12 +478,12 @@
                         </button>
                         
                         <!-- Multi-Stream -->
-                        <a href="#" onclick="showTab('multiStreamTab'); return false;" class="nav-item">
+                        <button class="nav-item" onclick="showMultiStreamModal()">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                             </svg>
                             <span>Multi-Stream</span>
-                        </a>
+                        </button>
                         
                         <!-- Settings -->
                         <button class="nav-item" onclick="showSettingsModal()">
@@ -494,7 +494,7 @@
                         </button>
                     </nav>
                 </div>
-        </div>
+            </div>
             
             <!-- Main Content Area -->
             <div class="flex-1 ml-64 p-6">
@@ -569,7 +569,7 @@
                                 <input type="checkbox" name="toggle" id="liveOnlyToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-600 appearance-none cursor-pointer transition-transform duration-200 ease-in"/>
                                 <label for="liveOnlyToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
                             </div>
-                            <a href="#" onclick="showTab('multiStreamTab'); return false;" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm inline-block transition-colors">Multi-Stream</a>
+                            <button onclick="showMultiStreamModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm">Multi-Stream</button>
             <button onclick="showSettingsModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm ml-2">
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -621,106 +621,11 @@
                 </div>
             </section>
 
-            <!-- Twitch Override Management removed from main page per request -->
-        </div>
-
-        <!-- Multi-Stream Tab -->
-        <div id="multiStreamTab" class="tab-content">
-        <section id="multiStreamDock" class="mb-8">
-            <!-- Control bar -->
-            <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-3">
-                    <h2 class="text-xl font-bold text-white">Multi-Stream</h2>
-                    <button id="msCollapseBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleMultiStreamCollapse()">Collapse</button>
-                </div>
-                <div class="text-gray-400 text-sm">Drag gutters to resize. Layout presets available.</div>
-            </div>
-
-            <div class="mb-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <!-- Streamer 1 -->
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <label class="text-sm font-medium text-gray-300">Streamer 1</label>
-                                <button id="favoriteBtn1" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(1)">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <select id="streamer1" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
-                                <option value="">Select Streamer 1</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Streamer 2 -->
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <label class="text-sm font-medium text-gray-300">Streamer 2</label>
-                                <button id="favoriteBtn2" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(2)">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <select id="streamer2" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
-                                <option value="">Select Streamer 2</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Streamer 3 -->
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <label class="text-sm font-medium text-gray-300">Streamer 3</label>
-                                <button id="favoriteBtn3" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(3)">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <select id="streamer3" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
-                                <option value="">Select Streamer 3</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <!-- Stream Controls -->
-                    <div class="flex justify-between items-center">
-                        <div class="flex space-x-2">
-                            <button id="globalMuteBtn" onclick="toggleGlobalMute()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.816L4.852 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.852l3.531-3.816a1 1 0 011.617.816zM14 5a1 1 0 011.707-.707 5.978 5.978 0 010 8.486A1 1 0 0114 12a4 4 0 000-5.657A1 1 0 0114 5z"></path>
-                                </svg>
-                            </button>
-                            <button id="fullscreenBtn" onclick="toggleMultiStreamFullscreen()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
-                                </svg>
-                            </button>
-                            <!-- Layout presets -->
-                            <div class="hidden md:flex items-center gap-1 ml-2">
-                                <span class="text-gray-400 text-xs mr-1">Layout:</span>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('grid')">Grid</button>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('row')">Row</button>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus1')">Focus 1</button>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus2')">Focus 2</button>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
-                                <button id="aspectToggleBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleAspectLock()">Lock 16:9</button>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="equalizeSplit()">Equal</button>
-                                <button class="px-2 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded" onclick="loadMultiStreams()">Load</button>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-                
-            <div id="multiStreamContainer" class="min-h-[280px] bg-gray-900/50 rounded-lg border border-gray-700/50 p-3">
-                    <!-- Streams will be loaded here -->
-                </div>
-            <div id="multiStreamExtras" class="mt-6 hidden">
-                <h3 class="text-lg font-semibold text-white mb-2">Stream Stats & Clips</h3>
-                <div id="msExtrasGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-            </div>
-        </section>
+            <section id="twitch-override-management" class="mb-10">
+                <h2 class="text-2xl font-bold text-white mb-4">Twitch Override Management</h2>
+                <p class="text-gray-300 mb-6">Manually link an in-game player name to a Twitch channel or override an existing link. This is useful for players whose Twitch streams aren't automatically detected.</p>
+                <button onclick="showOverrideModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md">Add/Update Twitch Override</button>
+            </section>
         </div>
 
         <!-- Player Stats & Match History Tab Content -->
@@ -798,7 +703,7 @@
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
-                    </div>
+                            </div>
                             <div class="ml-4">
                                 <h3 class="text-lg font-semibold text-white">Account Status</h3>
                                 <p id="accountStatusText" class="text-sm text-gray-400">Not signed in</p>
@@ -815,8 +720,8 @@
                                 Sign In
                             </button>
                         </div>
-                </div>
-
+                    </div>
+                    
                     <!-- Quick Stats Card -->
                     <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-2xl shadow-black/30 border border-gray-700/50">
                         <h3 class="text-lg font-semibold text-white mb-4">Your Stats</h3>
@@ -830,8 +735,8 @@
                                 <span id="accountCreated" class="text-blue-400 font-medium">-</span>
                             </div>
                         </div>
-                </div>
-
+                    </div>
+                    
                     <!-- Preferences Card -->
                     <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-2xl shadow-black/30 border border-gray-700/50">
                         <h3 class="text-lg font-semibold text-white mb-4">Preferences</h3>
@@ -842,16 +747,16 @@
                                 </svg>
                                 App Settings
                             </button>
-                            <a href="#" onclick="openMultiStreamDock(); return false;" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm block text-center">
+                            <button onclick="showMultiStreamModal()" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm">
                                 <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                                 </svg>
                                 Multi-Stream
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-2xl shadow-black/30 border border-gray-700/50 mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-gray-300">Favorite Streamers</h3>
@@ -861,21 +766,21 @@
                             </svg>
                             Refresh Status
                         </button>
-                </div>
-
+                    </div>
+                    
                     <div id="favoritesLoading" class="text-center py-8" style="display: none;">
                         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
                         <p class="text-gray-400 mt-2">Loading favorites...</p>
-                </div>
-
+                    </div>
+                    
                     <div id="favoritesError" class="text-center py-8 text-red-400" style="display: none;">
                         <p>Please sign in to view your favorite streamers.</p>
                         <div class="mt-4">
                             <button onclick="showAuthModal()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200">
                                 Sign In
                             </button>
+                        </div>
                     </div>
-                </div>
                     
                     <div id="favoritesEmpty" class="text-center py-8 text-gray-400" style="display: none;">
                         <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -886,14 +791,14 @@
                         <button onclick="showTab('leaderboardTab')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors duration-200">
                             Browse Leaderboard
                         </button>
-        </div>
-
+                    </div>
+                    
                     <div id="favoritesList" class="space-y-4">
                         <!-- Favorites will be populated here -->
                     </div>
                 </div>
             </section>
-    </div>
+        </div>
         
         </div> <!-- End Main Content Area -->
         </div> <!-- End Main Layout -->
@@ -932,10 +837,98 @@
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Multi-Stream Viewer Modal -->
+    <div id="multiStreamModal" class="modal multistream-modal">
+        <div class="modal-content" style="max-width: 95vw; width: 1400px; max-height: 90vh; overflow-y: auto;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">Multi-Stream Viewer</h2>
+                <span class="close-button" onclick="hideMultiStreamModal()">&times;</span>
+            </div>
+            
+            <!-- Streamer Selection with Quality Controls -->
+            <div class="mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <!-- Streamer 1 -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-gray-300">Streamer 1</label>
+                            <button id="favoriteBtn1" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(1)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <select id="streamer1" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                            <option value="">Select Streamer 1</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Streamer 2 -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-gray-300">Streamer 2</label>
+                            <button id="favoriteBtn2" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(2)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <select id="streamer2" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                            <option value="">Select Streamer 2</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Streamer 3 -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-gray-300">Streamer 3</label>
+                            <button id="favoriteBtn3" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(3)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <select id="streamer3" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                            <option value="">Select Streamer 3</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Stream Controls -->
+                <div class="flex justify-between items-center">
+                    <div class="flex space-x-2">
+                        <button id="globalMuteBtn" onclick="toggleGlobalMute()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.816L4.852 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.852l3.531-3.816a1 1 0 011.617.816zM14 5a1 1 0 011.707-.707 5.978 5.978 0 010 8.486A1 1 0 0114 12a4 4 0 000-5.657A1 1 0 0114 5z"></path>
+                            </svg>
+                        </button>
+                        <button id="fullscreenBtn" onclick="toggleMultiStreamFullscreen()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                            </svg>
+                        </button>
+                        <!-- Layout presets -->
+                        <div class="hidden md:flex items-center gap-1 ml-2">
+                            <span class="text-gray-400 text-xs mr-1">Layout:</span>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('grid')">Grid</button>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('row')">Row</button>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus1')">Focus 1</button>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus2')">Focus 2</button>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
+                            <button id="aspectToggleBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleAspectLock()">Lock 16:9</button>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="equalizeSplit()">Equal</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="multiStreamContainer" class="min-h-[500px]">
+                <!-- Streams will be loaded here -->
+            </div>
         </div>
-
-
-    </div> <!-- End Main Content Area -->
+    </div>
 
     <!-- AI Analysis Modal -->
     <div id="analysisModal" class="modal">
@@ -973,13 +966,6 @@
         // Cache-busting: Force reload of updated JavaScript
         console.log('Frontend loaded at:', new Date().toISOString());
         console.log('Version: Updated with debug logs and data fixes');
-        // Edge flags default
-        window.__edgeFlags = window.__edgeFlags || {
-            enable_medal: false,
-            max_recent_clips: 4,
-            multistream_default_layout: 'equal',
-            feature_flags: { multistreamDock: true, streamPage: false }
-        };
         // Soft beta gate to buy time for first load
         (function showBetaNoticeOnce(){
             try {
@@ -1006,7 +992,6 @@
         })();
         
         let allPlayers = [];
-        let dataLoaded = false;
         let filteredAndSortedPlayers = []; 
         let currentPage = 1;
         const itemsPerPage = 50; 
@@ -1027,8 +1012,8 @@
         const analysisModal = document.getElementById('analysisModal');
         function addToMultiStream(twitchUser) {
             try {
-                // Open the multistream dock and preselect the streamer in the first empty slot
-                openMultiStreamDock();
+                // Open the multistream modal and preselect the streamer in the first empty slot
+                showMultiStreamModal();
                 const slots = ['streamer1','streamer2','streamer3'];
                 const empty = slots.map(id => document.getElementById(id)).find(sel => sel && !sel.value);
                 if (empty) {
@@ -1101,7 +1086,7 @@
         }
 
         function openQueueModal() {
-            openMultiStreamDock();
+            showMultiStreamModal();
             // Fill dropdowns from queue (non-destructively; existing selection kept)
             const dropdowns = ['streamer1','streamer2','streamer3'].map(id => document.getElementById(id));
             let q = [...pendingMultiStreamQueue];
@@ -1383,7 +1368,7 @@
         const showTab = (tabId) => {
             try {
                 // Hide all tab content
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
                 const tabElement = document.getElementById(tabId);
                 if (tabElement) {
                     tabElement.classList.add('active');
@@ -1391,7 +1376,7 @@
                 
                 // Update navigation active states
                 document.querySelectorAll('.nav-item').forEach(button => button.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+                document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
                 
                 // Set active state for nav-item
                 const navElement = document.querySelector(`.nav-item[onclick="showTab('${tabId}')"]`);
@@ -2534,7 +2519,7 @@
                             if (predatorJson?.success && predatorJson.data) {
                                 predatorData = predatorJson.data;
                                 console.log('Extracted predator data:', predatorData);
-                                } else {
+                            } else {
                                 console.warn('Predator API returned success=false or no data:', predatorJson);
                             }
                         } catch (e) {
@@ -2570,28 +2555,17 @@
                 
                 // Fetch environment variables first (for Supabase)
                 try {
-                    const [envRes, flagsRes] = await Promise.all([
-                        fetch(`/api/public-env`),
-                        fetch(`/api/edge-config/public`)
-                    ]);
-                    try {
-                        const envData = await envRes.json();
-                        if (envData?.success && envData.data) {
-                            window.env = envData.data;
-                            window.__supabaseConfig = { 
-                                url: envData.data.NEXT_PUBLIC_SUPABASE_URL, 
-                                anon: envData.data.NEXT_PUBLIC_SUPABASE_ANON_KEY 
-                            };
-                        }
-                    } catch {}
-                    try {
-                        const flags = await flagsRes.json();
-                        if (flags?.success && flags.data) {
-                            window.__edgeFlags = Object.assign(window.__edgeFlags || {}, flags.data);
-                        }
-                    } catch {}
+                    const envResponse = await fetch(`/api/public-env`);
+                    const envData = await envResponse.json();
+                    if (envData?.success && envData.data) {
+                        window.env = envData.data;
+                        window.__supabaseConfig = { 
+                            url: envData.data.NEXT_PUBLIC_SUPABASE_URL, 
+                            anon: envData.data.NEXT_PUBLIC_SUPABASE_ANON_KEY 
+                        };
+                    }
                 } catch (err) { 
-                    console.warn('Failed to fetch env/flags:', err);
+                    console.warn('Failed to fetch env vars:', err);
                 }
 
                 // Load all critical data in parallel
@@ -2672,10 +2646,6 @@
                     console.log('Current filteredAndSortedPlayers:', filteredAndSortedPlayers.slice(0, 3).map(p => p.name));
                     loadTopPlayerLegends();
                 }, 3000); // Increased delay to ensure leaderboard is fully rendered
-                
-                // Mark data as loaded
-                dataLoaded = true;
-                console.log('[MultiStream] Data loaded, allPlayers count:', allPlayers.length);
                 
                 // Also try loading cached legends immediately
                 setTimeout(() => {
@@ -3816,118 +3786,52 @@
         }
         
         // Multi-Stream Viewer Functions
+        const multiStreamModal = document.getElementById('multiStreamModal');
         const MS_STORAGE_KEY = 'multistream_selection_v1';
-        // Open dock: populate controls and auto-load
-        const openMultiStreamDock = () => {
-            console.log('[MultiStream] Opening dock... Data loaded:', dataLoaded, 'Players count:', allPlayers?.length || 0);
-            console.log('[MultiStream] allPlayers exists:', !!allPlayers, 'is array:', Array.isArray(allPlayers));
-            
-            // SIMPLIFIED: Just check if allPlayers has any data, ignore dataLoaded flag for now
-            if (!allPlayers || !Array.isArray(allPlayers) || allPlayers.length === 0) {
-                console.warn('[MultiStream] No player data available, allPlayers:', allPlayers);
-                const container = document.getElementById('multiStreamContainer');
-                if (container) {
-                    container.innerHTML = '<div class="text-center text-red-400 p-8"><p>No player data available. Please refresh the page.</p></div>';
-                }
-                return;
-            }
-            
-            console.log('[MultiStream] ✅ Data check passed, proceeding with population...');
-            
+        
+        const showMultiStreamModal = () => {
+            multiStreamModal.classList.add('show');
             populateStreamerDropdowns();
             restoreMultiSelection();
-            
-            // After dropdowns are populated and restored, check if we should auto-load
-            setTimeout(() => {
-                const s1 = document.getElementById('streamer1')?.value;
-                const s2 = document.getElementById('streamer2')?.value;
-                const s3 = document.getElementById('streamer3')?.value;
-                const hasAny = [s1,s2,s3].some(v => v && v.trim().length > 0);
-                console.log('[MultiStream] Auto-load check:', { s1, s2, s3, hasAny });
-                if (hasAny) {
-                    console.log('[MultiStream] Auto-loading streams...');
-                    loadMultiStreams();
-                }
-                // Apply default layout from edge flags
-                try {
-                    const defLayout = (window.__edgeFlags?.multistream_default_layout || 'equal').toLowerCase();
-                    if (defLayout === 'row') setMultiLayout('row');
-                    else if (['focus1','focus2','focus3'].includes(defLayout)) setMultiLayout(defLayout);
-                    else setMultiLayout('grid');
-                } catch {}
-            }, 100); // Small delay to ensure DOM is ready
+        };
+        
+        const hideMultiStreamModal = () => {
+            multiStreamModal.classList.remove('show');
+            // Stop all streams when closing
+            const container = document.getElementById('multiStreamContainer');
+            container.innerHTML = '';
         };
         
         const populateStreamerDropdowns = () => {
-            console.log('[DEBUG] 🎯 populateStreamerDropdowns function called!');
-            console.log('[MultiStream] === POPULATING STREAMER DROPDOWNS ===');
-            console.log('[MultiStream] Total players available:', allPlayers ? allPlayers.length : 'undefined');
-            console.log('[MultiStream] AllPlayers type:', typeof allPlayers);
-            console.log('[MultiStream] dataLoaded flag:', dataLoaded);
+            console.log('=== POPULATING STREAMER DROPDOWNS ===');
+            console.log('Total players available:', allPlayers.length);
             
-            // Add stack trace to see who called this function
-            console.log('[MultiStream] Function called from:');
-            console.trace();
-            
-            // Debug: Show sample of all players to understand data structure
-            console.log('[MultiStream] Sample players:', allPlayers.slice(0, 3).map(p => ({
-                name: p.name || p.player_name,
-                status: p.status,
-                twitch_live: p.twitch_live,
-                stream: p.stream,
-                twitch_link: p.twitch_link,
-                hasClips: p.hasClips
-            })));
-            
-            // SIMPLIFIED: Include ALL top players for now, we'll show live status in the dropdown
-            console.log('[MultiStream] Using simplified approach: showing top 50 players regardless of streaming status');
-            
-            const liveStreamers = allPlayers.slice(0, 50).map(player => {
-                // Check various Twitch indicators
+            // Only show players who are actually live on Twitch (not just in-game status)
+            const liveStreamers = allPlayers.filter(player => {
+                // Must have all these conditions to be considered truly live
                 const twitchLive = player.twitch_live?.is_live === true;
-                const hasTwitchData = player.twitch_live !== null && player.twitch_live !== undefined;
-                const hasTwitchLink = player.twitch_link && player.twitch_link.includes('twitch.tv');
+                const hasStreamData = player.stream !== null && player.stream !== undefined;
+                const hasViewers = player.stream?.viewers !== undefined && player.stream?.viewers >= 0;
+                const hasTwitchUser = player.stream?.twitchUser && player.stream.twitchUser.length > 0;
+                const statusIsLive = player.status === "Live";
                 
-                // Determine display status
-                let statusIndicator = '';
-                if (twitchLive) {
-                    const viewers = player.twitch_live?.stream_data?.viewer_count || 0;
-                    statusIndicator = ` 🔴 (${viewers} viewers)`;
-                } else if (hasTwitchData || hasTwitchLink) {
-                    statusIndicator = ' 📺 (has Twitch)';
+                // Debug logging for problematic entries
+                if (!twitchLive || !hasStreamData || !hasViewers || !hasTwitchUser || !statusIsLive) {
+                    console.log(`Filtering out ${player.player_name || player.name}: twitchLive=${twitchLive}, hasStreamData=${hasStreamData}, hasViewers=${hasViewers}, hasTwitchUser=${hasTwitchUser}, statusIsLive=${statusIsLive}`);
                 }
                 
-                console.log(`Including ${player.name || player.player_name}${statusIndicator}`);
-                
-                return {
-                    ...player,
-                    displayName: (player.name || player.player_name) + statusIndicator,
-                    isLive: twitchLive,
-                    viewers: player.twitch_live?.stream_data?.viewer_count || 0
-                };
+                return twitchLive && hasStreamData && hasViewers && hasTwitchUser && statusIsLive;
             });
             
-            console.log('[MultiStream] Live streamers found:', liveStreamers.length);
-            if (liveStreamers.length === 0) {
-                console.warn('[MultiStream] No live streamers found! Checking data...');
-                console.log('[MultiStream] Sample of all players:', allPlayers.slice(0, 5).map(p => ({
-                    name: p.name || p.player_name,
-                    status: p.status,
-                    twitch_live: p.twitch_live,
-                    stream: p.stream
-                })));
-            } else {
-                console.log('[MultiStream] Live streamers:', liveStreamers.slice(0, 10).map(p => ({
-                    name: p.name || p.player_name,
-                    status: p.status,
-                    twitch_live_status: p.twitch_live?.is_live,
-                    has_stream: !!p.stream,
-                    viewers: p.stream?.viewers || 0,
-                    twitchUser: p.stream?.twitchUser || 'no_stream'
-                })));
-            }
-            
-            console.log('[MultiStream] Populating dropdowns with', liveStreamers.length, 'streamers');
+            console.log('Live streamers found:', liveStreamers.length);
+            console.log('Live streamers:', liveStreamers.map(p => ({
+                name: p.name || p.player_name,
+                status: p.status,
+                twitch_live_status: p.twitch_live?.is_live,
+                has_stream: !!p.stream,
+                viewers: p.stream?.viewers || 0,
+                twitchUser: p.stream?.twitchUser || 'no_stream'
+            })));
             
             const dropdowns = ['streamer1', 'streamer2', 'streamer3'];
             dropdowns.forEach(dropdownId => {
@@ -3936,54 +3840,18 @@
                 dropdown.innerHTML = '';
                 dropdown.appendChild(placeholder);
                 
-                // Add streamers with real data from API - NO HARDCODED ENTRIES
+                // Add only live streamers dynamically - NO HARDCODED ENTRIES
                 liveStreamers.forEach(player => {
-                    // Try multiple ways to get Twitch username
-                    let twitchUsername = player.stream?.twitchUser || 
-                                       player.stream?.twitch_username ||
-                                       (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
+                    const twitchUsername = player.stream?.twitchUser || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
+                    const viewerCount = player.stream?.viewers || 0;
                     
-                    // If no username found but has Twitch link, extract from link
-                    if (!twitchUsername && player.twitch_link) {
-                        twitchUsername = extractUsernameFromLink(player.twitch_link);
-                    }
-                    
-                    // If still no username, try using player name (common for streamers)
-                    if (!twitchUsername && (player.hasClips || player.stream)) {
-                        // Use player name as potential Twitch username (cleaned)
-                        twitchUsername = (player.name || player.player_name || '').toLowerCase().replace(/[^a-z0-9_]/g, '');
-                    }
-                    
-                    const viewerCount = player.stream?.viewers;
-                    const isLive = player.twitch_live?.is_live === true || String(player.status || '').toLowerCase().includes('live');
-                    
-                    if (twitchUsername && twitchUsername.length > 2) {
+                    if (twitchUsername) {
                         const option = document.createElement('option');
                         option.value = twitchUsername;
-                        
-                        // Show live status and viewer count when available
-                        let displayText = player.name || player.player_name;
-                        if (isLive && viewerCount !== undefined && viewerCount > 0) {
-                            displayText += ` (${viewerCount.toLocaleString()} viewers) 🔴 LIVE`;
-                        } else if (isLive) {
-                            displayText += ` 🔴 LIVE`;
-                        } else if (player.hasClips) {
-                            displayText += ` (Has Clips)`;
-                        } else {
-                            displayText += ` (Has Twitch)`;
-                        }
-                        
-                        option.textContent = displayText;
+                        option.textContent = `${player.name || player.player_name} (${viewerCount.toLocaleString()} viewers)`;
                         option.dataset.playerName = player.name || player.player_name;
                         option.dataset.twitchLink = player.twitch_link || `https://www.twitch.tv/${twitchUsername}`;
-                        option.dataset.isLive = isLive.toString();
-                        option.dataset.viewers = viewerCount?.toString() || '0';
-                        option.dataset.hasClips = (player.hasClips === true).toString();
                         dropdown.appendChild(option);
-                        
-                        console.log(`➕ Added to dropdown: ${displayText} (username: ${twitchUsername})`);
-                    } else {
-                        console.log(`❌ Skipping ${player.name || player.player_name}: no valid Twitch username`);
                     }
                 });
             });
@@ -4001,29 +3869,23 @@
             const streamer2 = document.getElementById('streamer2').value;
             const streamer3 = document.getElementById('streamer3').value;
             
-            console.log('[MultiStream] Selected streamers:', { streamer1, streamer2, streamer3 });
+            console.log('Selected streamers:', { streamer1, streamer2, streamer3 });
+            alert('Loading multistreams - check console for debug info');
             
-            // Validate that at least one streamer has a non-empty value
-            const streamers = [streamer1, streamer2, streamer3].filter(s => s && s.trim().length > 0);
-            console.log('[MultiStream] Filtered streamers:', streamers);
+            const streamers = [streamer1, streamer2, streamer3].filter(s => s);
+            console.log('Filtered streamers:', streamers);
             
             const container = document.getElementById('multiStreamContainer');
-            if (!container) {
-                console.error('[MultiStream] Container not found!');
-                return;
-            }
-            
             container.innerHTML = '';
             
             if (streamers.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center text-gray-400 p-4">Please select at least one streamer from the dropdowns above</div>';
-                console.log('[MultiStream] No streamers selected, showing hint');
+                container.innerHTML = '<div class="col-span-full text-center text-gray-400">Please select at least one streamer</div>';
                 return;
             }
             
-            // Create ultrathink flex layout with compact resizable panels
+            // Create flex layout with resizable panels (reduces dead space)
             const gridContainer = document.createElement('div');
-            gridContainer.className = 'flex flex-row flex-wrap gap-1 items-stretch';
+            gridContainer.className = 'flex flex-row gap-2 items-stretch';
             gridContainer.id = 'multistream-grid';
             
             streamers.forEach((streamer, index) => {
@@ -4246,7 +4108,7 @@ ${(() => {
                     </div>
                     
                     <!-- Stream Tab Content -->
-                    <div id="stream-content-${index}" class="stream-tab-content w-full bg-gray-900 relative" style="aspect-ratio: 16 / 7; overflow: hidden;">
+                    <div id="stream-content-${index}" class="stream-tab-content w-full bg-gray-900 relative" style="aspect-ratio: 16 / 9; overflow: hidden;">
                         <div id="loading-${index}" class="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900/80 z-10">
                             <div class="text-center">
                                 <div class="text-gray-300 mb-2 text-sm">Loading ${displayName}...</div>
@@ -4258,7 +4120,7 @@ ${(() => {
                     </div>
                     
                     <!-- Clips Tab Content -->
-                    <div id="clips-content-${index}" class="stream-tab-content w-full bg-gray-900 relative hidden" style="aspect-ratio: 16/7;">
+                    <div id="clips-content-${index}" class="stream-tab-content w-full bg-gray-900 relative hidden" style="aspect-ratio: 16/9;">
                         <div id="clips-loading-${index}" class="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900/80 z-10">
                             <div class="text-center">
                                 <div class="text-gray-300 mb-2 text-sm">Loading clips...</div>
@@ -4270,13 +4132,12 @@ ${(() => {
                         </div>
                     </div>
                 `;
-                // Set initial width based on number of streams for ultrathink layout
+                // Set initial width based on number of streams to reduce dead space
                 const count = streamers.length;
-                const basis = count === 1 ? '100%' : (count === 2 ? '48%' : '30%');
-                // Let Split.js control widths; set initial basis for first render
+                const basis = count === 1 ? '100%' : (count === 2 ? '49%' : '32%');
+                // Allow grow to fill container, while preserving basis
                 streamDiv.style.flex = `1 0 ${basis}`;
-                // Ensure the outer gray container grows with content height
-                streamDiv.style.alignSelf = 'stretch';
+                // Height follows aspect ratio via child container
                 gridContainer.appendChild(streamDiv);
                 makePanelResizable(streamDiv, index);
             });
@@ -4289,23 +4150,15 @@ ${(() => {
                 localStorage.setItem(MS_STORAGE_KEY, JSON.stringify(payload));
             } catch {}
 
-            // Load all streams with delays to avoid conflicts
+            // Load all streams with delays to avoid conflicts and set initial basis once
             streamers.forEach((streamer, index) => {
                 setTimeout(() => {
-                    console.log(`[MultiStream] Queueing stream ${index + 1}/${streamers.length}: ${streamer}`);
+                    console.log(`Loading stream ${index + 1}: ${streamer} (Twitch username)`);
                     loadStreamEmbed(index, streamer);
-                }, index * 500); // Stagger to avoid rate limits
-            });
-            
-            // Log telemetry for debugging
-            console.log('[MultiStream] Initialization complete:', {
-                containerFound: !!container,
-                streamerCount: streamers.length,
-                streamers: streamers,
-                timestamp: new Date().toISOString()
+                }, index * 500); // Reduced delay to 500ms
             });
 
-            // Initialize Split.js gutters after DOM paints and container measured
+            // Initialize Split.js gutters after DOM paints
             requestAnimationFrame(() => {
                 const ids = streamers.map((_, i) => `#pane-${i}`);
                 const panes = Array.from(gridContainer.children);
@@ -4315,14 +4168,13 @@ ${(() => {
                         const sizes = getSavedPaneSizes(panes.length) || panes.map(() => 100 / panes.length);
                         const split = Split(ids, {
                             sizes,
-                            minSize: 150,
-                            gutterSize: 4,
+                            minSize: 200,
+                            gutterSize: 6,
                             snapOffset: 12,
-                            onDrag: () => syncMultistreamContainerHeight(),
+                            onDrag: () => ensureHostsFill(),
                             onDragEnd: (newSizes) => savePaneSizes(newSizes)
                         });
                         window.__msSplit = split;
-                        syncMultistreamContainerHeight();
                     } catch (e) { console.warn('Split.js init failed:', e); }
                 }
             });
@@ -4352,7 +4204,7 @@ ${(() => {
                 window.__msSplit = null;
             }
             if (mode === 'grid') {
-                const basis = n === 1 ? '100%' : (n === 2 ? '48%' : '30%');
+                const basis = n === 1 ? '100%' : (n === 2 ? '49%' : '32%');
                 panels.forEach(p => set(p, basis));
             } else if (mode === 'row') {
                 panels.forEach(p => set(p, `${Math.floor(100/n)}%`));
@@ -4406,56 +4258,6 @@ ${(() => {
                 host.style.position = 'absolute'; host.style.inset = '0';
                 host.style.width = '100%'; host.style.height = '100%';
             });
-        }
-
-        // Keep the gray container sized to tallest pane content (prevents empty area)
-        function syncMultistreamContainerHeight(){
-            ensureHostsFill();
-            const grid = document.getElementById('multistream-grid');
-            if (!grid) return;
-            
-            // Find the tallest pane dynamically
-            let maxHeight = 0;
-            const panes = grid.querySelectorAll('.resize-container');
-            
-            panes.forEach(pane => {
-                const rect = pane.getBoundingClientRect();
-                if (rect.height > maxHeight) {
-                    maxHeight = rect.height;
-                }
-            });
-            
-            // Update container min-height to fit tallest pane
-            const container = document.getElementById('multiStreamContainer');
-            if (container && maxHeight > 0) {
-                const newHeight = Math.ceil(maxHeight + 40);
-                container.style.minHeight = newHeight + 'px';
-                console.log('[MultiStream] Container height synced to', newHeight, 'px');
-            }
-        }
-
-        // Collapse/expand dock inline
-        function toggleMultiStreamCollapse(){
-            const dock = document.getElementById('multiStreamDock');
-            if (!dock) return;
-            const controls = dock.querySelector('.mb-4');
-            const container = document.getElementById('multiStreamContainer');
-            const extras = document.getElementById('multiStreamExtras');
-            const btn = document.getElementById('msCollapseBtn');
-            const collapsed = dock.getAttribute('data-collapsed') === '1';
-            if (collapsed) {
-                if (controls) controls.style.display = '';
-                if (container) container.style.display = '';
-                if (extras) extras.style.display = '';
-                dock.setAttribute('data-collapsed','0');
-                if (btn) btn.textContent = 'Collapse';
-            } else {
-                if (controls) controls.style.display = 'none';
-                if (container) container.style.display = 'none';
-                if (extras) extras.style.display = 'none';
-                dock.setAttribute('data-collapsed','1');
-                if (btn) btn.textContent = 'Expand';
-            }
         }
 
         // Aspect ratio lock to reduce black bars during manual resize
@@ -4516,12 +4318,6 @@ ${(() => {
                 console.log('Twitch embed parent hostname:', window.location.hostname);
                 console.log('Full location:', window.location.href);
                 
-                // Use exact hostname for Twitch embed parent
-                const hostname = window.location.hostname;
-                const parentDomains = [hostname];
-                
-                console.log('[MultiStream] Using parent domains:', parentDomains);
-                
                 // Create the Twitch embed
                 const embed = new Twitch.Embed(`stream-${index}`, {
                     width: "100%",
@@ -4530,16 +4326,15 @@ ${(() => {
                     layout: "video",
                     muted: true, // Mute to avoid audio conflicts
                     autoplay: true,
-                    parent: parentDomains
+                    parent: [window.location.hostname]
                 });
                 
-                // Hide loading indicator after embed is created
+                // Remove loading indicator immediately when embed is created
                 setTimeout(() => {
                     if (loadingElement) {
-                        loadingElement.style.display = 'none';
+                        loadingElement.remove();
                     }
-                    console.log(`[MultiStream] Stream ${index} loaded: ${canonicalTwitchUsername}`);
-                }, 500);
+                }, 500); // Very fast removal
                 
                 // Also remove loading on embed ready event if available
                 if (embed && embed.addEventListener) {
@@ -4564,26 +4359,15 @@ ${(() => {
                 }
                 
             } catch (error) {
-                console.error(`[MultiStream] Failed to load stream ${index}:`, error);
-                
-                // Hide loading indicator
+                console.error(`Failed to load stream for ${streamer}:`, error);
                 if (loadingElement) {
-                    loadingElement.style.display = 'none';
-                }
-                
-                // Show error in stream container
-                const embedContainer = document.getElementById(`stream-${index}`);
-                if (embedContainer) {
-                    const errorMessage = error.message || 'Unknown error';
-                    embedContainer.innerHTML = `
-                        <div class="flex items-center justify-center h-full bg-gray-900 text-gray-300">
-                            <div class="text-center p-4">
-                                <div class="text-red-400 mb-2 font-semibold">Failed to load stream</div>
-                                <div class="text-gray-400 mb-3 text-sm">${errorMessage}</div>
-                                <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors">
-                                    Watch on Twitch
-                                </a>
-                            </div>
+                    loadingElement.innerHTML = `
+                        <div class="text-center p-4">
+                            <div class="text-red-400 mb-2 font-semibold">Failed to load stream</div>
+                            <div class="text-gray-400 mb-3 text-sm">${error.message}</div>
+                            <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
+                                Watch on Twitch
+                            </a>
                         </div>
                     `;
                 }
@@ -4659,7 +4443,7 @@ ${(() => {
         window.onclick = (event) => {
             if (event.target == analysisModal) hideModal();
             if (event.target == overrideModal) hideOverrideModal();
-            // modal close handlers removed (multistream is inline now)
+            if (event.target == multiStreamModal) hideMultiStreamModal();
             // Handle Supabase magic-link callback in hash fragment
             if (location.hash.includes('access_token') && window.supabase && window.__supabaseConfig?.url) {
                 try { new URLSearchParams(location.hash.substring(1)); } catch { /* ignore */ }
@@ -4897,14 +4681,14 @@ ${(() => {
                 const clipCreateButton = '';
 
                 // Try Twitch API clips first regardless; fall back to rewind if none
-                    console.log('Fetching Twitch API clips...');
-                    const response = await fetch(`/api/stream-clips/${streamer}`);
-                    const data = await response.json();
+                console.log('Fetching Twitch API clips...');
+                const response = await fetch(`/api/stream-clips/${streamer}`);
+                const data = await response.json();
 
                 if (data.success && data.data.recent_clips && data.data.recent_clips.length > 0) {
-                        displayTwitchClips(index, data.data.recent_clips, clipCreateButton);
-                        clipsContainer.dataset.loaded = 'true';
-                        return;
+                    displayTwitchClips(index, data.data.recent_clips, clipCreateButton);
+                    clipsContainer.dataset.loaded = 'true';
+                    return;
                 }
 
                 // Fallback to rewind/HLS clipping
@@ -5310,18 +5094,6 @@ ${(() => {
                 this.applyTheme();
                 
                 console.log('Enhanced features initialized successfully');
-                
-                // DEBUG: Test function to manually trigger Multi-Stream
-                window.debugMultiStream = () => {
-                    console.log('[DEBUG] 🧪 Manual Multi-Stream test triggered');
-                    console.log('[DEBUG] showTab function exists:', typeof window.showTab);
-                    console.log('[DEBUG] openMultiStreamDock function exists:', typeof openMultiStreamDock);
-                    console.log('[DEBUG] Calling showTab with multiStreamTab...');
-                    window.showTab('multiStreamTab');
-                };
-
-                // DEBUG: Log when this script finishes loading
-                console.log('[DEBUG] ✅ Multi-Stream debug setup complete. Run debugMultiStream() to test.');
             }
 
             async loadUserPreferences() {
@@ -6069,8 +5841,8 @@ ${(() => {
         }
         
         function watchStream(username) {
-            // Open the multistream dock first
-            openMultiStreamDock();
+            // Open the multistream modal first
+            showMultiStreamModal();
             
             // Add the streamer to the first available dropdown
             setTimeout(() => {
@@ -6190,74 +5962,22 @@ ${(() => {
         });
 
         // Update the showTab function to refresh account data and favorites
-        console.log('[DEBUG] Setting up showTab override. Original showTab exists:', typeof showTab);
         const originalShowTab = showTab;
         window.showTab = (tabId) => {
-            console.log('[DEBUG] showTab called with:', tabId);
-            console.log('[DEBUG] originalShowTab type:', typeof originalShowTab);
-            
-            if (typeof originalShowTab === 'function') {
-                try {
-                    originalShowTab(tabId);
-                    console.log('[DEBUG] originalShowTab completed for:', tabId);
-                } catch (error) {
-                    console.error('[DEBUG] originalShowTab failed for:', tabId, error);
-                }
-            } else {
-                console.error('[DEBUG] originalShowTab is not a function:', originalShowTab);
-            }
-            
+            originalShowTab(tabId);
             if (tabId === 'accountTab') {
-                console.log('[DEBUG] Handling accountTab');
                 updateAccountDisplay();
                 refreshFavorites();
-                // Scroll to top for account tab
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else if (tabId === 'multiStreamTab') {
-                console.log('[DEBUG] Handling multiStreamTab - calling openMultiStreamDock');
-                try {
-                    openMultiStreamDock();
-                    console.log('[DEBUG] openMultiStreamDock completed');
-                } catch (error) {
-                    console.error('[DEBUG] openMultiStreamDock failed:', error);
-                }
-                // For Multi-Stream, scroll to top immediately to show it at the top
-                window.scrollTo({ top: 0, behavior: 'instant' });
-            } else {
-                console.log('[DEBUG] Handling other tab:', tabId);
-                // For other tabs, scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         };
 
         window.toggleMultiStreamFullscreen = () => {
-            const container = document.getElementById('multiStreamContainer');
-            if (!container) {
-                console.warn('Multi-Stream container not found');
-                return;
-            }
-            
+            const modal = document.getElementById('multiStreamModal');
             if (document.fullscreenElement) {
                 document.exitFullscreen();
             } else {
-                container.requestFullscreen().catch(err => {
-                    console.warn('Fullscreen request failed:', err);
-                });
+                modal.requestFullscreen();
             }
-        };
-        
-        window.toggleGlobalMute = () => {
-            console.log('[MultiStream] Toggle global mute');
-            const iframes = document.querySelectorAll('#multiStreamContainer iframe');
-            iframes.forEach((iframe, index) => {
-                try {
-                    // Note: Due to CORS restrictions, we can't directly control Twitch embed audio
-                    // This would need to be implemented using Twitch Embed API
-                    console.log(`Would toggle mute for stream ${index + 1}`);
-                } catch (error) {
-                    console.warn('Cannot control iframe audio:', error);
-                }
-            });
         };
 
         // Enhanced CSS Styles
