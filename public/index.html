@@ -4113,7 +4113,7 @@ ${(() => {
                             </div>
                         </div>
                         <!-- Twitch embed container -->
-                        <div id="stream-${index}" class="w-full h-full"></div>
+                        <div id="stream-${index}" class="absolute inset-0 w-full h-full"></div>
                     </div>
                     
                     <!-- Clips Tab Content -->
@@ -4132,8 +4132,8 @@ ${(() => {
                 // Set initial width based on number of streams to reduce dead space
                 const count = streamers.length;
                 const basis = count === 1 ? '100%' : (count === 2 ? '49%' : '32%');
-                // Do not allow flex to override explicit width we set on resize
-                streamDiv.style.flex = `0 0 ${basis}`; // no grow/shrink, basis percent
+                // Allow grow to fill container, while preserving basis
+                streamDiv.style.flex = `1 0 ${basis}`;
                 streamDiv.style.height = '520px';
                 gridContainer.appendChild(streamDiv);
                 makePanelResizable(streamDiv, index);
@@ -4163,12 +4163,16 @@ ${(() => {
             const panels = Array.from(grid.getElementsByClassName('resize-container'));
             const n = panels.length;
             const set = (el, basis, height) => {
-                el.style.flex = `0 0 ${basis}`;
+                el.style.flex = `1 0 ${basis}`;
                 el.style.flexBasis = basis;
                 if (height) el.style.height = height;
                 // Keep child host fill container
                 const host = el.querySelector('[id^="stream-"]');
-                if (host) { host.style.width = '100%'; host.style.height = '100%'; }
+                if (host) { 
+                    host.style.position = 'absolute';
+                    host.style.inset = '0';
+                    host.style.width = '100%'; host.style.height = '100%'; 
+                }
             };
             if (mode === 'grid') {
                 const basis = n === 1 ? '100%' : (n === 2 ? '49%' : '32%');
@@ -4273,7 +4277,12 @@ ${(() => {
                         }
                         // Ensure internal iframe fills container
                         const iframe = document.querySelector(`#stream-${index} iframe`);
-                        if (iframe) { iframe.style.width = '100%'; iframe.style.height = '100%'; }
+                        if (iframe) { 
+                            iframe.style.position = 'absolute';
+                            iframe.style.inset = '0';
+                            iframe.style.width = '100%'; 
+                            iframe.style.height = '100%';
+                        }
                     });
                 }
                 
@@ -4326,6 +4335,7 @@ ${(() => {
                     newH = Math.round((newW / 16) * 9);
                 }
                 panel.style.width = newW + 'px';
+                panel.style.flex = `0 0 ${newW}px`;
                 panel.style.flexBasis = newW + 'px';
                 panel.style.height = newH + 'px';
                 // Force Twitch iframe to fill the new size
