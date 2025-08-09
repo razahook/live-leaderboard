@@ -3997,7 +3997,7 @@
                 const streamDiv = document.createElement('div');
                 streamDiv.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700/50 relative resize-container';
                 streamDiv.innerHTML = `
-                    <div class="resize-handle" style="position:absolute;right:6px;bottom:6px;width:14px;height:14px;border-right:2px solid #6b7280;border-bottom:2px solid #6b7280;cursor:nwse-resize;opacity:0.8"></div>
+                    <div class="resize-handle" style="position:absolute;right:6px;bottom:6px;width:16px;height:16px;border-right:2px solid #9ca3af;border-bottom:2px solid #9ca3af;cursor:nwse-resize;opacity:0.95;z-index:20"></div>
                     <div class="bg-gradient-to-r from-gray-800 to-gray-700 text-white p-4 border-b border-gray-600">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-3">
@@ -4219,6 +4219,9 @@ ${(() => {
         function makePanelResizable(panel, index) {
             const handle = panel.querySelector('.resize-handle');
             if (!handle) return;
+            // Ensure panel is positioned/visible for pointer events
+            panel.style.position = panel.style.position || 'relative';
+            panel.style.cursor = 'default';
             let isResizing = false;
             let startX = 0, startY = 0, startW = 0, startH = 0;
             handle.addEventListener('mousedown', (e) => {
@@ -4232,6 +4235,7 @@ ${(() => {
                 document.body.style.userSelect = 'none';
                 // Lock flex-basis so width changes take effect
                 panel.style.flex = `0 0 ${rect.width}px`;
+                panel.setAttribute('data-resizing', '1');
             });
             window.addEventListener('mousemove', (e) => {
                 if (!isResizing) return;
@@ -4252,6 +4256,7 @@ ${(() => {
                 if (!isResizing) return;
                 isResizing = false;
                 document.body.style.userSelect = '';
+                panel.removeAttribute('data-resizing');
             });
         }
         
