@@ -157,6 +157,7 @@ def oauth_login():
         return jsonify({
             'success': True,
             'oauth_url': oauth_url,
+            'redirect_uri': redirect_uri,
             'message': 'Redirect user to this URL to authorize clip creation'
         })
         
