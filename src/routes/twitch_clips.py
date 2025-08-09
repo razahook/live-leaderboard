@@ -5,6 +5,7 @@ import os
 from flask import Blueprint, jsonify, request
 from urllib.parse import quote_plus
 from routes.twitch_integration import get_twitch_access_token
+from routes.supabase_client import get_supabase
 try:
     from vercel_cache import VercelCacheManager
     cache_manager = VercelCacheManager()
@@ -51,6 +52,50 @@ def get_twitch_user_id(username):
     except Exception as e:
         print(f"Error getting user ID for {username}: {e}")
         return None
+
+
+def _resolve_streamer_id(supabase_client, twitch_login: str):
+    """Find or create a streamer row and return its id. Best-effort; returns None on failure."""
+    try:
+        if supabase_client is None or not twitch_login:
+            return None
+        login = twitch_login.lower()
+        res = supabase_client.table('streamers').select('id').eq('twitch_login', login).limit(1).execute()
+        if res.data:
+            return res.data[0]['id']
+        # Create minimal row
+        ins = supabase_client.table('streamers').insert({
+            'twitch_login': login,
+            'apex_names': [],
+            'medal_id': None
+        }).execute()
+        if ins.data:
+            return ins.data[0]['id']
+    except Exception as e:
+        print(f"Streamer resolve failed for {twitch_login}: {e}")
+    return None
+
+
+def _save_clip_metadata(clip_id: str, username: str, edit_url: str, url: str, embed_url: str):
+    """Persist clip metadata to Supabase if configured. Best-effort, non-blocking."""
+    try:
+        sb = get_supabase()
+        if sb is None:
+            return
+        streamer_id = _resolve_streamer_id(sb, username)
+        payload = {
+            'source': 'twitch',
+            'external_id': clip_id,
+            'url': url,
+            'embed_url': embed_url,
+            'edit_url': edit_url,
+            'broadcaster_login': username.lower(),
+            'streamer_id': streamer_id,
+        }
+        # Upsert by external_id to avoid dupes
+        sb.table('clips').upsert(payload, on_conflict='external_id').execute()
+    except Exception as e:
+        print(f"Supabase clip save failed: {e}")
 
 def get_user_clips_cached(username, headers, limit=5):
     cache_key = f"clips_{username}"
@@ -215,6 +260,18 @@ def create_clip(username):
             clip_result = clip_response.json()
             if clip_result.get('data'):
                 clip_info = clip_result['data'][0]
+                # Best-effort save
+                try:
+                    _save_clip_metadata(
+                        clip_id=clip_info['id'],
+                        username=username,
+                        edit_url=clip_info.get('edit_url', ''),
+                        url=f"https://clips.twitch.tv/{clip_info['id']}",
+                        embed_url=f"https://clips.twitch.tv/embed?clip={clip_info['id']}"
+                    )
+                except Exception:
+                    pass
+
                 return jsonify({
                     "success": True,
                     "message": f"Clip created successfully for {username}!",
