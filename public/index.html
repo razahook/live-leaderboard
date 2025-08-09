@@ -2568,6 +2568,33 @@
                     console.warn('Failed to fetch env vars:', err);
                 }
 
+                // Fetch edge-config feature flags and expose globally
+                try {
+                    const defaults = {
+                        enable_medal: false,
+                        max_recent_clips: 4,
+                        multistream_default_layout: 'equal',
+                        feature_flags: { multistreamDock: true, streamPage: false }
+                    };
+                    const flagsResp = await fetch('/api/edge-config/public');
+                    const flagsJson = await flagsResp.json();
+                    const flags = (flagsJson && flagsJson.success && flagsJson.data) ? { ...defaults, ...flagsJson.data } : defaults;
+                    window.__edgeFlags = flags;
+
+                    // Apply feature flags to UI (e.g., show/hide Multi-Stream entry points)
+                    (function applyFeatureFlags() {
+                        try {
+                            const enabled = !!(flags.feature_flags && flags.feature_flags.multistreamDock);
+                            const msOpeners = document.querySelectorAll('[onclick*="showMultiStreamModal"]');
+                            msOpeners.forEach(el => { el.style.display = enabled ? '' : 'none'; });
+                        } catch (e) {
+                            console.warn('applyFeatureFlags failed', e);
+                        }
+                    })();
+                } catch (err) {
+                    console.warn('Failed to fetch edge-config flags:', err);
+                }
+
                 // Load all critical data in parallel
                 const [dataResult] = await Promise.all([
                     loadData(),
@@ -4143,6 +4170,14 @@ ${(() => {
             });
             
             container.appendChild(gridContainer);
+
+            // Apply default multistream layout from edge flags
+            try {
+                const flags = window.__edgeFlags || {};
+                const raw = (flags.multistream_default_layout || 'equal').toString().toLowerCase();
+                const layout = raw === 'row' ? 'row' : (raw.startsWith('focus3') ? 'focus3' : (raw.startsWith('focus2') ? 'focus2' : (raw.startsWith('focus1') ? 'focus1' : 'grid')));
+                setMultiLayout(layout);
+            } catch (e) { /* no-op */ }
             
             // Persist selection
             try {
