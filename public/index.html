@@ -478,7 +478,7 @@
                         </button>
                         
                         <!-- Multi-Stream -->
-                        <a href="#" onclick="showTab('leaderboardTab'); openMultiStreamDock(); document.getElementById('multiStreamDock').scrollIntoView({behavior:'smooth'}); return false;" class="nav-item">
+                        <a href="#" onclick="showTab('multiStreamTab'); openMultiStreamDock(); return false;" class="nav-item">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                             </svg>
@@ -569,7 +569,7 @@
                                 <input type="checkbox" name="toggle" id="liveOnlyToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-600 appearance-none cursor-pointer transition-transform duration-200 ease-in"/>
                                 <label for="liveOnlyToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
                             </div>
-                            <a href="#" onclick="showTab('leaderboardTab'); openMultiStreamDock(); document.getElementById('multiStreamDock').scrollIntoView({behavior:'smooth'}); return false;" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm inline-block transition-colors">Multi-Stream</a>
+                            <a href="#" onclick="showTab('multiStreamTab'); openMultiStreamDock(); return false;" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm inline-block transition-colors">Multi-Stream</a>
             <button onclick="showSettingsModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm ml-2">
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -621,11 +621,7 @@
                 </div>
             </section>
 
-            <section id="twitch-override-management" class="mb-10">
-                <h2 class="text-2xl font-bold text-white mb-4">Twitch Override Management</h2>
-                <p class="text-gray-300 mb-6">Manually link an in-game player name to a Twitch channel or override an existing link. This is useful for players whose Twitch streams aren't automatically detected.</p>
-                <button onclick="showOverrideModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md">Add/Update Twitch Override</button>
-            </section>
+            <!-- Twitch Override Management removed from main page per request -->
         </div>
 
         <!-- Player Stats & Match History Tab Content -->
@@ -839,7 +835,8 @@
         </div>
     </div>
 
-    <!-- Multi-Stream Viewer Dock (inline, no modal) -->
+    <!-- Multi-Stream Tab -->
+    <div id="multiStreamTab" class="tab-content">
     <section id="multiStreamDock" class="mb-8">
         <!-- Control bar -->
         <div class="flex items-center justify-between mb-3">
@@ -935,6 +932,7 @@
             <div id="msExtrasGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
         </div>
     </section>
+    </div>
 
     <!-- AI Analysis Modal -->
     <div id="analysisModal" class="modal">
