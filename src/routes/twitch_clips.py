@@ -76,13 +76,18 @@ def _resolve_streamer_id(supabase_client, twitch_login: str):
     return None
 
 
-def _save_clip_metadata(clip_id: str, username: str, edit_url: str, url: str, embed_url: str):
+def _save_clip_metadata(clip_id: str, username: str, edit_url: str, url: str, embed_url: str, creator_login: str = None, created_by_user_id: str = None):
     """Persist clip metadata to Supabase if configured. Best-effort, non-blocking."""
     try:
         sb = get_supabase()
         if sb is None:
             return
         streamer_id = _resolve_streamer_id(sb, username)
+        extra = {}
+        if creator_login:
+            extra['creator_login'] = creator_login
+        if created_by_user_id:
+            extra['created_by_user_id'] = created_by_user_id
         payload = {
             'source': 'twitch',
             'external_id': clip_id,
@@ -91,6 +96,7 @@ def _save_clip_metadata(clip_id: str, username: str, edit_url: str, url: str, em
             'edit_url': edit_url,
             'broadcaster_login': username.lower(),
             'streamer_id': streamer_id,
+            'extra': extra,
         }
         # Upsert by external_id to avoid dupes
         sb.table('clips').upsert(payload, on_conflict='external_id').execute()
@@ -267,7 +273,10 @@ def create_clip(username):
                         username=username,
                         edit_url=clip_info.get('edit_url', ''),
                         url=f"https://clips.twitch.tv/{clip_info['id']}",
-                        embed_url=f"https://clips.twitch.tv/embed?clip={clip_info['id']}"
+                        embed_url=f"https://clips.twitch.tv/embed?clip={clip_info['id']}",
+                        # Add attribution for who initiated the clip when available
+                        creator_login=request.args.get('as') or None,
+                        created_by_user_id=request.headers.get('X-User-Id') or None
                     )
                 except Exception:
                     pass
