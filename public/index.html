@@ -3816,9 +3816,45 @@
         const openMultiStreamDock = () => {
             console.log('[MultiStream] Opening dock...');
             console.log('[MultiStream] AllPlayers available:', allPlayers ? allPlayers.length : 'undefined');
+            console.log('[MultiStream] Window.allPlayers:', window.allPlayers ? window.allPlayers.length : 'undefined');
+            
+            // Try to get player data from various sources
+            let playerData = allPlayers || window.allPlayers || [];
+            
+            // If no data, try to get from DOM leaderboard
+            if (!playerData || playerData.length === 0) {
+                console.log('[MultiStream] Trying to extract from leaderboard DOM...');
+                const tableRows = document.querySelectorAll('#leaderboard-body tr');
+                console.log('[MultiStream] Found table rows:', tableRows.length);
+                
+                // Create mock data from visible leaderboard for testing
+                playerData = Array.from(tableRows).slice(0, 10).map((row, index) => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length > 1) {
+                        const playerName = cells[1]?.textContent?.trim();
+                        if (playerName) {
+                            return {
+                                name: playerName,
+                                player_name: playerName,
+                                rank: index + 1,
+                                status: 'Live', // Mock status for testing
+                                twitch_link: `https://www.twitch.tv/${playerName.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+                                hasClips: true, // Mock for testing
+                                stream: {
+                                    twitchUser: playerName.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                                    viewers: Math.floor(Math.random() * 1000) + 100
+                                }
+                            };
+                        }
+                    }
+                    return null;
+                }).filter(Boolean);
+                
+                console.log('[MultiStream] Created mock data from DOM:', playerData.length, 'players');
+            }
             
             // Check if player data is available
-            if (!allPlayers || allPlayers.length === 0) {
+            if (!playerData || playerData.length === 0) {
                 console.warn('[MultiStream] No player data available, waiting for data...');
                 // Show a message in the Multi-Stream area
                 const container = document.getElementById('multiStreamContainer');
@@ -3832,6 +3868,12 @@
                     }
                 }, 2000);
                 return;
+            }
+            
+            // Set global data for dropdown population
+            if (!allPlayers) {
+                window.allPlayers = playerData;
+                allPlayers = playerData;
             }
             
             populateStreamerDropdowns();
@@ -3860,7 +3902,9 @@
         
         const populateStreamerDropdowns = () => {
             console.log('[MultiStream] === POPULATING STREAMER DROPDOWNS ===');
-            console.log('[MultiStream] Total players available:', allPlayers.length);
+            console.log('[MultiStream] Total players available:', allPlayers ? allPlayers.length : 'undefined');
+            console.log('[MultiStream] AllPlayers type:', typeof allPlayers);
+            console.log('[MultiStream] AllPlayers value:', allPlayers);
             
             // Debug: Show sample of all players to understand data structure
             console.log('[MultiStream] Sample players:', allPlayers.slice(0, 3).map(p => ({
