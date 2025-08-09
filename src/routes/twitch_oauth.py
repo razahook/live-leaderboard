@@ -15,7 +15,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 twitch_oauth_bp = Blueprint('twitch_oauth', __name__)
 
-# OAuth configuration
+# OAuth configuration (minor bump to trigger deploy)
 TWITCH_CLIENT_ID = os.environ.get('TWITCH_CLIENT_ID')
 TWITCH_CLIENT_SECRET = os.environ.get('TWITCH_CLIENT_SECRET')
 # Default redirect URI for Vercel deployment
