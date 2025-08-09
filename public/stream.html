@@ -155,8 +155,12 @@
                 const response = await fetch(`${API_BASE_URL}/api/leaderboard/PC`);
                 const data = await response.json();
                 
-                if (data.success && data.data) {
-                    allPlayers = data.data || [];
+                if (data?.success && data?.data) {
+                    // Normalize to an array of players
+                    const players = Array.isArray(data.data)
+                        ? data.data
+                        : (Array.isArray(data.data.players) ? data.data.players : []);
+                    allPlayers = players;
                     console.log('[Stream] Loaded players:', allPlayers.length);
                 } else {
                     console.error('[Stream] API returned error:', data);
@@ -171,16 +175,15 @@
         // Populate streamer dropdowns
         function populateDropdowns() {
             console.log('[Stream] Populating dropdowns...');
-            console.log('[Stream] Total players:', allPlayers.length);
+            console.log('[Stream] Total players:', Array.isArray(allPlayers) ? allPlayers.length : 0);
             
             // Filter for live streamers using same logic as main page
-            const liveStreamers = allPlayers.filter(player => {
+            const liveStreamers = (Array.isArray(allPlayers) ? allPlayers : []).filter(player => {
                 const twitchLive = player.twitch_live?.is_live === true;
-                const hasStreamData = player.stream !== null && player.stream !== undefined;
-                const hasTwitchUser = player.stream?.twitchUser && player.stream.twitchUser.length > 0;
-                const statusLive = String(player.status).toLowerCase().includes('live');
-                
-                return (twitchLive || statusLive) && hasStreamData && hasTwitchUser;
+                const hasStreamData = player.stream !== null && player.stream !== undefined || player.twitch_live?.stream_data;
+                const twitchUser = resolveTwitchUser(player);
+                const statusLive = String(player.status || '').toLowerCase().includes('live');
+                return (twitchLive || statusLive) && hasStreamData && !!twitchUser;
             });
 
             console.log('[Stream] Live streamers found:', liveStreamers.length);
@@ -203,9 +206,11 @@
                 dropdown.appendChild(placeholder);
 
                 liveStreamers.forEach(player => {
+                    const twitchUser = resolveTwitchUser(player);
                     const option = document.createElement('option');
-                    option.value = player.stream.twitchUser;
-                    option.textContent = `${player.name || player.player_name} (${player.stream?.viewers || 0} viewers)`;
+                    option.value = twitchUser;
+                    const viewers = player.stream?.viewers || player.twitch_live?.stream_data?.viewer_count || 0;
+                    option.textContent = `${player.name || player.player_name || twitchUser} (${viewers} viewers)`;
                     option.dataset.playerName = player.name || player.player_name;
                     dropdown.appendChild(option);
                 });
@@ -356,6 +361,20 @@
                 const loading = document.getElementById(`loading-${index}`);
                 if (loading) loading.style.display = 'none';
             }
+        }
+
+        // Resolve twitch username from various shapes
+        function resolveTwitchUser(player) {
+            if (!player) return '';
+            if (player.stream?.twitchUser) return String(player.stream.twitchUser).toLowerCase();
+            if (player.twitch_live?.user_data?.login) return String(player.twitch_live.user_data.login).toLowerCase();
+            if (player.twitch_link) {
+                try {
+                    const m = String(player.twitch_link).match(/twitch\.tv\/(\w+)/i);
+                    if (m && m[1]) return m[1].toLowerCase();
+                } catch {}
+            }
+            return '';
         }
 
         // Get display name for streamer
