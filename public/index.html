@@ -915,6 +915,7 @@
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus1')">Focus 1</button>
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus2')">Focus 2</button>
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
+                            <button id="aspectToggleBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleAspectLock()">Lock 16:9</button>
                         </div>
                     </div>
                 </div>
@@ -3783,10 +3784,12 @@
         
         // Multi-Stream Viewer Functions
         const multiStreamModal = document.getElementById('multiStreamModal');
+        const MS_STORAGE_KEY = 'multistream_selection_v1';
         
         const showMultiStreamModal = () => {
             multiStreamModal.classList.add('show');
             populateStreamerDropdowns();
+            restoreMultiSelection();
         };
         
         const hideMultiStreamModal = () => {
@@ -4138,6 +4141,12 @@ ${(() => {
             
             container.appendChild(gridContainer);
             
+            // Persist selection
+            try {
+                const payload = { s1: document.getElementById('streamer1').value || '', s2: document.getElementById('streamer2').value || '', s3: document.getElementById('streamer3').value || '' };
+                localStorage.setItem(MS_STORAGE_KEY, JSON.stringify(payload));
+            } catch {}
+
             // Load all streams with delays to avoid conflicts and set initial basis once
             streamers.forEach((streamer, index) => {
                 setTimeout(() => {
@@ -4157,6 +4166,9 @@ ${(() => {
                 el.style.flex = `0 0 ${basis}`;
                 el.style.flexBasis = basis;
                 if (height) el.style.height = height;
+                // Keep child host fill container
+                const host = el.querySelector('[id^="stream-"]');
+                if (host) { host.style.width = '100%'; host.style.height = '100%'; }
             };
             if (mode === 'grid') {
                 const basis = n === 1 ? '100%' : (n === 2 ? '49%' : '32%');
@@ -4170,6 +4182,38 @@ ${(() => {
                     else set(p, '32%', '420px');
                 });
             }
+        }
+
+        // Aspect ratio lock to reduce black bars during manual resize
+        let aspectLocked = false;
+        function toggleAspectLock(){
+            aspectLocked = !aspectLocked;
+            const btn = document.getElementById('aspectToggleBtn');
+            if (btn) btn.textContent = aspectLocked ? 'Free Resize' : 'Lock 16:9';
+        }
+
+        function restoreMultiSelection(){
+            try {
+                const raw = localStorage.getItem(MS_STORAGE_KEY);
+                if (!raw) return;
+                const {s1='',s2='',s3=''} = JSON.parse(raw);
+                const d1 = document.getElementById('streamer1');
+                const d2 = document.getElementById('streamer2');
+                const d3 = document.getElementById('streamer3');
+                if (d1 && s1) ensureDropdownValue(d1, s1);
+                if (d2 && s2) ensureDropdownValue(d2, s2);
+                if (d3 && s3) ensureDropdownValue(d3, s3);
+            } catch {}
+        }
+
+        function ensureDropdownValue(selectEl, value){
+            let opt = Array.from(selectEl.options).find(o => o.value.toLowerCase() === value.toLowerCase());
+            if (!opt) {
+                opt = document.createElement('option');
+                opt.value = value; opt.textContent = value;
+                selectEl.appendChild(opt);
+            }
+            selectEl.value = value;
         }
         
 
@@ -4275,10 +4319,15 @@ ${(() => {
                 if (!isResizing) return;
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
-                const newW = Math.max(300, startW + dx);
+                let newW = Math.max(300, startW + dx);
+                let newH = Math.max(180, startH + dy);
+                if (aspectLocked) {
+                    // maintain 16:9; prefer width change
+                    newH = Math.round((newW / 16) * 9);
+                }
                 panel.style.width = newW + 'px';
                 panel.style.flexBasis = newW + 'px';
-                panel.style.height = Math.max(180, startH + dy) + 'px';
+                panel.style.height = newH + 'px';
                 // Force Twitch iframe to fill the new size
                 const embedHost = panel.querySelector(`#stream-${index}`) || panel.querySelector('iframe');
                 if (embedHost) {
