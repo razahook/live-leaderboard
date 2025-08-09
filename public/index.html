@@ -3868,9 +3868,9 @@
                 return;
             }
             
-            // Create grid layout with resizable panels
+            // Create flex layout with resizable panels (reduces dead space)
             const gridContainer = document.createElement('div');
-            gridContainer.className = 'grid grid-cols-1 xl:grid-cols-3 gap-4';
+            gridContainer.className = 'flex flex-row flex-wrap gap-4 items-stretch';
             gridContainer.id = 'multistream-grid';
             
             streamers.forEach((streamer, index) => {
@@ -4093,7 +4093,7 @@ ${(() => {
                     </div>
                     
                     <!-- Stream Tab Content -->
-                    <div id="stream-content-${index}" class="stream-tab-content w-full bg-gray-900 relative" style="aspect-ratio: 16/9;">
+                    <div id="stream-content-${index}" class="stream-tab-content w-full bg-gray-900 relative" style="height: 420px; min-height: 240px; overflow: hidden;">
                         <div id="loading-${index}" class="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900/80 z-10">
                             <div class="text-center">
                                 <div class="text-gray-300 mb-2 text-sm">Loading ${displayName}...</div>
@@ -4117,8 +4117,13 @@ ${(() => {
                         </div>
                     </div>
                 `;
+                // Set initial width based on number of streams to reduce dead space
+                const count = streamers.length;
+                const basis = count === 1 ? '100%' : (count === 2 ? '49%' : '32%');
+                streamDiv.style.flex = `0 1 ${basis}`;
+                streamDiv.style.height = '520px';
                 gridContainer.appendChild(streamDiv);
-                makePanelResizable(streamDiv);
+                makePanelResizable(streamDiv, index);
             });
             
             container.appendChild(gridContainer);
@@ -4187,6 +4192,9 @@ ${(() => {
                                 }
                             }, 300);
                         }
+                        // Ensure internal iframe fills container
+                        const iframe = document.querySelector(`#stream-${index} iframe`);
+                        if (iframe) { iframe.style.width = '100%'; iframe.style.height = '100%'; }
                     });
                 }
                 
@@ -4207,7 +4215,7 @@ ${(() => {
         };
 
         // Simple drag-resize for each panel
-        function makePanelResizable(panel) {
+        function makePanelResizable(panel, index) {
             const handle = panel.querySelector('.resize-handle');
             if (!handle) return;
             let isResizing = false;
@@ -4228,6 +4236,12 @@ ${(() => {
                 const dy = e.clientY - startY;
                 panel.style.width = Math.max(260, startW + dx) + 'px';
                 panel.style.height = Math.max(180, startH + dy) + 'px';
+                // Force Twitch iframe to fill the new size
+                const embedHost = panel.querySelector(`#stream-${index}`) || panel.querySelector('iframe');
+                if (embedHost) {
+                    embedHost.style.width = '100%';
+                    embedHost.style.height = '100%';
+                }
             });
             window.addEventListener('mouseup', () => {
                 if (!isResizing) return;
