@@ -4375,24 +4375,9 @@ ${(() => {
                 console.log('Twitch embed parent hostname:', window.location.hostname);
                 console.log('Full location:', window.location.href);
                 
-                // Dynamically determine parent domains based on current environment
+                // Use exact hostname for Twitch embed parent
                 const hostname = window.location.hostname;
                 const parentDomains = [hostname];
-                
-                // If on Vercel, add wildcard for preview deployments
-                if (hostname.includes('vercel.app')) {
-                    // Get the base domain for Vercel previews
-                    const parts = hostname.split('.');
-                    if (parts.length >= 3) {
-                        // Add wildcard for all subdomains
-                        parentDomains.push(`*.${parts.slice(-2).join('.')}`);
-                    }
-                }
-                
-                // If localhost, add both localhost and 127.0.0.1
-                if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                    parentDomains.push('localhost', '127.0.0.1');
-                }
                 
                 console.log('[MultiStream] Using parent domains:', parentDomains);
                 
