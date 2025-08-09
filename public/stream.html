@@ -121,6 +121,11 @@
                 </div>
             </div>
         </div>
+        <!-- Extras: Stats & Clips -->
+        <div id="extrasContainer" class="mt-6 hidden">
+            <h3 class="text-xl font-semibold text-white mb-3">Stream Stats & Clips</h3>
+            <div id="extrasGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        </div>
     </div>
 
     <script>
@@ -309,6 +314,9 @@
                     }
                 }, 100);
             }
+
+            // Render stats/clips below
+            renderExtras(streamers);
         }
 
         // Load individual Twitch embed
@@ -360,6 +368,98 @@
                 
                 const loading = document.getElementById(`loading-${index}`);
                 if (loading) loading.style.display = 'none';
+            }
+        }
+
+        // Build stats/clips cards for selected streamers
+        async function renderExtras(streamers) {
+            const extrasWrap = document.getElementById('extrasContainer');
+            const grid = document.getElementById('extrasGrid');
+            if (!extrasWrap || !grid) return;
+            grid.innerHTML = '';
+            if (!streamers || streamers.length === 0) {
+                extrasWrap.classList.add('hidden');
+                return;
+            }
+
+            extrasWrap.classList.remove('hidden');
+            for (const user of streamers) {
+                const player = findPlayerByUser(user);
+                const display = getStreamerDisplayName(user);
+                const viewerCount = player?.stream?.viewers || player?.twitch_live?.stream_data?.viewer_count || 0;
+                const rankStr = player?.rank ? `#${player.rank}` : '—';
+                const rpStr = player?.rp ? `${Number(player.rp).toLocaleString()} RP` : '';
+
+                const card = document.createElement('div');
+                card.className = 'bg-gray-800/50 rounded-lg border border-gray-700/50 p-4';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <div class="text-white font-semibold">${display}</div>
+                            <div class="text-xs text-gray-400">${rankStr} ${rpStr ? '· ' + rpStr : ''} · ${viewerCount} viewers</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="https://twitch.tv/${user}" target="_blank" class="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 rounded">Open</a>
+                            <button class="px-3 py-1 text-xs bg-purple-600 hover:bg-purple-700 rounded" onclick="createClip('${user}')">Clip</button>
+                        </div>
+                    </div>
+                    <div id="clips-${user}" class="grid grid-cols-2 gap-2"></div>
+                `;
+                grid.appendChild(card);
+
+                // Load recent clips for each user
+                fetchRecentClips(user);
+            }
+        }
+
+        function findPlayerByUser(login) {
+            login = String(login || '').toLowerCase();
+            return (Array.isArray(allPlayers) ? allPlayers : []).find(p => {
+                const u = resolveTwitchUser(p);
+                return u && u.toLowerCase() === login;
+            });
+        }
+
+        async function fetchRecentClips(user) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/stream-recent/${encodeURIComponent(user)}`);
+                const data = await res.json();
+                if (!data || data.success === false) return;
+                const clips = Array.isArray(data?.data) ? data.data.slice(0, 4) : [];
+                const mount = document.getElementById(`clips-${user}`);
+                if (!mount) return;
+                if (clips.length === 0) {
+                    mount.innerHTML = '<div class="col-span-2 text-gray-400 text-sm">No recent clips</div>';
+                    return;
+                }
+                mount.innerHTML = clips.map(c => `
+                    <a href="${c.url || c.embed_url || '#'}" target="_blank" class="block group">
+                        <div class="relative rounded overflow-hidden border border-gray-700/50">
+                            <img src="${c.thumbnail_url || ''}" alt="clip" class="w-full h-24 object-cover group-hover:opacity-90">
+                            <div class="absolute bottom-1 right-1 text-xs bg-black/70 px-1.5 py-0.5 rounded">
+                                ${c.duration ? Math.round(c.duration)}s
+                            </div>
+                        </div>
+                        <div class="mt-1 text-xs text-gray-300 line-clamp-2">${(c.title || '').replace(/</g,'&lt;')}</div>
+                    </a>
+                `).join('');
+            } catch (e) {
+                console.warn('[Stream] recent clips failed for', user, e);
+            }
+        }
+
+        async function createClip(user) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/stream-clips/create/${encodeURIComponent(user)}`, { method: 'POST' });
+                const data = await res.json();
+                if (data?.success) {
+                    alert('Clip created successfully!');
+                    fetchRecentClips(user);
+                } else {
+                    alert('Clip failed: ' + (data?.error || 'unknown'));
+                }
+            } catch (e) {
+                alert('Clip failed: ' + e.message);
             }
         }
 
