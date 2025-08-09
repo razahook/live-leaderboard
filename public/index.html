@@ -581,6 +581,105 @@
                     </div>
                 </div>
 
+                <!-- Multi-Stream Tab -->
+                <div id="multiStreamTab" class="tab-content">
+                <section id="multiStreamDock" class="mb-8">
+                    <!-- Control bar -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-xl font-bold text-white">Multi-Stream</h2>
+                            <button id="msCollapseBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleMultiStreamCollapse()">Collapse</button>
+                        </div>
+                        <div class="text-gray-400 text-sm">Drag gutters to resize. Layout presets available.</div>
+                    </div>
+
+                    <div class="mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <!-- Streamer 1 -->
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-sm font-medium text-gray-300">Streamer 1</label>
+                                        <button id="favoriteBtn1" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(1)">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <select id="streamer1" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                                        <option value="">Select Streamer 1</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Streamer 2 -->
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-sm font-medium text-gray-300">Streamer 2</label>
+                                        <button id="favoriteBtn2" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(2)">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <select id="streamer2" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                                        <option value="">Select Streamer 2</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Streamer 3 -->
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-sm font-medium text-gray-300">Streamer 3</label>
+                                        <button id="favoriteBtn3" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(3)">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <select id="streamer3" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                                        <option value="">Select Streamer 3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Stream Controls -->
+                            <div class="flex justify-between items-center">
+                                <div class="flex space-x-2">
+                                    <button id="globalMuteBtn" onclick="toggleGlobalMute()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.816L4.852 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.852l3.531-3.816a1 1 0 011.617.816zM14 5a1 1 0 011.707-.707 5.978 5.978 0 010 8.486A1 1 0 0114 12a4 4 0 000-5.657A1 1 0 0114 5z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="fullscreenBtn" onclick="toggleMultiStreamFullscreen()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                                        </svg>
+                                    </button>
+                                    <!-- Layout presets -->
+                                    <div class="hidden md:flex items-center gap-1 ml-2">
+                                        <span class="text-gray-400 text-xs mr-1">Layout:</span>
+                                        <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('grid')">Grid</button>
+                                        <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('row')">Row</button>
+                                        <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus1')">Focus 1</button>
+                                        <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus2')">Focus 2</button>
+                                        <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
+                                        <button id="aspectToggleBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleAspectLock()">Lock 16:9</button>
+                                        <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="equalizeSplit()">Equal</button>
+                                        <button class="px-2 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded" onclick="loadMultiStreams()">Load</button>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    <div id="multiStreamContainer" class="min-h-[280px] bg-gray-900/50 rounded-lg border border-gray-700/50 p-3">
+                            <!-- Streams will be loaded here -->
+                        </div>
+                    <div id="multiStreamExtras" class="mt-6 hidden">
+                        <h3 class="text-lg font-semibold text-white mb-2">Stream Stats & Clips</h3>
+                        <div id="msExtrasGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                    </div>
+                </section>
+                </div>
+
                 <div class="overflow-x-auto bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg shadow-2xl shadow-black/30">
                     <table class="w-full min-w-max text-sm text-left text-gray-400">
                         <thead class="text-xs text-gray-300 uppercase bg-gray-700/20">
@@ -835,104 +934,6 @@
         </div>
         </div>
 
-        <!-- Multi-Stream Tab -->
-        <div id="multiStreamTab" class="tab-content">
-        <section id="multiStreamDock" class="mb-8">
-            <!-- Control bar -->
-            <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-3">
-                    <h2 class="text-xl font-bold text-white">Multi-Stream</h2>
-                    <button id="msCollapseBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleMultiStreamCollapse()">Collapse</button>
-                </div>
-                <div class="text-gray-400 text-sm">Drag gutters to resize. Layout presets available.</div>
-            </div>
-
-            <div class="mb-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <!-- Streamer 1 -->
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <label class="text-sm font-medium text-gray-300">Streamer 1</label>
-                                <button id="favoriteBtn1" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(1)">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <select id="streamer1" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
-                                <option value="">Select Streamer 1</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Streamer 2 -->
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <label class="text-sm font-medium text-gray-300">Streamer 2</label>
-                                <button id="favoriteBtn2" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(2)">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <select id="streamer2" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
-                                <option value="">Select Streamer 2</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Streamer 3 -->
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <label class="text-sm font-medium text-gray-300">Streamer 3</label>
-                                <button id="favoriteBtn3" class="text-gray-400 hover:text-red-500 transition-colors" onclick="toggleFavorite(3)">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.364a4.5 4.5 0 00-6.364 0z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <select id="streamer3" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
-                                <option value="">Select Streamer 3</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <!-- Stream Controls -->
-                    <div class="flex justify-between items-center">
-                        <div class="flex space-x-2">
-                            <button id="globalMuteBtn" onclick="toggleGlobalMute()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.816L4.852 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.852l3.531-3.816a1 1 0 011.617.816zM14 5a1 1 0 011.707-.707 5.978 5.978 0 010 8.486A1 1 0 0114 12a4 4 0 000-5.657A1 1 0 0114 5z"></path>
-                                </svg>
-                            </button>
-                            <button id="fullscreenBtn" onclick="toggleMultiStreamFullscreen()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
-                                </svg>
-                            </button>
-                            <!-- Layout presets -->
-                            <div class="hidden md:flex items-center gap-1 ml-2">
-                                <span class="text-gray-400 text-xs mr-1">Layout:</span>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('grid')">Grid</button>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('row')">Row</button>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus1')">Focus 1</button>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus2')">Focus 2</button>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
-                                <button id="aspectToggleBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleAspectLock()">Lock 16:9</button>
-                                <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="equalizeSplit()">Equal</button>
-                                <button class="px-2 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded" onclick="loadMultiStreams()">Load</button>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-                
-            <div id="multiStreamContainer" class="min-h-[280px] bg-gray-900/50 rounded-lg border border-gray-700/50 p-3">
-                    <!-- Streams will be loaded here -->
-                </div>
-            <div id="multiStreamExtras" class="mt-6 hidden">
-                <h3 class="text-lg font-semibold text-white mb-2">Stream Stats & Clips</h3>
-                <div id="msExtrasGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-            </div>
-        </section>
-        </div>
 
     </div> <!-- End Main Content Area -->
 
@@ -6118,21 +6119,18 @@ ${(() => {
         window.showTab = (tabId) => {
             originalShowTab(tabId);
             
-            // Scroll to top when switching tabs for better UX
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
             if (tabId === 'accountTab') {
                 updateAccountDisplay();
                 refreshFavorites();
+                // Scroll to top for account tab
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (tabId === 'multiStreamTab') {
                 openMultiStreamDock();
-                // Additional scroll to ensure Multi-Stream controls are visible
-                setTimeout(() => {
-                    const multiStreamTab = document.getElementById('multiStreamTab');
-                    if (multiStreamTab) {
-                        multiStreamTab.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }, 100);
+                // For Multi-Stream, scroll to top immediately to show it at the top
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            } else {
+                // For other tabs, scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         };
 
