@@ -494,7 +494,7 @@
                         </button>
                     </nav>
                 </div>
-            </div>
+        </div>
             
             <!-- Main Content Area -->
             <div class="flex-1 ml-64 p-6">
@@ -703,7 +703,7 @@
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
-                            </div>
+                    </div>
                             <div class="ml-4">
                                 <h3 class="text-lg font-semibold text-white">Account Status</h3>
                                 <p id="accountStatusText" class="text-sm text-gray-400">Not signed in</p>
@@ -720,8 +720,8 @@
                                 Sign In
                             </button>
                         </div>
-                    </div>
-                    
+                </div>
+
                     <!-- Quick Stats Card -->
                     <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-2xl shadow-black/30 border border-gray-700/50">
                         <h3 class="text-lg font-semibold text-white mb-4">Your Stats</h3>
@@ -735,8 +735,8 @@
                                 <span id="accountCreated" class="text-blue-400 font-medium">-</span>
                             </div>
                         </div>
-                    </div>
-                    
+                </div>
+
                     <!-- Preferences Card -->
                     <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-2xl shadow-black/30 border border-gray-700/50">
                         <h3 class="text-lg font-semibold text-white mb-4">Preferences</h3>
@@ -756,7 +756,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg shadow-2xl shadow-black/30 border border-gray-700/50 mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-gray-300">Favorite Streamers</h3>
@@ -766,21 +766,21 @@
                             </svg>
                             Refresh Status
                         </button>
-                    </div>
-                    
+                </div>
+
                     <div id="favoritesLoading" class="text-center py-8" style="display: none;">
                         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
                         <p class="text-gray-400 mt-2">Loading favorites...</p>
-                    </div>
-                    
+                </div>
+
                     <div id="favoritesError" class="text-center py-8 text-red-400" style="display: none;">
                         <p>Please sign in to view your favorite streamers.</p>
                         <div class="mt-4">
                             <button onclick="showAuthModal()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200">
                                 Sign In
                             </button>
-                        </div>
                     </div>
+                </div>
                     
                     <div id="favoritesEmpty" class="text-center py-8 text-gray-400" style="display: none;">
                         <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -791,14 +791,14 @@
                         <button onclick="showTab('leaderboardTab')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors duration-200">
                             Browse Leaderboard
                         </button>
-                    </div>
-                    
+        </div>
+
                     <div id="favoritesList" class="space-y-4">
                         <!-- Favorites will be populated here -->
                     </div>
                 </div>
             </section>
-        </div>
+    </div>
         
         </div> <!-- End Main Content Area -->
         </div> <!-- End Main Layout -->
@@ -838,7 +838,7 @@
             </form>
         </div>
     </div>
-
+    
     <!-- Multi-Stream Viewer Modal -->
     <div id="multiStreamModal" class="modal multistream-modal">
         <div class="modal-content" style="max-width: 95vw; width: 1400px; max-height: 90vh; overflow-y: auto;">
@@ -910,7 +910,7 @@
                             </svg>
                         </button>
                         <!-- Layout presets -->
-                        <div class="hidden md:flex items-center gap-1 ml-2">
+                <div class="hidden md:flex items-center gap-1 ml-2">
                             <span class="text-gray-400 text-xs mr-1">Layout:</span>
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('grid')">Grid</button>
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('row')">Row</button>
@@ -919,7 +919,10 @@
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
                             <button id="aspectToggleBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleAspectLock()">Lock 16:9</button>
                             <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="equalizeSplit()">Equal</button>
-                        </div>
+                    </div>
+                <div class="ml-auto">
+                    <button id="msLoadBtn" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg transition-colors" onclick="loadMultiStreams()">Load</button>
+                </div>
                     </div>
                 </div>
             </div>
@@ -965,7 +968,7 @@
     <script>
         // Cache-busting: Force reload of updated JavaScript
         console.log('Frontend loaded at:', new Date().toISOString());
-        console.log('Version: Updated with debug logs and data fixes');
+        console.log('Version: perf-fixes bump – edge flags + multistream auto-load (trigger)');
         // Soft beta gate to buy time for first load
         (function showBetaNoticeOnce(){
             try {
@@ -1368,7 +1371,7 @@
         const showTab = (tabId) => {
             try {
                 // Hide all tab content
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
                 const tabElement = document.getElementById(tabId);
                 if (tabElement) {
                     tabElement.classList.add('active');
@@ -1376,7 +1379,7 @@
                 
                 // Update navigation active states
                 document.querySelectorAll('.nav-item').forEach(button => button.classList.remove('active'));
-                document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
                 
                 // Set active state for nav-item
                 const navElement = document.querySelector(`.nav-item[onclick="showTab('${tabId}')"]`);
@@ -2519,7 +2522,7 @@
                             if (predatorJson?.success && predatorJson.data) {
                                 predatorData = predatorJson.data;
                                 console.log('Extracted predator data:', predatorData);
-                            } else {
+                                } else {
                                 console.warn('Predator API returned success=false or no data:', predatorJson);
                             }
                         } catch (e) {
@@ -2590,6 +2593,23 @@
                         } catch (e) {
                             console.warn('applyFeatureFlags failed', e);
                         }
+                    })();
+
+                    // Dev flags panel (enable with ?dev=1)
+                    (function addDevFlagsPanel(){
+                        try {
+                            const urlHasDev = new URLSearchParams(location.search).has('dev');
+                            if (!urlHasDev) return;
+                            const btn = document.createElement('button');
+                            btn.textContent = 'Flags';
+                            btn.style.cssText = 'position:fixed;bottom:16px;left:16px;z-index:9999;background:#374151;color:#fff;padding:6px 10px;border-radius:8px;border:1px solid #4b5563;opacity:.8';
+                            const panel = document.createElement('pre');
+                            panel.style.cssText = 'position:fixed;bottom:56px;left:16px;z-index:9999;background:#111827;color:#e5e7eb;padding:12px;border:1px solid #374151;border-radius:8px;min-width:320px;max-width:60vw;max-height:40vh;overflow:auto;display:none;box-shadow:0 10px 30px rgba(0,0,0,.5)';
+                            panel.textContent = JSON.stringify(flags, null, 2);
+                            btn.onclick = () => { panel.style.display = panel.style.display === 'none' ? 'block' : 'none'; };
+                            document.body.appendChild(btn);
+                            document.body.appendChild(panel);
+                        } catch {}
                     })();
                 } catch (err) {
                     console.warn('Failed to fetch edge-config flags:', err);
@@ -3835,19 +3855,10 @@
             
             // Only show players who are actually live on Twitch (not just in-game status)
             const liveStreamers = allPlayers.filter(player => {
-                // Must have all these conditions to be considered truly live
+                // Relaxed resolver parity with /stream
                 const twitchLive = player.twitch_live?.is_live === true;
-                const hasStreamData = player.stream !== null && player.stream !== undefined;
-                const hasViewers = player.stream?.viewers !== undefined && player.stream?.viewers >= 0;
-                const hasTwitchUser = player.stream?.twitchUser && player.stream.twitchUser.length > 0;
-                const statusIsLive = player.status === "Live";
-                
-                // Debug logging for problematic entries
-                if (!twitchLive || !hasStreamData || !hasViewers || !hasTwitchUser || !statusIsLive) {
-                    console.log(`Filtering out ${player.player_name || player.name}: twitchLive=${twitchLive}, hasStreamData=${hasStreamData}, hasViewers=${hasViewers}, hasTwitchUser=${hasTwitchUser}, statusIsLive=${statusIsLive}`);
-                }
-                
-                return twitchLive && hasStreamData && hasViewers && hasTwitchUser && statusIsLive;
+                const hasUser = !!(player.stream?.twitchUser || player.canonical_twitch_username || player.twitch_link);
+                return twitchLive && hasUser;
             });
             
             console.log('Live streamers found:', liveStreamers.length);
@@ -3869,18 +3880,30 @@
                 
                 // Add only live streamers dynamically - NO HARDCODED ENTRIES
                 liveStreamers.forEach(player => {
-                    const twitchUsername = player.stream?.twitchUser || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
+                    const twitchUsername = player.stream?.twitchUser || player.canonical_twitch_username || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
                     const viewerCount = player.stream?.viewers || 0;
                     
                     if (twitchUsername) {
                         const option = document.createElement('option');
                         option.value = twitchUsername;
-                        option.textContent = `${player.name || player.player_name} (${viewerCount.toLocaleString()} viewers)`;
+                        option.textContent = `${player.name || player.player_name || twitchUsername} (${viewerCount.toLocaleString()} viewers)`;
                         option.dataset.playerName = player.name || player.player_name;
                         option.dataset.twitchLink = player.twitch_link || `https://www.twitch.tv/${twitchUsername}`;
                         dropdown.appendChild(option);
                     }
                 });
+
+                // Auto-load on selection change and persist
+                dropdown.onchange = () => {
+                    try {
+                        const payload = { s1: document.getElementById('streamer1').value || '', s2: document.getElementById('streamer2').value || '', s3: document.getElementById('streamer3').value || '' };
+                        localStorage.setItem(MS_STORAGE_KEY, JSON.stringify(payload));
+                        const hash = encodeURIComponent([payload.s1, payload.s2, payload.s3].join(','));
+                        if (hash) location.hash = `ms=${hash}`; else if (location.hash.includes('ms=')) location.hash = '';
+                    } catch {}
+                    // Auto-load when any selection changes
+                    loadMultiStreams();
+                };
             });
         };
         
@@ -4170,7 +4193,7 @@ ${(() => {
             });
             
             container.appendChild(gridContainer);
-
+            
             // Apply default multistream layout from edge flags
             try {
                 const flags = window.__edgeFlags || {};
@@ -4305,9 +4328,24 @@ ${(() => {
 
         function restoreMultiSelection(){
             try {
-                const raw = localStorage.getItem(MS_STORAGE_KEY);
-                if (!raw) return;
-                const {s1='',s2='',s3=''} = JSON.parse(raw);
+                // Prefer URL hash first: #ms=s1,s2,s3
+                let s1='', s2='', s3='';
+                try {
+                    if (location.hash.includes('ms=')) {
+                        const ms = decodeURIComponent(location.hash.split('ms=')[1] || '');
+                        const parts = ms.split(',');
+                        s1 = (parts[0] || '').trim();
+                        s2 = (parts[1] || '').trim();
+                        s3 = (parts[2] || '').trim();
+                    }
+                } catch {}
+                if (!s1 && !s2 && !s3) {
+                    const raw = localStorage.getItem(MS_STORAGE_KEY);
+                    if (raw) {
+                        const obj = JSON.parse(raw);
+                        s1 = obj.s1 || ''; s2 = obj.s2 || ''; s3 = obj.s3 || '';
+                    }
+                }
                 const d1 = document.getElementById('streamer1');
                 const d2 = document.getElementById('streamer2');
                 const d3 = document.getElementById('streamer3');
@@ -4716,14 +4754,14 @@ ${(() => {
                 const clipCreateButton = '';
 
                 // Try Twitch API clips first regardless; fall back to rewind if none
-                console.log('Fetching Twitch API clips...');
-                const response = await fetch(`/api/stream-clips/${streamer}`);
-                const data = await response.json();
+                    console.log('Fetching Twitch API clips...');
+                    const response = await fetch(`/api/stream-clips/${streamer}`);
+                    const data = await response.json();
 
                 if (data.success && data.data.recent_clips && data.data.recent_clips.length > 0) {
-                    displayTwitchClips(index, data.data.recent_clips, clipCreateButton);
-                    clipsContainer.dataset.loaded = 'true';
-                    return;
+                        displayTwitchClips(index, data.data.recent_clips, clipCreateButton);
+                        clipsContainer.dataset.loaded = 'true';
+                        return;
                 }
 
                 // Fallback to rewind/HLS clipping
@@ -4748,6 +4786,10 @@ ${(() => {
         // Display Twitch API clips
         const displayTwitchClips = (index, clips, clipCreateButton = '') => {
             const clipsContainer = document.getElementById(`clips-container-${index}`);
+            try {
+                const maxClips = (window.__edgeFlags && window.__edgeFlags.max_recent_clips) ? parseInt(window.__edgeFlags.max_recent_clips, 10) : 4;
+                if (Array.isArray(clips)) clips = clips.slice(0, Math.max(1, maxClips));
+            } catch {}
             
             clipsContainer.innerHTML = `
                 ${clipCreateButton}
