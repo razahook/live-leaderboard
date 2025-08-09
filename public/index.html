@@ -3862,22 +3862,29 @@
             console.log('[MultiStream] === POPULATING STREAMER DROPDOWNS ===');
             console.log('[MultiStream] Total players available:', allPlayers.length);
             
-            // Only show players who are actually live on Twitch (not just in-game status)
+            // Include players who are live on Twitch or have streaming capability
             const liveStreamers = allPlayers.filter(player => {
-                // Must have all these conditions to be considered truly live
                 const twitchLive = player.twitch_live?.is_live === true;
+                const statusLive = String(player.status || '').toLowerCase().includes('live');
+                const statusInMatch = String(player.status || '').toLowerCase().includes('match');
                 const hasStreamData = player.stream !== null && player.stream !== undefined;
-                const hasViewers = player.stream?.viewers !== undefined && player.stream?.viewers >= 0;
                 const hasTwitchUser = player.stream?.twitchUser && player.stream.twitchUser.length > 0;
-                const statusIsLive = player.status === "Live";
+                const hasTwitchLink = player.twitch_link && player.twitch_link.includes('twitch.tv');
                 
-                // Debug logging for problematic entries
-                if (!twitchLive || !hasStreamData || !hasViewers || !hasTwitchUser || !statusIsLive) {
-                    console.log(`Filtering out ${player.player_name || player.name}: twitchLive=${twitchLive}, hasStreamData=${hasStreamData}, hasViewers=${hasViewers}, hasTwitchUser=${hasTwitchUser}, statusIsLive=${statusIsLive}`);
+                // Include if:
+                // 1. Actually live on Twitch, OR
+                // 2. Status shows live/in-match AND has stream data, OR  
+                // 3. Has Twitch link (even if not currently live)
+                const isEligible = twitchLive || 
+                                 (statusLive && hasStreamData) || 
+                                 (statusInMatch && hasStreamData) ||
+                                 (hasTwitchLink && (hasTwitchUser || hasStreamData));
+                
+                if (isEligible) {
+                    console.log(`Including ${player.name || player.player_name}: live=${twitchLive}, status=${player.status}, hasStream=${hasStreamData}, twitchUser=${hasTwitchUser}`);
                 }
                 
-                // Be more inclusive - don't require all conditions
-                return (twitchLive || statusIsLive) && hasStreamData && hasTwitchUser;
+                return isEligible;
             });
             
             console.log('[MultiStream] Live streamers found:', liveStreamers.length);
@@ -3909,17 +3916,31 @@
                 dropdown.innerHTML = '';
                 dropdown.appendChild(placeholder);
                 
-                // Add only live streamers dynamically - NO HARDCODED ENTRIES
+                // Add streamers with real data from API - NO HARDCODED ENTRIES
                 liveStreamers.forEach(player => {
                     const twitchUsername = player.stream?.twitchUser || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
-                    const viewerCount = player.stream?.viewers || 0;
+                    const viewerCount = player.stream?.viewers;
+                    const isLive = player.twitch_live?.is_live === true || String(player.status || '').toLowerCase().includes('live');
                     
                     if (twitchUsername) {
                         const option = document.createElement('option');
                         option.value = twitchUsername;
-                        option.textContent = `${player.name || player.player_name} (${viewerCount.toLocaleString()} viewers)`;
+                        
+                        // Show live status and viewer count when available
+                        let displayText = player.name || player.player_name;
+                        if (isLive && viewerCount !== undefined && viewerCount > 0) {
+                            displayText += ` (${viewerCount.toLocaleString()} viewers) 🔴 LIVE`;
+                        } else if (isLive) {
+                            displayText += ` 🔴 LIVE`;
+                        } else {
+                            displayText += ` (Has Twitch)`;
+                        }
+                        
+                        option.textContent = displayText;
                         option.dataset.playerName = player.name || player.player_name;
                         option.dataset.twitchLink = player.twitch_link || `https://www.twitch.tv/${twitchUsername}`;
+                        option.dataset.isLive = isLive.toString();
+                        option.dataset.viewers = viewerCount?.toString() || '0';
                         dropdown.appendChild(option);
                     }
                 });
