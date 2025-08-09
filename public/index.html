@@ -4120,7 +4120,8 @@ ${(() => {
                 // Set initial width based on number of streams to reduce dead space
                 const count = streamers.length;
                 const basis = count === 1 ? '100%' : (count === 2 ? '49%' : '32%');
-                streamDiv.style.flex = `0 1 ${basis}`;
+                // Do not allow flex to override explicit width we set on resize
+                streamDiv.style.flex = `0 0 ${basis}`; // no grow/shrink, basis percent
                 streamDiv.style.height = '520px';
                 gridContainer.appendChild(streamDiv);
                 makePanelResizable(streamDiv, index);
@@ -4128,7 +4129,7 @@ ${(() => {
             
             container.appendChild(gridContainer);
             
-            // Load all streams with delays to avoid conflicts
+            // Load all streams with delays to avoid conflicts and set initial basis once
             streamers.forEach((streamer, index) => {
                 setTimeout(() => {
                     console.log(`Loading stream ${index + 1}: ${streamer} (Twitch username)`);
@@ -4229,12 +4230,16 @@ ${(() => {
                 startW = rect.width;
                 startH = rect.height;
                 document.body.style.userSelect = 'none';
+                // Lock flex-basis so width changes take effect
+                panel.style.flex = `0 0 ${rect.width}px`;
             });
             window.addEventListener('mousemove', (e) => {
                 if (!isResizing) return;
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
-                panel.style.width = Math.max(260, startW + dx) + 'px';
+                const newW = Math.max(300, startW + dx);
+                panel.style.width = newW + 'px';
+                panel.style.flexBasis = newW + 'px';
                 panel.style.height = Math.max(180, startH + dy) + 'px';
                 // Force Twitch iframe to fill the new size
                 const embedHost = panel.querySelector(`#stream-${index}`) || panel.querySelector('iframe');
