@@ -3886,7 +3886,11 @@
             console.log('[MultiStream] === POPULATING STREAMER DROPDOWNS ===');
             console.log('[MultiStream] Total players available:', allPlayers ? allPlayers.length : 'undefined');
             console.log('[MultiStream] AllPlayers type:', typeof allPlayers);
-            console.log('[MultiStream] AllPlayers value:', allPlayers);
+            console.log('[MultiStream] dataLoaded flag:', dataLoaded);
+            
+            // Add stack trace to see who called this function
+            console.log('[MultiStream] Function called from:');
+            console.trace();
             
             // Debug: Show sample of all players to understand data structure
             console.log('[MultiStream] Sample players:', allPlayers.slice(0, 3).map(p => ({
@@ -3908,6 +3912,10 @@
                 const hasTwitchLink = player.twitch_link && player.twitch_link.includes('twitch.tv');
                 const hasClips = player.hasClips === true;
                 
+                // NEW: Check for ANY Twitch-related data at all
+                const hasTwitchData = player.twitch_live !== null && player.twitch_live !== undefined;
+                const hasAnyTwitchProperty = player.twitch_link || player.twitch_live || player.stream;
+                
                 // Debug each player's eligibility
                 const conditions = {
                     twitchLive,
@@ -3916,20 +3924,33 @@
                     hasStreamData,
                     hasTwitchUser,
                     hasTwitchLink,
-                    hasClips
+                    hasClips,
+                    hasTwitchData,
+                    hasAnyTwitchProperty
                 };
                 
-                // Be more inclusive - include anyone with Twitch presence
+                // Be VERY inclusive - include anyone with ANY Twitch presence
                 const isEligible = twitchLive || 
                                  statusLive || 
                                  statusInMatch ||
                                  hasStreamData ||
                                  hasTwitchUser ||
                                  hasTwitchLink ||
-                                 hasClips;
+                                 hasClips ||
+                                 hasTwitchData ||
+                                 hasAnyTwitchProperty;
                 
                 if (isEligible) {
                     console.log(`✅ Including ${player.name || player.player_name}:`, conditions);
+                } else {
+                    // Debug first 5 non-eligible players to understand data structure
+                    const nonEligibleCount = allPlayers.filter(p => !p.twitch_live && !p.twitch_link && !p.stream).length;
+                    if (nonEligibleCount < 5) {
+                        console.log(`❌ Excluding ${player.name || player.player_name}:`, {
+                            player: player,
+                            conditions
+                        });
+                    }
                 }
                 
                 return isEligible;
