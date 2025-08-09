@@ -127,7 +127,7 @@
         // Global variables
         let allPlayers = [];
         let splitInstance = null;
-        const NGROK_BASE_URL = 'https://live-leaderboard-git-performance-fixes-razahooks-projects.vercel.app';
+        const API_BASE_URL = window.location.origin;
 
         // Load player data on page load
         document.addEventListener('DOMContentLoaded', async () => {
@@ -152,12 +152,16 @@
         // Load player data from API
         async function loadPlayerData() {
             try {
-                const response = await fetch(`${NGROK_BASE_URL}/api/leaderboard-data`, {
-                    headers: { 'ngrok-skip-browser-warning': 'true' }
-                });
+                const response = await fetch(`${API_BASE_URL}/api/leaderboard/PC`);
                 const data = await response.json();
-                allPlayers = data.players || [];
-                console.log('[Stream] Loaded players:', allPlayers.length);
+                
+                if (data.success && data.data) {
+                    allPlayers = data.data || [];
+                    console.log('[Stream] Loaded players:', allPlayers.length);
+                } else {
+                    console.error('[Stream] API returned error:', data);
+                    allPlayers = [];
+                }
             } catch (error) {
                 console.error('[Stream] Error loading player data:', error);
                 allPlayers = [];
@@ -167,8 +171,9 @@
         // Populate streamer dropdowns
         function populateDropdowns() {
             console.log('[Stream] Populating dropdowns...');
+            console.log('[Stream] Total players:', allPlayers.length);
             
-            // Filter for live streamers
+            // Filter for live streamers using same logic as main page
             const liveStreamers = allPlayers.filter(player => {
                 const twitchLive = player.twitch_live?.is_live === true;
                 const hasStreamData = player.stream !== null && player.stream !== undefined;
@@ -179,6 +184,16 @@
             });
 
             console.log('[Stream] Live streamers found:', liveStreamers.length);
+            
+            if (liveStreamers.length === 0) {
+                console.warn('[Stream] No live streamers found! Sample data:');
+                console.log('[Stream] First 3 players:', allPlayers.slice(0, 3).map(p => ({
+                    name: p.name || p.player_name,
+                    status: p.status,
+                    twitch_live: p.twitch_live,
+                    stream: p.stream
+                })));
+            }
 
             const dropdowns = ['streamer1', 'streamer2', 'streamer3'];
             dropdowns.forEach(dropdownId => {
