@@ -19,6 +19,8 @@
     <!-- CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://embed.twitch.tv/embed/v1.js"></script>
+    <!-- Split.js for best-in-class resizable panes -->
+    <script src="https://unpkg.com/split.js/dist/split.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -3883,7 +3885,7 @@
             
             // Create flex layout with resizable panels (reduces dead space)
             const gridContainer = document.createElement('div');
-            gridContainer.className = 'flex flex-row flex-wrap gap-4 items-stretch';
+            gridContainer.className = 'flex flex-row gap-2 items-stretch';
             gridContainer.id = 'multistream-grid';
             
             streamers.forEach((streamer, index) => {
@@ -4155,6 +4157,27 @@ ${(() => {
                     loadStreamEmbed(index, streamer);
                 }, index * 500); // Reduced delay to 500ms
             });
+
+            // Initialize Split.js gutters after DOM paints
+            requestAnimationFrame(() => {
+                const ids = streamers.map((_, i) => `#pane-${i}`);
+                const panes = Array.from(gridContainer.children);
+                panes.forEach((p, i) => p.id = `pane-${i}`);
+                if (window.Split && panes.length > 1) {
+                    try {
+                        const sizes = getSavedPaneSizes(panes.length) || panes.map(() => 100 / panes.length);
+                        const split = Split(ids, {
+                            sizes,
+                            minSize: 200,
+                            gutterSize: 6,
+                            snapOffset: 12,
+                            onDrag: () => ensureHostsFill(),
+                            onDragEnd: (newSizes) => savePaneSizes(newSizes)
+                        });
+                        window.__msSplit = split;
+                    } catch (e) { console.warn('Split.js init failed:', e); }
+                }
+            });
         };
 
         // Layout presets
@@ -4175,6 +4198,11 @@ ${(() => {
                     host.style.width = '100%'; host.style.height = '100%'; 
                 }
             };
+            // Destroy split if exists to re-layout cleanly
+            if (window.__msSplit && window.__msSplit.destroy) {
+                try { window.__msSplit.destroy(); } catch {}
+                window.__msSplit = null;
+            }
             if (mode === 'grid') {
                 const basis = n === 1 ? '100%' : (n === 2 ? '49%' : '32%');
                 panels.forEach(p => set(p, basis));
@@ -4187,10 +4215,49 @@ ${(() => {
                     else set(p, '32%');
                 });
             }
+            // Recreate split gutters after layout
+            requestAnimationFrame(() => {
+                const panes = Array.from(grid.children);
+                const ids = panes.map((_, i) => `#pane-${i}`);
+                panes.forEach((p, i) => p.id = `pane-${i}`);
+                if (window.Split && panes.length > 1) {
+                    try {
+                        const sizes = getSavedPaneSizes(panes.length) || panes.map(() => 100 / panes.length);
+                        window.__msSplit = Split(ids, {
+                            sizes,
+                            minSize: 200,
+                            gutterSize: 6,
+                            snapOffset: 12,
+                            onDrag: () => ensureHostsFill(),
+                            onDragEnd: (newSizes) => savePaneSizes(newSizes)
+                        });
+                    } catch (e) { console.warn('Split.js reinit failed:', e); }
+                }
+            });
         }
 
         function equalizeSplit(){
             setMultiLayout('grid');
+        }
+
+        // Helpers for Split.js
+        function getSavedPaneSizes(count) {
+            try {
+                const raw = localStorage.getItem('ms_pane_sizes');
+                if (!raw) return null;
+                const arr = JSON.parse(raw);
+                if (Array.isArray(arr) && arr.length === count) return arr;
+            } catch {}
+            return null;
+        }
+        function savePaneSizes(sizes) {
+            try { localStorage.setItem('ms_pane_sizes', JSON.stringify(sizes)); } catch {}
+        }
+        function ensureHostsFill() {
+            document.querySelectorAll('[id^="stream-"]').forEach(host => {
+                host.style.position = 'absolute'; host.style.inset = '0';
+                host.style.width = '100%'; host.style.height = '100%';
+            });
         }
 
         // Aspect ratio lock to reduce black bars during manual resize
