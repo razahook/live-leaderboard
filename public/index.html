@@ -3862,6 +3862,16 @@
             console.log('[MultiStream] === POPULATING STREAMER DROPDOWNS ===');
             console.log('[MultiStream] Total players available:', allPlayers.length);
             
+            // Debug: Show sample of all players to understand data structure
+            console.log('[MultiStream] Sample players:', allPlayers.slice(0, 3).map(p => ({
+                name: p.name || p.player_name,
+                status: p.status,
+                twitch_live: p.twitch_live,
+                stream: p.stream,
+                twitch_link: p.twitch_link,
+                hasClips: p.hasClips
+            })));
+            
             // Include players who are live on Twitch or have streaming capability
             const liveStreamers = allPlayers.filter(player => {
                 const twitchLive = player.twitch_live?.is_live === true;
@@ -3870,18 +3880,30 @@
                 const hasStreamData = player.stream !== null && player.stream !== undefined;
                 const hasTwitchUser = player.stream?.twitchUser && player.stream.twitchUser.length > 0;
                 const hasTwitchLink = player.twitch_link && player.twitch_link.includes('twitch.tv');
+                const hasClips = player.hasClips === true;
                 
-                // Include if:
-                // 1. Actually live on Twitch, OR
-                // 2. Status shows live/in-match AND has stream data, OR  
-                // 3. Has Twitch link (even if not currently live)
+                // Debug each player's eligibility
+                const conditions = {
+                    twitchLive,
+                    statusLive,
+                    statusInMatch,
+                    hasStreamData,
+                    hasTwitchUser,
+                    hasTwitchLink,
+                    hasClips
+                };
+                
+                // Be more inclusive - include anyone with Twitch presence
                 const isEligible = twitchLive || 
-                                 (statusLive && hasStreamData) || 
-                                 (statusInMatch && hasStreamData) ||
-                                 (hasTwitchLink && (hasTwitchUser || hasStreamData));
+                                 statusLive || 
+                                 statusInMatch ||
+                                 hasStreamData ||
+                                 hasTwitchUser ||
+                                 hasTwitchLink ||
+                                 hasClips;
                 
                 if (isEligible) {
-                    console.log(`Including ${player.name || player.player_name}: live=${twitchLive}, status=${player.status}, hasStream=${hasStreamData}, twitchUser=${hasTwitchUser}`);
+                    console.log(`✅ Including ${player.name || player.player_name}:`, conditions);
                 }
                 
                 return isEligible;
@@ -3918,11 +3940,26 @@
                 
                 // Add streamers with real data from API - NO HARDCODED ENTRIES
                 liveStreamers.forEach(player => {
-                    const twitchUsername = player.stream?.twitchUser || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
+                    // Try multiple ways to get Twitch username
+                    let twitchUsername = player.stream?.twitchUser || 
+                                       player.stream?.twitch_username ||
+                                       (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
+                    
+                    // If no username found but has Twitch link, extract from link
+                    if (!twitchUsername && player.twitch_link) {
+                        twitchUsername = extractUsernameFromLink(player.twitch_link);
+                    }
+                    
+                    // If still no username, try using player name (common for streamers)
+                    if (!twitchUsername && (player.hasClips || player.stream)) {
+                        // Use player name as potential Twitch username (cleaned)
+                        twitchUsername = (player.name || player.player_name || '').toLowerCase().replace(/[^a-z0-9_]/g, '');
+                    }
+                    
                     const viewerCount = player.stream?.viewers;
                     const isLive = player.twitch_live?.is_live === true || String(player.status || '').toLowerCase().includes('live');
                     
-                    if (twitchUsername) {
+                    if (twitchUsername && twitchUsername.length > 2) {
                         const option = document.createElement('option');
                         option.value = twitchUsername;
                         
@@ -3932,6 +3969,8 @@
                             displayText += ` (${viewerCount.toLocaleString()} viewers) 🔴 LIVE`;
                         } else if (isLive) {
                             displayText += ` 🔴 LIVE`;
+                        } else if (player.hasClips) {
+                            displayText += ` (Has Clips)`;
                         } else {
                             displayText += ` (Has Twitch)`;
                         }
@@ -3941,7 +3980,12 @@
                         option.dataset.twitchLink = player.twitch_link || `https://www.twitch.tv/${twitchUsername}`;
                         option.dataset.isLive = isLive.toString();
                         option.dataset.viewers = viewerCount?.toString() || '0';
+                        option.dataset.hasClips = (player.hasClips === true).toString();
                         dropdown.appendChild(option);
+                        
+                        console.log(`➕ Added to dropdown: ${displayText} (username: ${twitchUsername})`);
+                    } else {
+                        console.log(`❌ Skipping ${player.name || player.player_name}: no valid Twitch username`);
                     }
                 });
             });
