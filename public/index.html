@@ -3840,6 +3840,10 @@
             multiStreamModal.classList.add('show');
             populateStreamerDropdowns();
             restoreMultiSelection();
+            // Auto-load after restoring selection so the panel appears immediately
+            setTimeout(() => {
+                try { loadMultiStreams(); } catch {}
+            }, 150);
         };
         
         const hideMultiStreamModal = () => {
