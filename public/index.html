@@ -965,6 +965,13 @@
         // Cache-busting: Force reload of updated JavaScript
         console.log('Frontend loaded at:', new Date().toISOString());
         console.log('Version: Updated with debug logs and data fixes');
+        // Edge flags default
+        window.__edgeFlags = window.__edgeFlags || {
+            enable_medal: false,
+            max_recent_clips: 4,
+            multistream_default_layout: 'equal',
+            feature_flags: { multistreamDock: true, streamPage: false }
+        };
         // Soft beta gate to buy time for first load
         (function showBetaNoticeOnce(){
             try {
@@ -2554,17 +2561,28 @@
                 
                 // Fetch environment variables first (for Supabase)
                 try {
-                    const envResponse = await fetch(`/api/public-env`);
-                    const envData = await envResponse.json();
-                    if (envData?.success && envData.data) {
-                        window.env = envData.data;
-                        window.__supabaseConfig = { 
-                            url: envData.data.NEXT_PUBLIC_SUPABASE_URL, 
-                            anon: envData.data.NEXT_PUBLIC_SUPABASE_ANON_KEY 
-                        };
-                    }
+                    const [envRes, flagsRes] = await Promise.all([
+                        fetch(`/api/public-env`),
+                        fetch(`/api/edge-config/public`)
+                    ]);
+                    try {
+                        const envData = await envRes.json();
+                        if (envData?.success && envData.data) {
+                            window.env = envData.data;
+                            window.__supabaseConfig = { 
+                                url: envData.data.NEXT_PUBLIC_SUPABASE_URL, 
+                                anon: envData.data.NEXT_PUBLIC_SUPABASE_ANON_KEY 
+                            };
+                        }
+                    } catch {}
+                    try {
+                        const flags = await flagsRes.json();
+                        if (flags?.success && flags.data) {
+                            window.__edgeFlags = Object.assign(window.__edgeFlags || {}, flags.data);
+                        }
+                    } catch {}
                 } catch (err) { 
-                    console.warn('Failed to fetch env vars:', err);
+                    console.warn('Failed to fetch env/flags:', err);
                 }
 
                 // Load all critical data in parallel
@@ -3803,6 +3821,13 @@
                     console.log('[MultiStream] Auto-loading streams...');
                     loadMultiStreams();
                 }
+                // Apply default layout from edge flags
+                try {
+                    const defLayout = (window.__edgeFlags?.multistream_default_layout || 'equal').toLowerCase();
+                    if (defLayout === 'row') setMultiLayout('row');
+                    else if (['focus1','focus2','focus3'].includes(defLayout)) setMultiLayout(defLayout);
+                    else setMultiLayout('grid');
+                } catch {}
             }, 100); // Small delay to ensure DOM is ready
         };
         
