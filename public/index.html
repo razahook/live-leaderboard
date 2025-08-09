@@ -3814,6 +3814,7 @@
         const MS_STORAGE_KEY = 'multistream_selection_v1';
         // Open dock: populate controls and auto-load
         const openMultiStreamDock = () => {
+            console.log('[DEBUG] 🚀 openMultiStreamDock function called!');
             console.log('[MultiStream] Opening dock...');
             console.log('[MultiStream] AllPlayers available:', allPlayers ? allPlayers.length : 'undefined');
             console.log('[MultiStream] Window.allPlayers:', window.allPlayers ? window.allPlayers.length : 'undefined');
@@ -3901,6 +3902,7 @@
         };
         
         const populateStreamerDropdowns = () => {
+            console.log('[DEBUG] 🎯 populateStreamerDropdowns function called!');
             console.log('[MultiStream] === POPULATING STREAMER DROPDOWNS ===');
             console.log('[MultiStream] Total players available:', allPlayers ? allPlayers.length : 'undefined');
             console.log('[MultiStream] AllPlayers type:', typeof allPlayers);
@@ -5356,6 +5358,18 @@ ${(() => {
                 this.applyTheme();
                 
                 console.log('Enhanced features initialized successfully');
+                
+                // DEBUG: Test function to manually trigger Multi-Stream
+                window.debugMultiStream = () => {
+                    console.log('[DEBUG] 🧪 Manual Multi-Stream test triggered');
+                    console.log('[DEBUG] showTab function exists:', typeof window.showTab);
+                    console.log('[DEBUG] openMultiStreamDock function exists:', typeof openMultiStreamDock);
+                    console.log('[DEBUG] Calling showTab with multiStreamTab...');
+                    window.showTab('multiStreamTab');
+                };
+
+                // DEBUG: Log when this script finishes loading
+                console.log('[DEBUG] ✅ Multi-Stream debug setup complete. Run debugMultiStream() to test.');
             }
 
             async loadUserPreferences() {
@@ -6224,20 +6238,41 @@ ${(() => {
         });
 
         // Update the showTab function to refresh account data and favorites
+        console.log('[DEBUG] Setting up showTab override. Original showTab exists:', typeof showTab);
         const originalShowTab = showTab;
         window.showTab = (tabId) => {
-            originalShowTab(tabId);
+            console.log('[DEBUG] showTab called with:', tabId);
+            console.log('[DEBUG] originalShowTab type:', typeof originalShowTab);
+            
+            if (typeof originalShowTab === 'function') {
+                try {
+                    originalShowTab(tabId);
+                    console.log('[DEBUG] originalShowTab completed for:', tabId);
+                } catch (error) {
+                    console.error('[DEBUG] originalShowTab failed for:', tabId, error);
+                }
+            } else {
+                console.error('[DEBUG] originalShowTab is not a function:', originalShowTab);
+            }
             
             if (tabId === 'accountTab') {
+                console.log('[DEBUG] Handling accountTab');
                 updateAccountDisplay();
                 refreshFavorites();
                 // Scroll to top for account tab
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (tabId === 'multiStreamTab') {
-                openMultiStreamDock();
+                console.log('[DEBUG] Handling multiStreamTab - calling openMultiStreamDock');
+                try {
+                    openMultiStreamDock();
+                    console.log('[DEBUG] openMultiStreamDock completed');
+                } catch (error) {
+                    console.error('[DEBUG] openMultiStreamDock failed:', error);
+                }
                 // For Multi-Stream, scroll to top immediately to show it at the top
                 window.scrollTo({ top: 0, behavior: 'instant' });
             } else {
+                console.log('[DEBUG] Handling other tab:', tabId);
                 // For other tabs, scroll to top
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
