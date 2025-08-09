@@ -907,6 +907,15 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
                             </svg>
                         </button>
+                        <!-- Layout presets -->
+                        <div class="hidden md:flex items-center gap-1 ml-2">
+                            <span class="text-gray-400 text-xs mr-1">Layout:</span>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('grid')">Grid</button>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('row')">Row</button>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus1')">Focus 1</button>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus2')">Focus 2</button>
+                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4137,6 +4146,31 @@ ${(() => {
                 }, index * 500); // Reduced delay to 500ms
             });
         };
+
+        // Layout presets
+        function setMultiLayout(mode) {
+            const grid = document.getElementById('multistream-grid');
+            if (!grid) return;
+            const panels = Array.from(grid.getElementsByClassName('resize-container'));
+            const n = panels.length;
+            const set = (el, basis, height) => {
+                el.style.flex = `0 0 ${basis}`;
+                el.style.flexBasis = basis;
+                if (height) el.style.height = height;
+            };
+            if (mode === 'grid') {
+                const basis = n === 1 ? '100%' : (n === 2 ? '49%' : '32%');
+                panels.forEach(p => set(p, basis, '520px'));
+            } else if (mode === 'row') {
+                panels.forEach(p => set(p, `${Math.floor(100/n)}%`, '420px'));
+            } else if (mode.startsWith('focus')) {
+                const idx = parseInt(mode.replace('focus',''), 10) - 1;
+                panels.forEach((p,i) => {
+                    if (i === idx) set(p, '66%', '580px');
+                    else set(p, '32%', '420px');
+                });
+            }
+        }
         
 
         
