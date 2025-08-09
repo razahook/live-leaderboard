@@ -843,7 +843,10 @@
     <section id="multiStreamDock" class="mb-8">
         <!-- Control bar -->
         <div class="flex items-center justify-between mb-3">
-            <h2 class="text-xl font-bold text-white">Multi-Stream</h2>
+            <div class="flex items-center gap-3">
+                <h2 class="text-xl font-bold text-white">Multi-Stream</h2>
+                <button id="msCollapseBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleMultiStreamCollapse()">Collapse</button>
+            </div>
             <div class="text-gray-400 text-sm">Drag gutters to resize. Layout presets available.</div>
         </div>
 
@@ -927,6 +930,10 @@
         <div id="multiStreamContainer" class="min-h-[300px]">
                 <!-- Streams will be loaded here -->
             </div>
+        <div id="multiStreamExtras" class="mt-6 hidden">
+            <h3 class="text-lg font-semibold text-white mb-2">Stream Stats & Clips</h3>
+            <div id="msExtrasGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        </div>
     </section>
 
     <!-- AI Analysis Modal -->
@@ -4339,6 +4346,30 @@ ${(() => {
                 const newHeight = Math.ceil(maxHeight + 40);
                 container.style.minHeight = newHeight + 'px';
                 console.log('[MultiStream] Container height synced to', newHeight, 'px');
+            }
+        }
+
+        // Collapse/expand dock inline
+        function toggleMultiStreamCollapse(){
+            const dock = document.getElementById('multiStreamDock');
+            if (!dock) return;
+            const controls = dock.querySelector('.mb-4');
+            const container = document.getElementById('multiStreamContainer');
+            const extras = document.getElementById('multiStreamExtras');
+            const btn = document.getElementById('msCollapseBtn');
+            const collapsed = dock.getAttribute('data-collapsed') === '1';
+            if (collapsed) {
+                if (controls) controls.style.display = '';
+                if (container) container.style.display = '';
+                if (extras) extras.style.display = '';
+                dock.setAttribute('data-collapsed','0');
+                if (btn) btn.textContent = 'Collapse';
+            } else {
+                if (controls) controls.style.display = 'none';
+                if (container) container.style.display = 'none';
+                if (extras) extras.style.display = 'none';
+                dock.setAttribute('data-collapsed','1');
+                if (btn) btn.textContent = 'Expand';
             }
         }
 
