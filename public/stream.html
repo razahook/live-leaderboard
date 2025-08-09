@@ -472,7 +472,7 @@
                 try {
                     const m = String(player.twitch_link).match(/twitch\.tv\/(\w+)/i);
                     if (m && m[1]) return m[1].toLowerCase();
-                } catch {}
+                } catch (e) {}
             }
             return '';
         }
