@@ -900,33 +900,8 @@
                 </div>
                 
                 <!-- Stream Controls -->
-                <div class="flex justify-between items-center">
-                    <div class="flex space-x-2">
-                        <button id="globalMuteBtn" onclick="toggleGlobalMute()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.816L4.852 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.852l3.531-3.816a1 1 0 011.617.816zM14 5a1 1 0 011.707-.707 5.978 5.978 0 010 8.486A1 1 0 0114 12a4 4 0 000-5.657A1 1 0 0114 5z"></path>
-                            </svg>
-                        </button>
-                        <button id="fullscreenBtn" onclick="toggleMultiStreamFullscreen()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
-                            </svg>
-                        </button>
-                        <!-- Layout presets -->
-                <div class="hidden md:flex items-center gap-1 ml-2">
-                            <span class="text-gray-400 text-xs mr-1">Layout:</span>
-                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('grid')">Grid</button>
-                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('row')">Row</button>
-                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus1')">Focus 1</button>
-                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus2')">Focus 2</button>
-                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="setMultiLayout('focus3')">Focus 3</button>
-                            <button id="aspectToggleBtn" class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="toggleAspectLock()">Lock 16:9</button>
-                            <button class="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded" onclick="equalizeSplit()">Equal</button>
-                    </div>
-                <div class="ml-auto">
-                    <button id="msLoadBtn" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg transition-colors" onclick="loadMultiStreams()">Load</button>
-                </div>
-                    </div>
+                <div class="flex justify-center items-center">
+                    <button id="msLoadBtn" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors">Load Streams</button>
                 </div>
             </div>
             

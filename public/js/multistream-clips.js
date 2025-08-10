@@ -518,29 +518,45 @@ function injectClipControlsInModal(modalContent) {
         return;
     }
     
-    // Find the header section to insert after it
-    const header = modalContent.querySelector('h2');
-    if (!header) return;
+    // Find the streamer selection section
+    const streamerSection = modalContent.querySelector('.mb-6');
+    if (!streamerSection) return;
     
     const controls = document.createElement('div');
     controls.className = 'multistream-clip-controls';
-    controls.style.marginBottom = '20px';
+    controls.style.cssText = `
+        margin-bottom: 24px;
+        padding: 16px;
+        background: rgba(17, 24, 39, 0.8);
+        border-radius: 12px;
+        border: 1px solid rgba(75, 85, 99, 0.5);
+    `;
     controls.innerHTML = `
-        <button id="createClipBtn" class="clip-btn" onclick="createClipForCurrentStream()">
-            📹 Create Clip
-        </button>
-        
-        <button id="medalImportBtn" class="clip-btn medal-btn" onclick="openMedalImport()">
-            🏅 Import Medal.tv
-        </button>
-        
-        <button id="myClipsBtn" class="clip-btn" onclick="viewMyClips()">
-            📋 My Clips
-        </button>
+        <div style="text-align: center; margin-bottom: 12px;">
+            <h3 style="color: #f9fafb; font-size: 16px; font-weight: 600; margin: 0;">
+                🎬 Clip Management
+            </h3>
+            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0 0;">
+                Create and manage clips for your selected streamers
+            </p>
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <button id="createClipBtn" class="clip-btn" onclick="createClipForCurrentStream()">
+                📹 Create Clip
+            </button>
+            
+            <button id="medalImportBtn" class="clip-btn medal-btn" onclick="openMedalImport()">
+                🏅 Import Medal.tv
+            </button>
+            
+            <button id="myClipsBtn" class="clip-btn" onclick="viewMyClips()">
+                📋 My Clips
+            </button>
+        </div>
     `;
     
-    // Insert after the header
-    header.parentNode.insertBefore(controls, header.nextSibling);
+    // Insert before the streamer selection section
+    streamerSection.parentNode.insertBefore(controls, streamerSection);
 }
 
 // Export functions for global access
