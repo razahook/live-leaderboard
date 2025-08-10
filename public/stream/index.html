@@ -618,19 +618,26 @@
       // On Vercel, we need to use the actual domain, not the git branch subdomain
       let parent = location.hostname;
       
+      console.log('Original hostname:', parent);
+      console.log('Is Vercel preview?', parent.includes('vercel.app') && parent.includes('git-'));
+      
       // If we're on a Vercel preview deployment, use the main domain
       if (parent.includes('vercel.app') && parent.includes('git-')) {
         // Extract the main project name from the git branch URL
-        const match = parent.match(/live-leaderboard-git-[^-]+-([^.]+)\.vercel\.app/);
+        // Format: live-leaderboard-git-[branch]-[username]-[project].vercel.app
+        const match = parent.match(/live-leaderboard-git-[^-]+-[^-]+-([^.]+)\.vercel\.app/);
+        console.log('Regex match result:', match);
         if (match) {
           parent = `live-leaderboard-${match[1]}.vercel.app`;
+          console.log('Extracted main domain:', parent);
         } else {
           // Fallback to the main domain
           parent = 'live-leaderboard-razahooks-projects.vercel.app';
+          console.log('Using fallback domain:', parent);
         }
       }
       
-      console.log('Using parent domain for Twitch embed:', parent);
+      console.log('Final parent domain for Twitch embed:', parent);
       
       // Create a unique ID for this iframe
       const iframeId = `twitch-iframe-${channel}-${Date.now()}`;
