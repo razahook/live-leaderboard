@@ -2433,12 +2433,17 @@
 
         async function initializeApp() {
             try {
-                // No-op: AI Analysis fully removed and replaced by Multi-Stream column
+                // Show loading state immediately for better UX
+                const tableBody = document.querySelector('#leaderboardTable tbody');
+                if (tableBody && !tableBody.innerHTML.includes('Loading')) {
+                    tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-2"></div>Loading leaderboard...</td></tr>';
+                }
+                
                 // Load data as JavaScript files to bypass ad blockers
                 const loadData = async () => {
                     // Check localStorage cache first
                     const cacheKey = 'leaderboard_cache';
-                    const cacheExpiry = 60000; // 1 minute cache
+                    const cacheExpiry = 300000; // 5 minute cache for better performance
                     const cached = localStorage.getItem(cacheKey);
                     
                     if (cached) {
@@ -2447,7 +2452,7 @@
                             const age = Date.now() - timestamp;
                             
                             if (age < cacheExpiry) {
-                                console.log('Using cached leaderboard data, age:', Math.round(age/1000) + 's');
+                                // Using cached data for faster load
                                 // Use cached data immediately
                                 window.leaderboardData = data.leaderboardData;
                                 window.predatorThresholds = data.predatorData;
@@ -2463,7 +2468,7 @@
                                                 timestamp: Date.now()
                                             };
                                             localStorage.setItem(cacheKey, JSON.stringify(newCache));
-                                            console.log('Updated cache with fresh data');
+                                            // Cache updated silently
                                         }
                                     })
                                     .catch(e => console.warn('Background refresh failed:', e));
@@ -2493,15 +2498,10 @@
                     let predatorData = null;
                     if (predatorResponse.status === 'fulfilled') {
                         try {
-                            console.log('Predator response status:', predatorResponse.value.status);
                             const predatorJson = await predatorResponse.value.json();
-                            console.log('Raw predator JSON response:', predatorJson);
                             
                             if (predatorJson?.success && predatorJson.data) {
                                 predatorData = predatorJson.data;
-                                console.log('Extracted predator data:', predatorData);
-                                } else {
-                                console.warn('Predator API returned success=false or no data:', predatorJson);
                             }
                         } catch (e) {
                             console.error('Failed to parse predator JSON:', e);
@@ -2674,7 +2674,7 @@
                 
                 // Also try loading cached legends immediately
                 setTimeout(() => {
-                    console.log('Loading cached legends immediately...');
+                    // Load cached legends silently
                     loadCachedLegends();
                 }, 500);
                 
