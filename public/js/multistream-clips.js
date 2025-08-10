@@ -267,6 +267,23 @@ function getCurrentStreamFocus() {
         return focused.dataset.username || focused.dataset.streamer;
     }
     
+    // Check multistream dropdowns for selected streamers
+    const streamSelects = document.querySelectorAll('select[id^="streamSelect"]');
+    for (const select of streamSelects) {
+        if (select.value && select.value !== 'none') {
+            return select.value;
+        }
+    }
+    
+    // Try to get from any visible stream container with data attributes
+    const streamContainers = document.querySelectorAll('[data-streamer], [data-username]');
+    for (const container of streamContainers) {
+        const streamer = container.dataset.streamer || container.dataset.username;
+        if (streamer && streamer !== 'none') {
+            return streamer;
+        }
+    }
+    
     // Fallback: try to get from URL or other sources
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('streamer') || null;
@@ -440,9 +457,32 @@ function closeStreamerClipsModal() {
 // Initialize clip controls when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-inject clip controls if multistream container exists
-    const multistreamContainer = document.querySelector('.multistream-container, #multistream, .streams-container');
+    const multistreamContainer = document.querySelector('.multistream-container, #multistream, .streams-container, .multistream-modal');
     if (multistreamContainer) {
         injectClipControls(multistreamContainer);
+    }
+    
+    // Watch for multistream modal to open and inject controls
+    const multiStreamModal = document.getElementById('multiStreamModal');
+    if (multiStreamModal) {
+        // Use MutationObserver to detect when modal becomes visible
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const modal = mutation.target;
+                    if (modal.style.display !== 'none' && !modal.querySelector('.multistream-clip-controls')) {
+                        // Modal is now visible, inject controls
+                        setTimeout(() => {
+                            const modalContent = modal.querySelector('.modal-content');
+                            if (modalContent) {
+                                injectClipControlsInModal(modalContent);
+                            }
+                        }, 100);
+                    }
+                }
+            });
+        });
+        observer.observe(multiStreamModal, { attributes: true, attributeFilter: ['style'] });
     }
 });
 
@@ -470,6 +510,37 @@ function injectClipControls(container) {
     
     // Insert at the top of the container
     container.insertBefore(controls, container.firstChild);
+}
+
+function injectClipControlsInModal(modalContent) {
+    // Check if controls already exist
+    if (modalContent.querySelector('.multistream-clip-controls')) {
+        return;
+    }
+    
+    // Find the header section to insert after it
+    const header = modalContent.querySelector('h2');
+    if (!header) return;
+    
+    const controls = document.createElement('div');
+    controls.className = 'multistream-clip-controls';
+    controls.style.marginBottom = '20px';
+    controls.innerHTML = `
+        <button id="createClipBtn" class="clip-btn" onclick="createClipForCurrentStream()">
+            📹 Create Clip
+        </button>
+        
+        <button id="medalImportBtn" class="clip-btn medal-btn" onclick="openMedalImport()">
+            🏅 Import Medal.tv
+        </button>
+        
+        <button id="myClipsBtn" class="clip-btn" onclick="viewMyClips()">
+            📋 My Clips
+        </button>
+    `;
+    
+    // Insert after the header
+    header.parentNode.insertBefore(controls, header.nextSibling);
 }
 
 // Export functions for global access
