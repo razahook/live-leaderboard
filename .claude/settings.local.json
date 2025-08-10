@@ -30,7 +30,8 @@
       "mcp__vercel__list_teams",
       "mcp__vercel__list_projects",
       "mcp__vercel__list_deployments",
-      "mcp__chrome-stdio__chrome_fill_or_select"
+      "mcp__chrome-stdio__chrome_fill_or_select",
+      "mcp__serena__replace_regex"
     ],
     "deny": []
   }
