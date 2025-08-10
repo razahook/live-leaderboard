@@ -8,39 +8,62 @@
  * stay hidden even in a single-page application. This prevents duplicate controls from showing.
  */
 function hideSidebarClipButtons() {
+    const normalizeText = (value) => {
+        try {
+            return (value || '')
+                .toLowerCase()
+                .replace(/[\u{1F300}-\u{1FAFF}]/gu, '') // strip emojis
+                .replace(/[^a-z0-9\s\.]/g, ' ') // keep alnum and dots
+                .replace(/medal\.tv/g, 'medal')
+                .replace(/\s+/g, ' ')
+                .trim();
+        } catch (_) {
+            return '';
+        }
+    };
+
+    const shouldHideByText = (element) => {
+        const candidates = [
+            element.textContent,
+            element.innerText,
+            element.getAttribute('aria-label'),
+            element.getAttribute('title')
+        ];
+        for (const raw of candidates) {
+            const t = normalizeText(raw);
+            if (!t) continue;
+            if (t.includes('create clip') || t.includes('import medal') || t.includes('my clips')) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     const hideLogic = () => {
-        // Select all buttons on the page
-        const allButtons = document.querySelectorAll('body button');
+        // Select common interactive elements, not only <button>
+        const interactiveElements = document.querySelectorAll(
+            'button, a, [role="button"], .btn, .button'
+        );
 
-        allButtons.forEach(btn => {
-            // Check if the button's text content matches the ones we want to hide
-            const btnText = btn.textContent.trim();
-            const isTargetButton =
-                btnText.includes('Create Clip') ||
-                btnText.includes('Import Medal.tv') ||
-                btnText.includes('My Clips');
+        interactiveElements.forEach((el) => {
+            if (el.closest('.multistream-clip-controls')) return; // keep our injected controls
+            if (el.dataset.hiddenByMultistream === '1') return; // already handled
 
-            // Check that the button is NOT part of our injected "Clip Management" controls
-            const isInjectedControl = btn.closest('.multistream-clip-controls');
-
-            // If it's a target button and NOT one of ours, hide it.
-            if (isTargetButton && !isInjectedControl) {
-                // Hide the button. Using setProperty is a robust way to apply the style.
-                btn.style.setProperty('display', 'none', 'important');
+            if (shouldHideByText(el)) {
+                el.style.setProperty('display', 'none', 'important');
+                el.dataset.hiddenByMultistream = '1';
             }
         });
     };
 
-    // Run the logic once on initial page load
+    // Run once and observe dynamic changes
     hideLogic();
-
-    // Set up a MutationObserver to re-run the logic whenever the page's DOM changes.
-    // This is crucial for modern websites that load content dynamically.
-    const observer = new MutationObserver(hideLogic);
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
+    const observer = new MutationObserver(() => {
+        // Debounce microtasks
+        clearTimeout(observer._t);
+        observer._t = setTimeout(hideLogic, 50);
     });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true });
 }
 
 // Enhanced clip creation function
