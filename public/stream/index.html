@@ -453,15 +453,16 @@
              console.log('data.data keys:', data.data ? Object.keys(data.data) : 'null/undefined');
              
              if (data.success && data.data) {
-               // Check if data.data is an array or needs to be extracted differently
-               if (Array.isArray(data.data)) {
-                 allPlayers = data.data;
-               } else if (data.data.players && Array.isArray(data.data.players)) {
+               // The main page shows data.data.players is where the actual player array is
+               if (data.data.players && Array.isArray(data.data.players)) {
                  allPlayers = data.data.players;
-               } else if (data.data.data && Array.isArray(data.data.data)) {
-                 allPlayers = data.data.data;
+                 console.log('Found players array in data.data.players:', allPlayers.length);
+               } else if (Array.isArray(data.data)) {
+                 allPlayers = data.data;
+                 console.log('data.data is directly an array:', allPlayers.length);
                } else {
-                 console.log('data.data structure not recognized, trying to find array...');
+                 console.log('data.data structure:', data.data);
+                 console.log('data.data keys:', Object.keys(data.data));
                  // Try to find any array in the response
                  const findArray = (obj) => {
                    if (Array.isArray(obj)) return obj;
