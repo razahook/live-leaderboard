@@ -511,7 +511,8 @@ def proxy_m3u8():
             flags=re.MULTILINE
         )
         
-        print(f"Modified {len(re.findall(r'\.ts', modified_content))} .ts references in M3U8")
+        ts_pattern = r'\.ts'
+        print(f"Modified {len(re.findall(ts_pattern, modified_content))} .ts references in M3U8")
         
         # Debug: Show first few lines of modified content
         lines = modified_content.split('\n')[:10]
