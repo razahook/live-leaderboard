@@ -630,76 +630,20 @@ function injectClipControlsInModal(modalContent) {
 function setupAggressiveClipControlHiding(modalContent) {
     console.log('=== SETTING UP AGGRESSIVE CLIP CONTROL HIDING ===');
     
-    // Add NUCLEAR CSS rules to completely eliminate individual clip buttons
+    // Add targeted CSS rules to hide only individual stream clip buttons  
     const hideStyle = document.createElement('style');
     hideStyle.innerHTML = `
-        /* NUCLEAR OPTION: Hide ALL individual stream clip buttons */
+        /* Target specific individual stream clip buttons only */
         #multiStreamModal button[onclick*="createLiveClip"]:not(.multistream-clip-controls *) {
             display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-            position: absolute !important;
-            left: -9999px !important;
-            width: 0 !important;
-            height: 0 !important;
-        }
-        
-        #multiStreamModal button[title*="Create clip"]:not(.multistream-clip-controls *),
-        #multiStreamModal button[title*="clip"]:not(.multistream-clip-controls *) {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-            position: absolute !important;
-            left: -9999px !important;
-            width: 0 !important;
-            height: 0 !important;
         }
         
         #multiStreamModal button.bg-orange-600:not(.multistream-clip-controls *) {
             display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-            position: absolute !important;
-            left: -9999px !important;
-            width: 0 !important;
-            height: 0 !important;
-        }
-        
-        /* Hide buttons with clip-related content */
-        #multiStreamModal button:not(.multistream-clip-controls button):not(.clip-btn)[class*="stream"],
-        #multiStreamModal [id*="stream"] button:not(.multistream-clip-controls button),
-        #multiStreamModal .stream-panel button:not(.multistream-clip-controls button) {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-            position: absolute !important;
-            left: -9999px !important;
-            width: 0 !important;
-            height: 0 !important;
-        }
-        
-        /* Show only essential buttons */
-        #multiStreamModal button.clip-btn,
-        #multiStreamModal .multistream-clip-controls button,
-        #multiStreamModal button[id="msLoadBtn"],
-        #multiStreamModal select,
-        #multiStreamModal .close-button {
-            display: initial !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-            position: relative !important;
-            left: auto !important;
-            width: auto !important;
-            height: auto !important;
         }
     `;
     document.head.appendChild(hideStyle);
-    console.log('Added NUCLEAR CSS rules to completely eliminate individual clip buttons');
+    console.log('Added targeted CSS rules to hide individual clip buttons');
     
     // Function to hide clip buttons
     function hideClipButtons() {
