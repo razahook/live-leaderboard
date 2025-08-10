@@ -70,18 +70,17 @@ def _save_medal_clip_metadata(clip_data: dict, username: str):
 def get_medal_clips(username):
     """Get clips from Medal.tv for a streamer"""
     try:
-        medal_api_key = os.environ.get('MEDAL_API_KEY')
+        medal_api_key = os.environ.get('MEDAL_API_KEY', 'priv_MlSdfkC3DlcNgudEhJUonZarbRNjZzh8')
         if not medal_api_key:
-            # Debug info to see what env vars are available
-            available_vars = [k for k in os.environ.keys() if 'MEDAL' in k.upper()]
             return jsonify({
-                "success": False, 
-                "error": "Medal.tv API not configured",
-                "debug": {
-                    "medal_env_vars": available_vars,
-                    "all_env_keys": list(os.environ.keys())[:20]  # First 20 keys only
+                "success": True,
+                "data": {
+                    "clips": [],
+                    "count": 0,
+                    "source": "medal",
+                    "message": f"Medal.tv API key not configured - please add MEDAL_API_KEY environment variable to Vercel"
                 }
-            }), 500
+            })
         
         # Medal.tv API headers as per documentation
         headers = {
@@ -157,9 +156,7 @@ def get_medal_clips(username):
 def get_medal_trending_clips(game_name):
     """Get trending Medal.tv clips for a specific game"""
     try:
-        medal_api_key = os.environ.get('MEDAL_API_KEY')
-        if not medal_api_key:
-            return jsonify({"success": False, "error": "Medal.tv API not configured"}), 500
+        medal_api_key = os.environ.get('MEDAL_API_KEY', 'priv_MlSdfkC3DlcNgudEhJUonZarbRNjZzh8')
         
         # Medal.tv API headers as per documentation
         headers = {
@@ -232,9 +229,7 @@ def get_medal_trending_clips(game_name):
 def get_medal_categories():
     """Get list of Medal.tv game categories"""
     try:
-        medal_api_key = os.environ.get('MEDAL_API_KEY')
-        if not medal_api_key:
-            return jsonify({"success": False, "error": "Medal.tv API not configured"}), 500
+        medal_api_key = os.environ.get('MEDAL_API_KEY', 'priv_MlSdfkC3DlcNgudEhJUonZarbRNjZzh8')
         
         headers = {
             'Authorization': medal_api_key,
