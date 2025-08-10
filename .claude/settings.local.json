@@ -16,7 +16,21 @@
       "Bash(git reset:*)",
       "WebFetch(domain:apexlegendsstatus.com)",
       "Bash(git log:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "mcp__chrome-stdio__chrome_navigate",
+      "mcp__chrome-stdio__chrome_screenshot",
+      "mcp__serena__list_dir",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__find_file",
+      "mcp__serena__get_symbols_overview",
+      "mcp__chrome-stdio__chrome_get_interactive_elements",
+      "mcp__chrome-stdio__chrome_console",
+      "mcp__chrome-stdio__chrome_click_element",
+      "mcp__chrome-stdio__chrome_get_web_content",
+      "mcp__vercel__list_teams",
+      "mcp__vercel__list_projects",
+      "mcp__vercel__list_deployments",
+      "mcp__chrome-stdio__chrome_fill_or_select"
     ],
     "deny": []
   }
