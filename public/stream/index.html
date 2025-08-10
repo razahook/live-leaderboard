@@ -448,14 +448,50 @@
            if (response.ok) {
              const data = await response.json();
              console.log('API response data:', data);
+             console.log('data.data type:', typeof data.data);
+             console.log('data.data value:', data.data);
+             console.log('data.data keys:', data.data ? Object.keys(data.data) : 'null/undefined');
+             
              if (data.success && data.data) {
-               allPlayers = data.data;
-               console.log('Fetched player data from API:', allPlayers.length);
-               // Cache it
-               localStorage.setItem('leaderboardCache', JSON.stringify({
-                 data: allPlayers,
-                 timestamp: Date.now()
-               }));
+               // Check if data.data is an array or needs to be extracted differently
+               if (Array.isArray(data.data)) {
+                 allPlayers = data.data;
+               } else if (data.data.players && Array.isArray(data.data.players)) {
+                 allPlayers = data.data.players;
+               } else if (data.data.data && Array.isArray(data.data.data)) {
+                 allPlayers = data.data.data;
+               } else {
+                 console.log('data.data structure not recognized, trying to find array...');
+                 // Try to find any array in the response
+                 const findArray = (obj) => {
+                   if (Array.isArray(obj)) return obj;
+                   if (typeof obj === 'object' && obj !== null) {
+                     for (const key in obj) {
+                       if (Array.isArray(obj[key])) return obj[key];
+                       const result = findArray(obj[key]);
+                       if (result) return result;
+                     }
+                   }
+                   return null;
+                 };
+                 const foundArray = findArray(data);
+                 if (foundArray) {
+                   allPlayers = foundArray;
+                   console.log('Found array in response:', foundArray.length);
+                 } else {
+                   console.log('No array found in response');
+                 }
+               }
+               
+               console.log('Final allPlayers:', allPlayers);
+               console.log('allPlayers length:', allPlayers ? allPlayers.length : 'null/undefined');
+               
+               if (allPlayers && allPlayers.length > 0) {
+                 localStorage.setItem('leaderboardCache', JSON.stringify({
+                   data: allPlayers,
+                   timestamp: Date.now()
+                 }));
+               }
              } else {
                console.log('API response not successful or no data');
              }
