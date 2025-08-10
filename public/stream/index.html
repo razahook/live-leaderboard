@@ -592,9 +592,7 @@
         
       } catch (error) {
         console.error('Error populating streamer dropdowns:', error);
-        showMessage('Failed to load live streamers. Using sample streamers.', 'info');
-        // Fallback to sample streamers if API fails
-        loadSampleStreamers();
+        showMessage('Failed to load live streamers.', 'info');
       } finally {
         // Remove loading state
         dropdowns.forEach(id => {
@@ -780,18 +778,9 @@
       return focused ? (focused.dataset.username || null) : null;
     }
     
-    // Auto-load sample streamers on page load for demo
+    // Auto-populate dropdowns with live streamers on page load
     document.addEventListener('DOMContentLoaded', function() {
-      // First populate the dropdowns with live streamers
-      populateStreamerDropdowns().then(() => {
-        // Add a small delay to ensure everything is loaded
-        setTimeout(() => {
-          // If no streamers are selected, load sample streamers
-          if (!document.getElementById('s1').value && !document.getElementById('s2').value && !document.getElementById('s3').value) {
-            loadSampleStreamers();
-          }
-        }, 500);
-      });
+      populateStreamerDropdowns();
     });
   </script>
 
