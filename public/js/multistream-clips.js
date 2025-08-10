@@ -537,9 +537,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Run the function to hide the original sidebar buttons as soon as the page is ready.
     hideSidebarClipButtons();
 
-    // Auto-inject clip controls if multistream container exists
-    const multistreamContainer = document.querySelector('.multistream-container, #multistream, .streams-container, .multistream-modal');
-    if (multistreamContainer) {
+    // Auto-inject clip controls if multistream container exists (but not on the dedicated stream page)
+    const multistreamContainer = document.querySelector('.multistream-container, .streams-container, .multistream-modal');
+    if (multistreamContainer && !window.location.pathname.includes('/stream')) {
         injectClipControls(multistreamContainer);
     }
     
