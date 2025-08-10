@@ -180,7 +180,7 @@
     .grid {
       margin-top: 32px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
       gap: 24px;
     }
 
@@ -243,12 +243,22 @@
       border-color: #8b5cf6;
       z-index: 10;
     }
+    
+    .tile.has-stream {
+      border-color: #22c55e;
+      box-shadow: 0 6px 18px rgba(34, 197, 94, 0.3);
+    }
+    
+    .tile.has-stream header span {
+      color: #22c55e;
+      font-weight: 700;
+    }
 
     .player {
       flex-grow: 1;
       background: #000;
       position: relative;
-      min-height: 180px;
+      min-height: 300px;
     }
 
     iframe {
@@ -260,6 +270,7 @@
       background: #000;
       border-radius: 0 0 16px 16px;
       pointer-events: auto;
+      min-height: 300px;
     }
 
     @media (max-width: 800px) {
@@ -273,6 +284,12 @@
         flex-direction: column;
       }
       .multistream-clip-controls button {
+        width: 100%;
+      }
+      .header > div:last-child {
+        flex-direction: column;
+      }
+      .header > div:last-child button {
         width: 100%;
       }
     }
@@ -293,7 +310,10 @@
         <input id="s2" placeholder="Streamer 2 (twitch login)">
         <input id="s3" placeholder="Streamer 3 (twitch login)">
       </div>
-      <button class="btn btn-primary" onclick="loadStreams()">Load Streams</button>
+      <div style="display: flex; gap: 12px; margin-top: 20px;">
+        <button class="btn btn-primary" onclick="loadStreams()" style="flex: 1;">Load Streams</button>
+        <button class="btn btn-accent" onclick="loadSampleStreamers()" style="flex: 0 0 auto;">Load Sample</button>
+      </div>
     </div>
 
     <div id="multistream" class="grid" aria-label="Stream tiles">
@@ -323,26 +343,53 @@
 
   <script>
     const tiles = [null, document.getElementById('tile-1'), document.getElementById('tile-2'), document.getElementById('tile-3')];
+    
+    // Sample popular Apex streamers for testing
+    const sampleStreamers = ['aceu', 'shroud', 'iitztimmy'];
+    
     function twitchIframe(channel) {
       const parent = location.hostname;
       return `<iframe allowfullscreen allow="autoplay; fullscreen" src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(parent)}&muted=true"></iframe>`;
     }
+    
     function setTile(idx, channel) {
       const tile = tiles[idx];
       const header = tile.querySelector('header span');
       const player = tile.querySelector('.player');
-      header.textContent = channel || 'Empty';
-      player.innerHTML = channel ? twitchIframe(channel) : '';
-      tile.dataset.username = channel || '';
+      
+      if (channel && channel.trim()) {
+        header.textContent = channel;
+        player.innerHTML = twitchIframe(channel);
+        tile.dataset.username = channel;
+        tile.classList.add('has-stream');
+      } else {
+        header.textContent = 'Empty';
+        player.innerHTML = '';
+        tile.dataset.username = '';
+        tile.classList.remove('has-stream');
+      }
     }
+    
     function loadStreams() {
-      setTile(1, document.getElementById('s1').value.trim());
-      setTile(2, document.getElementById('s2').value.trim());
-      setTile(3, document.getElementById('s3').value.trim());
-      // auto select first non-empty
+      const s1 = document.getElementById('s1').value.trim();
+      const s2 = document.getElementById('s2').value.trim();
+      const s3 = document.getElementById('s3').value.trim();
+      
+      setTile(1, s1);
+      setTile(2, s2);
+      setTile(3, s3);
+      
+      // Auto select first non-empty stream
       const first = [1,2,3].find(i => tiles[i].dataset.username);
       if (first) selectTile(first);
+      
+      // Show success message
+      const loadedCount = [s1, s2, s3].filter(s => s.trim()).length;
+      if (loadedCount > 0) {
+        showMessage(`Loaded ${loadedCount} stream(s) successfully!`, 'success');
+      }
     }
+    
     function selectTile(idx) {
       tiles.forEach(t => t && t.removeAttribute('data-selected'));
       tiles[idx].setAttribute('data-selected', 'true');
@@ -350,12 +397,54 @@
       tiles.forEach(t => t && t.setAttribute('aria-selected', 'false'));
       tiles[idx].setAttribute('aria-selected', 'true');
     }
+    
+    function loadSampleStreamers() {
+      document.getElementById('s1').value = sampleStreamers[0];
+      document.getElementById('s2').value = sampleStreamers[1];
+      document.getElementById('s3').value = sampleStreamers[2];
+      loadStreams();
+    }
+    
+    function showMessage(message, type = 'info') {
+      const existing = document.querySelector('.message');
+      if (existing) existing.remove();
+      
+      const msg = document.createElement('div');
+      msg.className = `message message-${type}`;
+      msg.textContent = message;
+      msg.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 1000;
+        background: ${type === 'success' ? '#22c55e' : '#3b82f6'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      `;
+      
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), 3000);
+    }
+    
     // Helpers used by multistream-clips.js
     window.getCurrentStreamFocus = function () {
       const focused = document.querySelector('[data-selected="true"][data-idx]');
       return focused ? (focused.dataset.username || null) : null;
     }
-     </script>
+    
+    // Auto-load sample streamers on page load for demo
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add a small delay to ensure everything is loaded
+      setTimeout(() => {
+        if (!document.getElementById('s1').value && !document.getElementById('s2').value && !document.getElementById('s3').value) {
+          loadSampleStreamers();
+        }
+      }, 500);
+    });
+  </script>
 
    <script src="/js/multistream-clips.js?v=stream-1"></script>
  </body>
