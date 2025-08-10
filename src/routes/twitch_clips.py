@@ -2,6 +2,7 @@ import requests
 import time
 import json
 import os
+from datetime import datetime
 from flask import Blueprint, jsonify, request
 from urllib.parse import quote_plus
 from routes.twitch_integration import get_twitch_access_token
@@ -77,31 +78,74 @@ def _resolve_streamer_id(supabase_client, twitch_login: str):
 
 
 def _save_clip_metadata(clip_id: str, username: str, edit_url: str, url: str, embed_url: str, creator_login: str = None, created_by_user_id: str = None):
-    """Persist clip metadata to Supabase if configured. Best-effort, non-blocking."""
+    """Persist clip metadata to database. Best-effort, non-blocking."""
     try:
+        # Try Supabase first
         sb = get_supabase()
-        if sb is None:
-            return
-        streamer_id = _resolve_streamer_id(sb, username)
-        extra = {}
-        if creator_login:
-            extra['creator_login'] = creator_login
-        if created_by_user_id:
-            extra['created_by_user_id'] = created_by_user_id
-        payload = {
-            'source': 'twitch',
-            'external_id': clip_id,
-            'url': url,
-            'embed_url': embed_url,
-            'edit_url': edit_url,
-            'broadcaster_login': username.lower(),
-            'streamer_id': streamer_id,
-            'extra': extra,
-        }
-        # Upsert by external_id to avoid dupes
-        sb.table('clips').upsert(payload, on_conflict='external_id').execute()
+        if sb is not None:
+            try:
+                streamer_id = _resolve_streamer_id(sb, username)
+                extra = {}
+                if creator_login:
+                    extra['creator_login'] = creator_login
+                if created_by_user_id:
+                    extra['created_by_user_id'] = created_by_user_id
+                payload = {
+                    'source': 'twitch',
+                    'external_id': clip_id,
+                    'url': url,
+                    'embed_url': embed_url,
+                    'edit_url': edit_url,
+                    'broadcaster_login': username.lower(),
+                    'streamer_id': streamer_id,
+                    'extra': extra,
+                }
+                # Upsert by external_id to avoid dupes
+                sb.table('clips').upsert(payload, on_conflict='external_id').execute()
+                print(f"✅ Clip saved to Supabase: {clip_id}")
+                return
+            except Exception as e:
+                print(f"Supabase clip save failed: {e}")
+        
+        # Fallback to local database
+        try:
+            from models.clips import Clip
+            from models.user import db
+            
+            # Check if clip already exists
+            existing_clip = Clip.query.filter_by(external_id=clip_id).first()
+            if existing_clip:
+                # Update existing clip
+                existing_clip.url = url
+                existing_clip.embed_url = embed_url
+                existing_clip.edit_url = edit_url
+                existing_clip.updated_at = datetime.utcnow()
+                if creator_login:
+                    existing_clip.creator_login = creator_login
+                if created_by_user_id:
+                    existing_clip.created_by_user_id = created_by_user_id
+            else:
+                # Create new clip
+                new_clip = Clip(
+                    external_id=clip_id,
+                    source='twitch',
+                    url=url,
+                    embed_url=embed_url,
+                    edit_url=edit_url,
+                    broadcaster_login=username.lower(),
+                    creator_login=creator_login,
+                    created_by_user_id=created_by_user_id
+                )
+                db.session.add(new_clip)
+            
+            db.session.commit()
+            print(f"✅ Clip saved to local database: {clip_id}")
+            
+        except Exception as e:
+            print(f"Local database clip save failed: {e}")
+            
     except Exception as e:
-        print(f"Supabase clip save failed: {e}")
+        print(f"Clip save failed: {e}")
 
 def get_user_clips_cached(username, headers, limit=5):
     cache_key = f"clips_{username}"
@@ -266,27 +310,33 @@ def create_clip(username):
             clip_result = clip_response.json()
             if clip_result.get('data'):
                 clip_info = clip_result['data'][0]
+                
+                # Fix malformed edit_url - only use if it's a valid URL
+                edit_url = clip_info.get('edit_url', '')
+                if not edit_url or 'not_logged_in' in edit_url:
+                    edit_url = f"https://clips.twitch.tv/{clip_info['id']}"
+                
                 # Best-effort save
                 try:
                     _save_clip_metadata(
                         clip_id=clip_info['id'],
                         username=username,
-                        edit_url=clip_info.get('edit_url', ''),
+                        edit_url=edit_url,
                         url=f"https://clips.twitch.tv/{clip_info['id']}",
                         embed_url=f"https://clips.twitch.tv/embed?clip={clip_info['id']}",
                         # Add attribution for who initiated the clip when available
                         creator_login=request.args.get('as') or None,
                         created_by_user_id=request.headers.get('X-User-Id') or None
                     )
-                except Exception:
-                    pass
+                except Exception as e:
+                    print(f"Failed to save clip metadata: {e}")
 
                 return jsonify({
                     "success": True,
                     "message": f"Clip created successfully for {username}!",
                     "data": {
                         "clip_id": clip_info['id'],
-                        "edit_url": clip_info['edit_url'],
+                        "edit_url": edit_url,
                         "url": f"https://clips.twitch.tv/{clip_info['id']}",
                         "embed_url": f"https://clips.twitch.tv/embed?clip={clip_info['id']}",
                         "broadcaster": username,
