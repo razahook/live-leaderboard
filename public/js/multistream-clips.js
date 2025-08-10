@@ -267,10 +267,19 @@ function getCurrentStreamFocus() {
         return focused.dataset.username || focused.dataset.streamer;
     }
     
-    // Check multistream dropdowns for selected streamers
-    const streamSelects = document.querySelectorAll('select[id^="streamSelect"]');
-    for (const select of streamSelects) {
-        if (select.value && select.value !== 'none') {
+    // Check multistream dropdowns for selected streamers (thy specific IDs)
+    const streamSelects = ['streamer1', 'streamer2', 'streamer3'];
+    for (const selectId of streamSelects) {
+        const select = document.getElementById(selectId);
+        if (select && select.value && select.value !== '' && select.value !== 'none') {
+            return select.value;
+        }
+    }
+    
+    // Check any select with streamSelect in ID
+    const streamSelectElements = document.querySelectorAll('select[id*="stream"]');
+    for (const select of streamSelectElements) {
+        if (select.value && select.value !== '' && select.value !== 'none') {
             return select.value;
         }
     }
@@ -279,14 +288,14 @@ function getCurrentStreamFocus() {
     const streamContainers = document.querySelectorAll('[data-streamer], [data-username]');
     for (const container of streamContainers) {
         const streamer = container.dataset.streamer || container.dataset.username;
-        if (streamer && streamer !== 'none') {
+        if (streamer && streamer !== 'none' && streamer !== '') {
             return streamer;
         }
     }
     
     // Fallback: try to get from URL or other sources
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('streamer') || null;
+    return urlParams.get('streamer') || 'Please select a streamer first';
 }
 
 function getCurrentUserId() {
@@ -518,45 +527,77 @@ function injectClipControlsInModal(modalContent) {
         return;
     }
     
-    // Find the streamer selection section
-    const streamerSection = modalContent.querySelector('.mb-6');
-    if (!streamerSection) return;
+    // Get the header and all content after it
+    const header = modalContent.querySelector('.flex.justify-between.items-center.mb-6');
+    if (!header) return;
     
-    const controls = document.createElement('div');
-    controls.className = 'multistream-clip-controls';
-    controls.style.cssText = `
-        margin-bottom: 24px;
-        padding: 16px;
-        background: rgba(17, 24, 39, 0.8);
-        border-radius: 12px;
-        border: 1px solid rgba(75, 85, 99, 0.5);
+    // Get all content after the header
+    const allContentAfterHeader = [];
+    let nextSibling = header.nextElementSibling;
+    while (nextSibling) {
+        allContentAfterHeader.push(nextSibling);
+        nextSibling = nextSibling.nextElementSibling;
+    }
+    
+    // Remove all content after header temporarily
+    allContentAfterHeader.forEach(el => el.remove());
+    
+    // Create the unified content wrapper
+    const unifiedWrapper = document.createElement('div');
+    unifiedWrapper.style.cssText = `
+        background: rgba(17, 24, 39, 0.6);
+        border-radius: 16px;
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        padding: 24px;
+        margin-top: 16px;
     `;
-    controls.innerHTML = `
-        <div style="text-align: center; margin-bottom: 12px;">
-            <h3 style="color: #f9fafb; font-size: 16px; font-weight: 600; margin: 0;">
-                🎬 Clip Management
-            </h3>
-            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0 0;">
-                Create and manage clips for your selected streamers
-            </p>
-        </div>
-        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-            <button id="createClipBtn" class="clip-btn" onclick="createClipForCurrentStream()">
+    
+    // Create clip controls section
+    const clipControls = document.createElement('div');
+    clipControls.className = 'multistream-clip-controls';
+    clipControls.style.cssText = `
+        text-align: center;
+        margin-bottom: 32px;
+        padding: 20px;
+        background: rgba(30, 41, 59, 0.8);
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+    `;
+    clipControls.innerHTML = `
+        <h3 style="color: #f1f5f9; font-size: 18px; font-weight: 700; margin: 0 0 8px 0;">
+            🎬 Clip Management
+        </h3>
+        <p style="color: #cbd5e1; font-size: 14px; margin: 0 0 20px 0;">
+            Create and manage clips for your selected streamers
+        </p>
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+            <button id="createClipBtn" class="clip-btn" onclick="createClipForCurrentStream()" style="min-width: 140px;">
                 📹 Create Clip
             </button>
-            
-            <button id="medalImportBtn" class="clip-btn medal-btn" onclick="openMedalImport()">
+            <button id="medalImportBtn" class="clip-btn medal-btn" onclick="openMedalImport()" style="min-width: 140px;">
                 🏅 Import Medal.tv
             </button>
-            
-            <button id="myClipsBtn" class="clip-btn" onclick="viewMyClips()">
+            <button id="myClipsBtn" class="clip-btn" onclick="viewMyClips()" style="min-width: 140px;">
                 📋 My Clips
             </button>
         </div>
     `;
     
-    // Insert before the streamer selection section
-    streamerSection.parentNode.insertBefore(controls, streamerSection);
+    // Add clip controls to wrapper
+    unifiedWrapper.appendChild(clipControls);
+    
+    // Add all original content back to wrapper
+    allContentAfterHeader.forEach(el => {
+        // Remove any existing margin-bottom from sections to avoid double spacing
+        if (el.classList.contains('mb-6')) {
+            el.classList.remove('mb-6');
+            el.classList.add('mb-8');
+        }
+        unifiedWrapper.appendChild(el);
+    });
+    
+    // Insert the unified wrapper after header
+    header.parentNode.insertBefore(unifiedWrapper, header.nextSibling);
 }
 
 // Export functions for global access
