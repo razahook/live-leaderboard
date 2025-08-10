@@ -432,8 +432,8 @@
            const response = await fetch('/api/leaderboard/PC');
            if (response.ok) {
              const data = await response.json();
-             if (data.success && data.data) {
-               allPlayers = data.data;
+             if (data.success && data.data && data.data.players) {
+               allPlayers = data.data.players;
                console.log('Fetched player data from API:', allPlayers.length);
                // Cache it
                localStorage.setItem('leaderboardCache', JSON.stringify({
