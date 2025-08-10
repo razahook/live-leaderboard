@@ -3824,7 +3824,7 @@
                 try {
                     const modalContent = multiStreamModal.querySelector('.modal-content');
                     if (modalContent && window.injectClipControlsInModal) {
-                        console.log('=== INJECTING CLIP CONTROLS ===');
+                        // Inject clip controls
                         window.injectClipControlsInModal(modalContent);
                     } else {
                         console.log('Modal content or injection function not found');
@@ -3848,8 +3848,7 @@
         };
         
         const populateStreamerDropdowns = () => {
-            console.log('=== POPULATING STREAMER DROPDOWNS ===');
-            console.log('Total players available:', allPlayers.length);
+            // Populate streamer dropdowns
             
             // Only show players who are actually live on Twitch (not just in-game status)
             const liveStreamers = allPlayers.filter(player => {
@@ -3912,7 +3911,7 @@
         };
         
         const loadMultiStreams = () => {
-            console.log('=== LOADING MULTISTREAMS ===');
+            // Load multistreams
             const streamer1 = document.getElementById('streamer1').value;
             const streamer2 = document.getElementById('streamer2').value;
             const streamer3 = document.getElementById('streamer3').value;
@@ -3971,11 +3970,7 @@
                     );
                 }
                 
-                // Debug logging for player data
-                console.log(`=== PLAYER ${index} DEBUG (${displayName}) ===`);
-                console.log('Canonical username:', canonicalTwitchUsername);
-                
-                // Show which matching strategy worked
+                // Find player data silently
                 let matchingStrategy = 'none';
                 if (playerData) {
                     if (playerData.stream?.twitchUser === canonicalTwitchUsername) {
@@ -3989,37 +3984,16 @@
                     }
                 }
                 
-                console.log('Matching strategy:', matchingStrategy);
-                console.log('Player found:', !!playerData);
+                // Player matching completed
                 
-                // Debug: Show players with twitch_live data
-                const playersWithLiveData = allPlayers.filter(p => p.twitch_live && p.twitch_live.is_live === true);
-                console.log('Players with live data:', playersWithLiveData.map(p => ({
-                    name: p.name || p.player_name,
-                    twitchUser: p.stream?.twitchUser,
-                    canonical_twitch_username: p.canonical_twitch_username,
-                    is_live: p.twitch_live?.is_live
-                })));
+                // Continue with player processing
                 
                 if (playerData) {
-                    console.log('Matched player data:', {
-                        name: playerData.name || playerData.player_name,
-                        twitch_link: playerData.twitch_link,
-                        canonical_twitch_username: playerData.canonical_twitch_username,
-                        twitchUser: playerData.stream?.twitchUser,
-                        status: playerData.status,
-                        twitch_live: playerData.twitch_live,
-                        hasClips: playerData.hasClips,
-                        has_twitch_live_data: !!playerData.twitch_live,
-                        is_live: playerData.twitch_live?.is_live
-                    });
+                    // Process player data
                     
-                    // Show a clear alert about live status
-                    const liveStatus = playerData.twitch_live?.is_live ? 'LIVE' : 'NOT LIVE';
-                    alert(`Player ${index} (${displayName}) - Status: ${liveStatus}, Clips: ${playerData?.hasClips}`);
+                    // Player data found
                 } else {
-                    console.log('No player data found for', canonicalTwitchUsername);
-                    alert(`Player ${index} (${displayName}) - NO PLAYER DATA FOUND`);
+                    // No player data found
                 }
                 
                 const rank = playerData?.rank || Math.floor(Math.random() * 500) + 1;

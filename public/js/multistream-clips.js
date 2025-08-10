@@ -568,32 +568,39 @@ function injectClipControlsInModal(modalContent) {
     `;
     
     clipControls.innerHTML = `
-        <div style="margin-bottom: 16px;">
-            <h3 style="color: #f1f5f9; font-size: 20px; font-weight: 700; margin: 0 0 8px 0; text-align: center;">
-                🎬 Clip Management Hub
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0 0 6px 0; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                🎬 Clip Management
             </h3>
-            <p style="color: #cbd5e1; font-size: 14px; margin: 0; text-align: center;">
+            <p style="color: #e2e8f0; font-size: 13px; margin: 0; text-align: center; opacity: 0.9;">
                 Create and manage clips for your selected streamers
             </p>
         </div>
-        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; align-items: center;">
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; align-items: center;">
             <button id="createClipBtn" class="clip-btn" onclick="createClipForCurrentStream()" 
-                    style="min-width: 150px; font-size: 14px; font-weight: 600; padding: 12px 20px;">
+                    style="min-width: 140px; font-size: 13px; font-weight: 600; padding: 14px 18px; 
+                           background: linear-gradient(135deg, #10b981, #059669); 
+                           border: none; border-radius: 8px; color: white; cursor: pointer;
+                           box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                           transition: all 0.2s ease;">
                 📹 Create Clip
             </button>
             <button id="medalImportBtn" class="clip-btn medal-btn" onclick="openMedalImport()" 
-                    style="min-width: 150px; font-size: 14px; font-weight: 600; padding: 12px 20px;">
+                    style="min-width: 140px; font-size: 13px; font-weight: 600; padding: 14px 18px;
+                           background: linear-gradient(135deg, #f59e0b, #d97706);
+                           border: none; border-radius: 8px; color: white; cursor: pointer;
+                           box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+                           transition: all 0.2s ease;">
                 🏅 Import Medal.tv
             </button>
             <button id="myClipsBtn" class="clip-btn" onclick="viewMyClips()" 
-                    style="min-width: 150px; font-size: 14px; font-weight: 600; padding: 12px 20px;">
+                    style="min-width: 140px; font-size: 13px; font-weight: 600; padding: 14px 18px;
+                           background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                           border: none; border-radius: 8px; color: white; cursor: pointer;
+                           box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+                           transition: all 0.2s ease;">
                 📋 My Clips
             </button>
-        </div>
-        <div style="margin-top: 12px;">
-            <small style="color: #94a3b8; font-size: 12px;">
-                💡 Select streamers below, then create or import clips
-            </small>
         </div>
     `;
     
@@ -633,7 +640,7 @@ function setupAggressiveClipControlHiding(modalContent) {
     // Add targeted CSS rules to hide only individual stream clip buttons  
     const hideStyle = document.createElement('style');
     hideStyle.innerHTML = `
-        /* Target specific individual stream clip buttons only */
+        /* Target ONLY clip buttons, preserve VOD, PiP, and other tabs */
         #multiStreamModal button[onclick*="createLiveClip"]:not(.multistream-clip-controls *) {
             display: none !important;
         }
@@ -641,46 +648,45 @@ function setupAggressiveClipControlHiding(modalContent) {
         #multiStreamModal button.bg-orange-600:not(.multistream-clip-controls *) {
             display: none !important;
         }
+        
     `;
     document.head.appendChild(hideStyle);
-    console.log('Added targeted CSS rules to hide individual clip buttons');
+    console.log('Added targeted CSS rules to hide only clip buttons, preserve VOD/PiP tabs');
     
-    // Function to hide clip buttons
+    // Function to hide only clip-related buttons, preserve VOD/PiP tabs
     function hideClipButtons() {
-        const selectors = [
-            'button[onclick*="createLiveClip"]',
-            'button[title*="clip"]', 
-            'button[title*="Clip"]',
-            'button:contains("📎")',
-            '.stream-controls button',
-            '.player-controls button',
-            '[class*="stream"] button',
-        ];
-        
+        const buttons = modalContent.querySelectorAll('button');
         let hiddenCount = 0;
         
-        selectors.forEach(selector => {
-            try {
-                const buttons = modalContent.querySelectorAll(selector);
-                buttons.forEach(btn => {
-                    // Don't hide if it's part of our centralized controls
-                    if (!btn.closest('.multistream-clip-controls')) {
-                        const btnText = btn.textContent.trim().toLowerCase();
-                        const btnTitle = (btn.title || '').toLowerCase();
-                        const btnOnclick = (btn.onclick || btn.getAttribute('onclick') || '').toString();
-                        
-                        // Check if it's a clip-related button
-                        if (btnText.includes('📎') || btnText.includes('clip') || 
-                            btnTitle.includes('clip') || btnOnclick.includes('clip')) {
-                            btn.style.display = 'none';
-                            btn.style.visibility = 'hidden';
-                            hiddenCount++;
-                            console.log(`Hidden clip button: "${btnText}" (${selector})`);
-                        }
-                    }
-                });
-            } catch (e) {
-                // Selector might not work, skip it
+        buttons.forEach(btn => {
+            // Don't hide if it's part of our centralized controls
+            if (!btn.closest('.multistream-clip-controls')) {
+                const btnText = btn.textContent.trim().toLowerCase();
+                const btnTitle = (btn.title || '').toLowerCase();
+                const btnOnclick = (btn.onclick || btn.getAttribute('onclick') || '').toString();
+                
+                // Only hide if it's specifically a clip button
+                const isClipButton = (
+                    btnText.includes('📎') || 
+                    btnText.includes('clip') ||
+                    btnTitle.includes('clip') ||
+                    btnOnclick.includes('createLiveClip')
+                );
+                
+                // Preserve essential tabs
+                const isEssentialTab = (
+                    btnText.includes('vod') ||
+                    btnText.includes('pip') ||
+                    btnText.includes('tab') ||
+                    btn.classList.contains('essential-tab')
+                );
+                
+                if (isClipButton && !isEssentialTab) {
+                    btn.style.display = 'none';
+                    btn.style.visibility = 'hidden';
+                    hiddenCount++;
+                    console.log(`Hidden clip button: "${btnText}"`);
+                }
             }
         });
         
