@@ -396,6 +396,7 @@
     </div>
   </div>
 
+  <script src="https://embed.twitch.tv/embed/v1.js"></script>
   <script>
           // Function to populate streamer dropdowns with live streamers
    async function populateStreamerDropdowns() {
@@ -613,8 +614,29 @@
     const tiles = [null, document.getElementById('tile-1'), document.getElementById('tile-2'), document.getElementById('tile-3')];
     
     function twitchIframe(channel) {
-      const parent = location.hostname;
-      return `<iframe allowfullscreen allow="autoplay; fullscreen" src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(parent)}&muted=true"></iframe>`;
+      // Use the correct parent domain for Twitch embedding
+      // On Vercel, we need to use the actual domain, not the git branch subdomain
+      let parent = location.hostname;
+      
+      // If we're on a Vercel preview deployment, use the main domain
+      if (parent.includes('vercel.app') && parent.includes('git-')) {
+        // Extract the main project name from the git branch URL
+        const match = parent.match(/live-leaderboard-git-[^-]+-([^.]+)\.vercel\.app/);
+        if (match) {
+          parent = `live-leaderboard-${match[1]}.vercel.app`;
+        } else {
+          // Fallback to the main domain
+          parent = 'live-leaderboard-razahooks-projects.vercel.app';
+        }
+      }
+      
+      console.log('Using parent domain for Twitch embed:', parent);
+      
+      // Create a unique ID for this iframe
+      const iframeId = `twitch-iframe-${channel}-${Date.now()}`;
+      
+      // Return the iframe HTML with the correct parent domain
+      return `<iframe id="${iframeId}" allowfullscreen allow="autoplay; fullscreen" src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(parent)}&muted=true"></iframe>`;
     }
     
     function setTile(idx, channel) {
@@ -635,6 +657,19 @@
         tile.dataset.username = channel;
         tile.classList.add('has-stream');
         console.log('Tile updated with stream:', channel);
+        
+        // Add error handling for the iframe
+        setTimeout(() => {
+          const iframeElement = player.querySelector('iframe');
+          if (iframeElement) {
+            iframeElement.onerror = () => {
+              console.error(`Failed to load Twitch iframe for ${channel}`);
+            };
+            iframeElement.onload = () => {
+              console.log(`Twitch iframe loaded successfully for ${channel}`);
+            };
+          }
+        }, 100);
       } else {
         header.textContent = 'Empty';
         player.innerHTML = '';
