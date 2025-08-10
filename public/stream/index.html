@@ -329,7 +329,9 @@
       height: 100%;
       display: block;
       background: #000;
-      border-radius: 0 0 16px 16px;
+      border-radius: 0;
+      overflow: hidden;
+      object-fit: cover;
     }
 
     @media (max-width: 1200px) {
@@ -680,9 +682,13 @@
           parent: [parent],
           autoplay: false,
           muted: true,
-          // These options help control the layout
-          layout: 'video',
-          theme: 'dark'
+          allowfullscreen: false,
+          quality: 'auto',
+          // Try video-only layout for better aspect ratio control
+          layout: 'video-only',
+          theme: 'dark',
+          // Additional parameters to improve sizing
+          time: '0h0m0s'
         });
         
         // Add event listeners for better control
