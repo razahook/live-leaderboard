@@ -40,16 +40,20 @@ function hideSidebarClipButtons() {
     };
 
     const hideLogic = () => {
-        // Select common interactive elements, not only <button>
-        const interactiveElements = document.querySelectorAll(
-            'button, a, [role="button"], .btn, .button'
-        );
+        // 1) Check obvious interactive elements
+        const primary = document.querySelectorAll('button, a, [role="button"], [onclick], .btn, .button, [class*="btn" i]');
+        // 2) Fallback: scan small set of generic elements that often hold label-only buttons
+        const secondary = document.querySelectorAll('span, div');
+        const elements = [...primary, ...secondary];
 
-        interactiveElements.forEach((el) => {
+        elements.forEach((el) => {
             if (el.closest('.multistream-clip-controls')) return; // keep our injected controls
             if (el.dataset.hiddenByMultistream === '1') return; // already handled
 
-            if (shouldHideByText(el)) {
+            const computed = window.getComputedStyle(el);
+            const looksClickable = ['pointer'].includes(computed.cursor) || el.hasAttribute('onclick') || el.tagName === 'A' || el.tagName === 'BUTTON' || el.getAttribute('role') === 'button';
+
+            if (looksClickable && shouldHideByText(el)) {
                 el.style.setProperty('display', 'none', 'important');
                 el.dataset.hiddenByMultistream = '1';
             }
