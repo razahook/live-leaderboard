@@ -415,94 +415,120 @@
          }
        });
        
-       // Get all players data - same as main page
-       let allPlayers = [];
-       
-       // First try localStorage cache
-       const cachedData = localStorage.getItem('leaderboardCache');
-       if (cachedData) {
-         try {
-           const cache = JSON.parse(cachedData);
-           if (cache.data && Array.isArray(cache.data)) {
-             allPlayers = cache.data;
-             console.log('Using cached player data:', allPlayers.length);
-           } else {
-             console.log('Cached data is not an array, will fetch from API');
-             allPlayers = [];
-           }
-         } catch (e) {
-           console.error('Error parsing cache:', e);
-           allPlayers = [];
-         }
-       }
-       
-       // If no cache, fetch from leaderboard API
-       if (allPlayers.length === 0) {
-         try {
-           console.log('No cached data, fetching from API...');
-           const response = await fetch('/api/stats/PC');
-           console.log('API response:', response);
-           console.log('Response status:', response.status);
-           console.log('Response ok:', response.ok);
-           
-           if (response.ok) {
-             const data = await response.json();
-             console.log('API response data:', data);
-             console.log('data.data type:', typeof data.data);
-             console.log('data.data value:', data.data);
-             console.log('data.data keys:', data.data ? Object.keys(data.data) : 'null/undefined');
+       // First try localStorage cache - check both cache keys used by main page and stream page
+      let allPlayers = [];
+      const mainPageCache = localStorage.getItem('leaderboard_cache');
+      const streamPageCache = localStorage.getItem('leaderboardCache');
+      
+      if (mainPageCache) {
+        try {
+          const cache = JSON.parse(mainPageCache);
+          if (cache.data && Array.isArray(cache.data)) {
+            allPlayers = cache.data;
+            console.log('Using main page cached data:', allPlayers.length);
+          } else if (cache.data && cache.data.players && Array.isArray(cache.data.players)) {
+            allPlayers = cache.data.players;
+            console.log('Using main page cached data.players:', allPlayers.length);
+          } else {
+            console.log('Main page cached data structure not recognized:', cache);
+          }
+        } catch (e) {
+          console.error('Error parsing main page cache:', e);
+        }
+      }
+      
+      // If no main page cache, try stream page cache
+      if (allPlayers.length === 0 && streamPageCache) {
+        try {
+          const cache = JSON.parse(streamPageCache);
+          if (cache.data && Array.isArray(cache.data)) {
+            allPlayers = cache.data;
+            console.log('Using stream page cached data:', allPlayers.length);
+          } else {
+            console.log('Stream page cached data is not an array, will fetch from API');
+          }
+        } catch (e) {
+          console.error('Error parsing stream page cache:', e);
+        }
+      }
+      
+      // If no cache, fetch from leaderboard API
+      if (allPlayers.length === 0) {
+        try {
+          console.log('No cached data, fetching from API...');
+          const response = await fetch('/api/stats/PC');
+          console.log('API response:', response);
+          console.log('Response status:', response.status);
+          console.log('Response ok:', response.ok);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('API response data:', data);
+            console.log('data.data type:', typeof data.data);
+            console.log('data.data value:', data.data);
+            console.log('data.data keys:', data.data ? Object.keys(data.data) : 'null/undefined');
+            
+            if (data.success && data.data) {
+              // The main page shows data.data.players is where the actual player array is
+              if (data.data.players && Array.isArray(data.data.players)) {
+                allPlayers = data.data.players;
+                console.log('Found players array in data.data.players:', allPlayers.length);
+              } else if (Array.isArray(data.data)) {
+                allPlayers = data.data;
+                console.log('data.data is directly an array:', allPlayers.length);
+              } else {
+                console.log('data.data structure:', data.data);
+                console.log('data.data keys:', Object.keys(data.data));
+                // Try to find any array in the response
+                const findArray = (obj) => {
+                  if (Array.isArray(obj)) return obj;
+                  if (typeof obj === 'object' && obj !== null) {
+                    for (const key in obj) {
+                      if (Array.isArray(obj[key])) return obj[key];
+                      const result = findArray(obj[key]);
+                      if (result) return result;
+                    }
+                  }
+                  return null;
+                };
+                const foundArray = findArray(data);
+                if (foundArray) {
+                  allPlayers = foundArray;
+                  console.log('Found array in response:', foundArray.length);
+                } else {
+                  console.log('No array found in response');
+                }
+              }
+              
+              console.log('Final allPlayers:', allPlayers);
+              console.log('allPlayers length:', allPlayers ? allPlayers.length : 'null/undefined');
              
-             if (data.success && data.data) {
-               // The main page shows data.data.players is where the actual player array is
-               if (data.data.players && Array.isArray(data.data.players)) {
-                 allPlayers = data.data.players;
-                 console.log('Found players array in data.data.players:', allPlayers.length);
-               } else if (Array.isArray(data.data)) {
-                 allPlayers = data.data;
-                 console.log('data.data is directly an array:', allPlayers.length);
-               } else {
-                 console.log('data.data structure:', data.data);
-                 console.log('data.data keys:', Object.keys(data.data));
-                 // Try to find any array in the response
-                 const findArray = (obj) => {
-                   if (Array.isArray(obj)) return obj;
-                   if (typeof obj === 'object' && obj !== null) {
-                     for (const key in obj) {
-                       if (Array.isArray(obj[key])) return obj[key];
-                       const result = findArray(obj[key]);
-                       if (result) return result;
-                     }
-                   }
-                   return null;
-                 };
-                 const foundArray = findArray(data);
-                 if (foundArray) {
-                   allPlayers = foundArray;
-                   console.log('Found array in response:', foundArray.length);
-                 } else {
-                   console.log('No array found in response');
-                 }
-               }
-               
-               console.log('Final allPlayers:', allPlayers);
-               console.log('allPlayers length:', allPlayers ? allPlayers.length : 'null/undefined');
-               
-               if (allPlayers && allPlayers.length > 0) {
-                 localStorage.setItem('leaderboardCache', JSON.stringify({
-                   data: allPlayers,
-                   timestamp: Date.now()
-                 }));
-               }
-             } else {
-               console.log('API response not successful or no data');
-             }
-           } else {
-             console.error('API response not ok:', response.status, response.statusText);
-           }
-         } catch (fetchError) {
-           console.error('Error fetching leaderboard:', fetchError);
-         }
-       }
+              if (allPlayers && allPlayers.length > 0) {
+                // Store in both cache keys for compatibility
+                try {
+                  localStorage.setItem('leaderboard_cache', JSON.stringify({
+                    data: allPlayers,
+                    timestamp: Date.now()
+                  }));
+                  localStorage.setItem('leaderboardCache', JSON.stringify({
+                    data: allPlayers,
+                    timestamp: Date.now()
+                  }));
+                  console.log('Cached data in both locations');
+                } catch (e) {
+                  console.warn('Failed to cache data:', e);
+                }
+              }
+            } else {
+              console.log('API response not successful or no data');
+            }
+          } else {
+            console.error('API response not ok:', response.status, response.statusText);
+          }
+        } catch (fetchError) {
+          console.error('Error fetching leaderboard:', fetchError);
+        }
+      }
        
        // Ensure allPlayers is always an array before filtering
        if (!Array.isArray(allPlayers)) {
@@ -526,6 +552,8 @@
          dropdown.innerHTML = '';
          dropdown.appendChild(placeholder);
          
+         console.log(`Populating dropdown ${dropdownId} with ${liveStreamers.length} streamers`);
+         
          // Add live streamers - same as main page
          liveStreamers.forEach(player => {
            const twitchUsername = player.stream?.twitchUser || player.canonical_twitch_username || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
@@ -537,14 +565,18 @@
              option.textContent = `${player.name || player.player_name || twitchUsername} (${viewerCount.toLocaleString()} viewers)`;
              option.dataset.playerName = player.name || player.player_name;
              dropdown.appendChild(option);
+             console.log(`Added option: ${twitchUsername} - ${player.name || player.player_name} (${viewerCount} viewers)`);
            }
          });
+         
+         console.log(`Dropdown ${dropdownId} now has ${dropdown.options.length} options`);
        });
         
         // Add change event listeners to auto-load streams
         dropdowns.forEach(dropdownId => {
           const dropdown = document.getElementById(dropdownId);
           dropdown.onchange = () => {
+            console.log(`Dropdown ${dropdownId} changed to:`, dropdown.value);
             // Auto-load streams when selection changes
             setTimeout(() => loadStreams(), 100);
           };
@@ -590,16 +622,25 @@
       const header = tile.querySelector('header span');
       const player = tile.querySelector('.player');
       
+      console.log(`setTile called for index: ${idx}, channel: ${channel}`);
+      console.log('Tile element:', tile);
+      console.log('Header element:', header);
+      console.log('Player element:', player);
+      
       if (channel && channel.trim()) {
         header.textContent = channel;
-        player.innerHTML = twitchIframe(channel);
+        const iframe = twitchIframe(channel);
+        console.log('Created iframe HTML:', iframe);
+        player.innerHTML = iframe;
         tile.dataset.username = channel;
         tile.classList.add('has-stream');
+        console.log('Tile updated with stream:', channel);
       } else {
         header.textContent = 'Empty';
         player.innerHTML = '';
         tile.dataset.username = '';
         tile.classList.remove('has-stream');
+        console.log('Tile cleared');
       }
     }
     
@@ -608,22 +649,27 @@
       const s2 = document.getElementById('s2').value.trim();
       const s3 = document.getElementById('s3').value.trim();
       
+      console.log('loadStreams called with values:', { s1, s2, s3 });
+      
       setTile(1, s1);
       setTile(2, s2);
       setTile(3, s3);
       
       // Auto select first non-empty stream
       const first = [1,2,3].find(i => tiles[i].dataset.username);
+      console.log('First non-empty stream index:', first);
       if (first) selectTile(first);
       
       // Show success message
       const loadedCount = [s1, s2, s3].filter(s => s.trim()).length;
+      console.log('Loaded stream count:', loadedCount);
       if (loadedCount > 0) {
         showMessage(`Loaded ${loadedCount} stream(s) successfully!`, 'success');
       }
     }
     
     function selectTile(idx) {
+      console.log('selectTile called with index:', idx);
       tiles.forEach(t => t && t.removeAttribute('data-selected'));
       tiles[idx].setAttribute('data-selected', 'true');
       // For accessibility
@@ -632,6 +678,7 @@
     }
     
     function loadSampleStreamers() {
+      console.log('loadSampleStreamers called');
       // Set sample streamers in dropdowns
       const sampleStreamers = ['aceu', 'shroud', 'iitztimmy'];
       
@@ -657,6 +704,7 @@
       setSampleStreamer(s2Dropdown, sampleStreamers[1]);
       setSampleStreamer(s3Dropdown, sampleStreamers[2]);
       
+      console.log('Sample streamers set, calling loadStreams');
       loadStreams();
     }
     
