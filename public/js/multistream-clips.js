@@ -524,80 +524,98 @@ function injectClipControls(container) {
 function injectClipControlsInModal(modalContent) {
     // Check if controls already exist
     if (modalContent.querySelector('.multistream-clip-controls')) {
+        console.log('Clip controls already exist, skipping injection');
         return;
     }
     
-    // Get the header and all content after it
-    const header = modalContent.querySelector('.flex.justify-between.items-center.mb-6');
-    if (!header) return;
+    console.log('Injecting clip controls into modal...', modalContent);
     
-    // Get all content after the header
-    const allContentAfterHeader = [];
-    let nextSibling = header.nextElementSibling;
-    while (nextSibling) {
-        allContentAfterHeader.push(nextSibling);
-        nextSibling = nextSibling.nextElementSibling;
+    // Debug: log all children of modalContent
+    console.log('Modal content children:', Array.from(modalContent.children));
+    
+    // Try to find the header more aggressively
+    let header = modalContent.querySelector('h2');
+    if (!header) {
+        header = modalContent.querySelector('.flex.justify-between.items-center');
+        if (!header) {
+            header = modalContent.firstElementChild;
+            console.log('Using first child as header:', header);
+        }
     }
     
-    // Remove all content after header temporarily
-    allContentAfterHeader.forEach(el => el.remove());
+    if (!header) {
+        console.error('Could not find header to inject controls after');
+        return;
+    }
     
-    // Create the unified content wrapper
-    const unifiedWrapper = document.createElement('div');
-    unifiedWrapper.style.cssText = `
-        background: rgba(17, 24, 39, 0.6);
-        border-radius: 16px;
-        border: 1px solid rgba(75, 85, 99, 0.3);
-        padding: 24px;
-        margin-top: 16px;
-    `;
-    
-    // Create clip controls section
+    // Create clip controls with VERY explicit positioning
     const clipControls = document.createElement('div');
     clipControls.className = 'multistream-clip-controls';
     clipControls.style.cssText = `
-        text-align: center;
-        margin-bottom: 32px;
-        padding: 20px;
-        background: rgba(30, 41, 59, 0.8);
-        border-radius: 12px;
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        position: relative !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 20px 0 !important;
+        padding: 24px !important;
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(30, 41, 59, 0.9)) !important;
+        border-radius: 16px !important;
+        border: 2px solid rgba(148, 163, 184, 0.3) !important;
+        text-align: center !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        clear: both !important;
+        z-index: 1000 !important;
     `;
+    
     clipControls.innerHTML = `
-        <h3 style="color: #f1f5f9; font-size: 18px; font-weight: 700; margin: 0 0 8px 0;">
-            🎬 Clip Management
-        </h3>
-        <p style="color: #cbd5e1; font-size: 14px; margin: 0 0 20px 0;">
-            Create and manage clips for your selected streamers
-        </p>
-        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-            <button id="createClipBtn" class="clip-btn" onclick="createClipForCurrentStream()" style="min-width: 140px;">
+        <div style="margin-bottom: 16px;">
+            <h3 style="color: #f1f5f9; font-size: 20px; font-weight: 700; margin: 0 0 8px 0; text-align: center;">
+                🎬 Clip Management Hub
+            </h3>
+            <p style="color: #cbd5e1; font-size: 14px; margin: 0; text-align: center;">
+                Create and manage clips for your selected streamers
+            </p>
+        </div>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; align-items: center;">
+            <button id="createClipBtn" class="clip-btn" onclick="createClipForCurrentStream()" 
+                    style="min-width: 150px; font-size: 14px; font-weight: 600; padding: 12px 20px;">
                 📹 Create Clip
             </button>
-            <button id="medalImportBtn" class="clip-btn medal-btn" onclick="openMedalImport()" style="min-width: 140px;">
+            <button id="medalImportBtn" class="clip-btn medal-btn" onclick="openMedalImport()" 
+                    style="min-width: 150px; font-size: 14px; font-weight: 600; padding: 12px 20px;">
                 🏅 Import Medal.tv
             </button>
-            <button id="myClipsBtn" class="clip-btn" onclick="viewMyClips()" style="min-width: 140px;">
+            <button id="myClipsBtn" class="clip-btn" onclick="viewMyClips()" 
+                    style="min-width: 150px; font-size: 14px; font-weight: 600; padding: 12px 20px;">
                 📋 My Clips
             </button>
         </div>
+        <div style="margin-top: 12px;">
+            <small style="color: #94a3b8; font-size: 12px;">
+                💡 Select streamers below, then create or import clips
+            </small>
+        </div>
     `;
     
-    // Add clip controls to wrapper
-    unifiedWrapper.appendChild(clipControls);
+    // Insert immediately after header with maximum force
+    if (header.nextSibling) {
+        header.parentNode.insertBefore(clipControls, header.nextSibling);
+    } else {
+        header.parentNode.appendChild(clipControls);
+    }
     
-    // Add all original content back to wrapper
-    allContentAfterHeader.forEach(el => {
-        // Remove any existing margin-bottom from sections to avoid double spacing
-        if (el.classList.contains('mb-6')) {
-            el.classList.remove('mb-6');
-            el.classList.add('mb-8');
+    console.log('Clip controls injected successfully:', clipControls);
+    
+    // Force visibility check after a brief delay
+    setTimeout(() => {
+        const injectedControls = modalContent.querySelector('.multistream-clip-controls');
+        if (injectedControls) {
+            console.log('Controls confirmed in DOM:', injectedControls);
+            console.log('Controls position:', injectedControls.getBoundingClientRect());
+        } else {
+            console.error('Controls not found in DOM after injection!');
         }
-        unifiedWrapper.appendChild(el);
-    });
-    
-    // Insert the unified wrapper after header
-    header.parentNode.insertBefore(unifiedWrapper, header.nextSibling);
+    }, 100);
 }
 
 // Export functions for global access
