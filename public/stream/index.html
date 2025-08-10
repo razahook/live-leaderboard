@@ -33,24 +33,21 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 16px;
+      padding: 12px;
     }
 
     .container {
-      max-width: 1600px;
+      max-width: 1920px;
       width: 100%;
       background: var(--color-bg-alt);
-      border-radius: 20px;
+      border-radius: 16px;
       box-shadow:
         0 4px 12px rgba(0,0,0,0.8),
         inset 0 0 0 1px var(--color-border-strong);
-      padding: 24px 32px;
+      padding: 20px 24px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
     }
 
     .header {
@@ -226,10 +223,11 @@
     }
 
     .grid {
-      margin-top: 32px;
+      margin-top: 24px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      gap: 32px;
+      width: 100%;
     }
 
     .tile {
@@ -306,7 +304,8 @@
       flex-grow: 1;
       background: #000;
       position: relative;
-      min-height: 400px;
+      min-height: 500px;
+      border-radius: 0 0 16px 16px;
     }
 
     iframe {
@@ -318,7 +317,7 @@
       background: #000;
       border-radius: 0 0 16px 16px;
       pointer-events: auto;
-      min-height: 400px;
+      min-height: 500px;
     }
 
     @media (max-width: 1200px) {
