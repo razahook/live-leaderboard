@@ -4479,6 +4479,30 @@
     "https://twitch.tv/nes_re1qz": {
       "username": "nes_re1qz",
       "timestamp": 1754837603.6222346
+    },
+    "/core/out?type=twitch&id=scuwry": {
+      "username": "scuwry",
+      "timestamp": 1754837676.9365838
+    },
+    "/core/out?type=twitch&id=monsoongg": {
+      "username": "monsoongg",
+      "timestamp": 1754837676.9630218
+    },
+    "/core/out?type=twitch&id=xelonzy": {
+      "username": "xelonzy",
+      "timestamp": 1754837676.9732988
+    },
+    "https://twitch.tv/scuwry": {
+      "username": "scuwry",
+      "timestamp": 1754837677.7103767
+    },
+    "https://twitch.tv/monsoongg": {
+      "username": "monsoongg",
+      "timestamp": 1754837677.730263
+    },
+    "https://twitch.tv/xelonzy": {
+      "username": "xelonzy",
+      "timestamp": 1754837677.7393167
     }
   },
   "last_updated": null
