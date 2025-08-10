@@ -162,6 +162,54 @@
       background: #121a34;
     }
 
+    .controls select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1.8px solid #334155;
+      background: #0b1220;
+      color: #e5e7eb;
+      font-size: 16px;
+      font-weight: 500;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+    .controls select:focus {
+      outline: none;
+      border-color: #8b5cf6;
+      box-shadow: 0 0 10px #8b5cf6aa;
+      background: #121a34;
+    }
+    .controls select option {
+      background: #0b1220;
+      color: #e5e7eb;
+      padding: 8px;
+    }
+    
+    .streamer-dropdown {
+      position: relative;
+    }
+    
+    .streamer-dropdown.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    
+    .streamer-dropdown.loading::after {
+      content: "⏳";
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: translateY(-50%) rotate(0deg); }
+      to { transform: translateY(-50%) rotate(360deg); }
+    }
+
     button[onclick="loadStreams()"] {
       margin-top: 20px;
       width: 100%;
@@ -306,13 +354,20 @@
         <button class="btn btn-accent" onclick="viewMyClips()">📋 My Clips</button>
       </div>
       <div class="controls">
-        <input id="s1" placeholder="Streamer 1 (twitch login)">
-        <input id="s2" placeholder="Streamer 2 (twitch login)">
-        <input id="s3" placeholder="Streamer 3 (twitch login)">
+        <select id="s1" class="streamer-dropdown">
+          <option value="">-- Select Streamer 1 --</option>
+        </select>
+        <select id="s2" class="streamer-dropdown">
+          <option value="">-- Select Streamer 2 --</option>
+        </select>
+        <select id="s3" class="streamer-dropdown">
+          <option value="">-- Select Streamer 3 --</option>
+        </select>
       </div>
       <div style="display: flex; gap: 12px; margin-top: 20px;">
         <button class="btn btn-primary" onclick="loadStreams()" style="flex: 1;">Load Streams</button>
         <button class="btn btn-accent" onclick="loadSampleStreamers()" style="flex: 0 0 auto;">Load Sample</button>
+        <button class="btn btn-warning" onclick="populateStreamerDropdowns()" style="flex: 0 0 auto;">🔄 Refresh Live Streamers</button>
       </div>
     </div>
 
@@ -342,10 +397,105 @@
   </div>
 
   <script>
-    const tiles = [null, document.getElementById('tile-1'), document.getElementById('tile-2'), document.getElementById('tile-3')];
+    // Function to populate streamer dropdowns with live streamers
+    async function populateStreamerDropdowns() {
+      try {
+        // Show loading state
+        const dropdowns = ['s1', 's2', 's3'];
+        dropdowns.forEach(id => {
+          const dropdown = document.getElementById(id);
+          dropdown.classList.add('loading');
+        });
+        
+        // Try to get the allPlayers data from the main page
+        let allPlayers = [];
+        
+        // First try to get from localStorage if available
+        const storedPlayers = localStorage.getItem('allPlayers');
+        if (storedPlayers) {
+          allPlayers = JSON.parse(storedPlayers);
+        }
+        
+        // If no stored data, try to fetch from the API
+        if (allPlayers.length === 0) {
+          const response = await fetch('/api/players');
+          if (response.ok) {
+            const data = await response.json();
+            allPlayers = data.players || [];
+            // Store for future use
+            localStorage.setItem('allPlayers', JSON.stringify(allPlayers));
+          }
+        }
+        
+        // Filter for live streamers
+        const liveStreamers = allPlayers.filter(player => {
+          const twitchLive = player.twitch_live?.is_live === true;
+          const hasUser = !!(player.stream?.twitchUser || player.canonical_twitch_username || player.twitch_link);
+          return twitchLive && hasUser;
+        });
+        
+        console.log('Live streamers found:', liveStreamers.length);
+        
+        // Populate all three dropdowns
+        dropdowns.forEach(dropdownId => {
+          const dropdown = document.getElementById(dropdownId);
+          const placeholder = dropdown.options[0];
+          dropdown.innerHTML = '';
+          dropdown.appendChild(placeholder);
+          
+          // Add live streamers
+          liveStreamers.forEach(player => {
+            const twitchUsername = player.stream?.twitchUser || player.canonical_twitch_username || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
+            const viewerCount = player.stream?.viewers || 0;
+            
+            if (twitchUsername) {
+              const option = document.createElement('option');
+              option.value = twitchUsername;
+              option.textContent = `${player.name || player.player_name || twitchUsername} (${viewerCount.toLocaleString()} viewers)`;
+              option.dataset.playerName = player.name || player.player_name;
+              dropdown.appendChild(option);
+            }
+          });
+        });
+        
+        // Add change event listeners to auto-load streams
+        dropdowns.forEach(dropdownId => {
+          const dropdown = document.getElementById(dropdownId);
+          dropdown.onchange = () => {
+            // Auto-load streams when selection changes
+            setTimeout(() => loadStreams(), 100);
+          };
+        });
+        
+        // Show success message
+        if (liveStreamers.length > 0) {
+          showMessage(`Found ${liveStreamers.length} live streamers!`, 'success');
+        } else {
+          showMessage('No live streamers found. Try refreshing.', 'info');
+        }
+        
+      } catch (error) {
+        console.error('Error populating streamer dropdowns:', error);
+        showMessage('Failed to load live streamers. Using sample streamers.', 'info');
+        // Fallback to sample streamers if API fails
+        loadSampleStreamers();
+      } finally {
+        // Remove loading state
+        dropdowns.forEach(id => {
+          const dropdown = document.getElementById(id);
+          dropdown.classList.remove('loading');
+        });
+      }
+    }
     
-    // Sample popular Apex streamers for testing
-    const sampleStreamers = ['aceu', 'shroud', 'iitztimmy'];
+    // Helper function to extract username from Twitch link
+    function extractUsernameFromLink(link) {
+      if (!link) return null;
+      const match = link.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
+      return match ? match[1].toLowerCase() : null;
+    }
+    
+    const tiles = [null, document.getElementById('tile-1'), document.getElementById('tile-2'), document.getElementById('tile-3')];
     
     function twitchIframe(channel) {
       const parent = location.hostname;
@@ -399,9 +549,31 @@
     }
     
     function loadSampleStreamers() {
-      document.getElementById('s1').value = sampleStreamers[0];
-      document.getElementById('s2').value = sampleStreamers[1];
-      document.getElementById('s3').value = sampleStreamers[2];
+      // Set sample streamers in dropdowns
+      const sampleStreamers = ['aceu', 'shroud', 'iitztimmy'];
+      
+      // Find and select the sample streamers in the dropdowns
+      const s1Dropdown = document.getElementById('s1');
+      const s2Dropdown = document.getElementById('s2');
+      const s3Dropdown = document.getElementById('s3');
+      
+      // Try to find and select the sample streamers
+      const setSampleStreamer = (dropdown, username) => {
+        for (let i = 0; i < dropdown.options.length; i++) {
+          if (dropdown.options[i].value === username) {
+            dropdown.selectedIndex = i;
+            return true;
+          }
+        }
+        // If not found, set the value directly
+        dropdown.value = username;
+        return false;
+      };
+      
+      setSampleStreamer(s1Dropdown, sampleStreamers[0]);
+      setSampleStreamer(s2Dropdown, sampleStreamers[1]);
+      setSampleStreamer(s3Dropdown, sampleStreamers[2]);
+      
       loadStreams();
     }
     
@@ -437,12 +609,16 @@
     
     // Auto-load sample streamers on page load for demo
     document.addEventListener('DOMContentLoaded', function() {
-      // Add a small delay to ensure everything is loaded
-      setTimeout(() => {
-        if (!document.getElementById('s1').value && !document.getElementById('s2').value && !document.getElementById('s3').value) {
-          loadSampleStreamers();
-        }
-      }, 500);
+      // First populate the dropdowns with live streamers
+      populateStreamerDropdowns().then(() => {
+        // Add a small delay to ensure everything is loaded
+        setTimeout(() => {
+          // If no streamers are selected, load sample streamers
+          if (!document.getElementById('s1').value && !document.getElementById('s2').value && !document.getElementById('s3').value) {
+            loadSampleStreamers();
+          }
+        }, 500);
+      });
     });
   </script>
 
