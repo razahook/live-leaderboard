@@ -306,10 +306,11 @@
       flex-grow: 1;
       background: #000;
       position: relative;
-      min-height: clamp(450px, 50vh, 900px);
       border-radius: 0 0 16px 16px;
       height: 100%;
       width: 100%;
+      display: flex;
+      align-items: stretch;
     }
 
     iframe {
@@ -335,9 +336,6 @@
       .grid {
         grid-template-columns: 1fr;
         height: calc(100vh - 250px);
-      }
-      .player {
-        min-height: clamp(200px, 35vh, 400px);
       }
       iframe {
         min-height: clamp(200px, 35vh, 400px);
