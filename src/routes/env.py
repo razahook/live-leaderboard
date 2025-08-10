@@ -18,10 +18,21 @@ def public_env():
 def edge_config_public():
     url = os.environ.get('EDGE_CONFIG')
     flags = {
-        'enable_medal': False,
+        'enable_medal': True,  # Enable Medal.tv by default now
         'max_recent_clips': 4,
         'multistream_default_layout': 'equal',
-        'feature_flags': {'multistreamDock': True, 'streamPage': False}
+        'feature_flags': {'multistreamDock': True, 'streamPage': False},
+        'medal_config': {
+            'default_category': '5FsRVgww4b',  # Apex Legends
+            'filter_apex_only': True,
+            'allow_user_imports': True,
+            'max_clips_per_search': 20
+        },
+        'game_categories': {
+            'apex_legends': '5FsRVgww4b',
+            'valorant': 'fW3AZxHf_c', 
+            'overwatch': 'some_id'
+        }
     }
     if url:
         try:
