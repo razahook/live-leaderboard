@@ -649,9 +649,15 @@ function setupAggressiveClipControlHiding(modalContent) {
             display: none !important;
         }
         
+        /* Hide useless tabs by color classes */
+        #multiStreamModal button.bg-blue-600:not(.multistream-clip-controls *),
+        #multiStreamModal button.bg-yellow-600:not(.multistream-clip-controls *) {
+            display: none !important;
+        }
+        
     `;
     document.head.appendChild(hideStyle);
-    console.log('Added targeted CSS rules to hide only clip buttons, preserve VOD/PiP tabs');
+    console.log('Added CSS rules to hide clip buttons and useless tabs');
     
     // Function to hide only clip-related buttons, preserve VOD/PiP tabs
     function hideClipButtons() {
@@ -673,19 +679,21 @@ function setupAggressiveClipControlHiding(modalContent) {
                     btnOnclick.includes('createLiveClip')
                 );
                 
-                // Preserve essential tabs
-                const isEssentialTab = (
-                    btnText.includes('vod') ||
-                    btnText.includes('pip') ||
+                // Check if it's a useless tab that should be hidden
+                const isUselessTab = (
                     btnText.includes('tab') ||
-                    btn.classList.contains('essential-tab')
+                    btnText.includes('pip') ||
+                    btnText.includes('vod') ||
+                    btnText.includes('test') ||
+                    btnText.includes('debug')
                 );
                 
-                if (isClipButton && !isEssentialTab) {
+                // Hide clip buttons OR useless tabs
+                if (isClipButton || isUselessTab) {
                     btn.style.display = 'none';
                     btn.style.visibility = 'hidden';
                     hiddenCount++;
-                    console.log(`Hidden clip button: "${btnText}"`);
+                    console.log(`Hidden button: "${btnText}"`);
                 }
             }
         });
