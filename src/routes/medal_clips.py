@@ -72,7 +72,16 @@ def get_medal_clips(username):
     try:
         medal_api_key = os.environ.get('MEDAL_API_KEY')
         if not medal_api_key:
-            return jsonify({"success": False, "error": "Medal.tv API not configured"}), 500
+            # Debug info to see what env vars are available
+            available_vars = [k for k in os.environ.keys() if 'MEDAL' in k.upper()]
+            return jsonify({
+                "success": False, 
+                "error": "Medal.tv API not configured",
+                "debug": {
+                    "medal_env_vars": available_vars,
+                    "all_env_keys": list(os.environ.keys())[:20]  # First 20 keys only
+                }
+            }), 500
         
         # Medal.tv API headers as per documentation
         headers = {
