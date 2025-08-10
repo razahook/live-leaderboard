@@ -227,7 +227,7 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: clamp(32px, 5vw, 80px);
       width: 100%;
-      height: calc(100vh - 320px);
+      /* Remove fixed height to allow natural aspect ratio */
       align-items: stretch;
       padding: 0 clamp(16px, 3vw, 48px);
     }
@@ -303,11 +303,11 @@
     }
 
     .player {
-      flex-grow: 1;
+      /* Use aspect-ratio for perfect 16:9 ratio (1.778) matching official Twitch */
+      aspect-ratio: 16 / 9;
       background: #000;
       position: relative;
       border-radius: 0 0 16px 16px;
-      height: 100%;
       width: 100%;
       display: flex;
       align-items: stretch;
@@ -321,7 +321,7 @@
       background: #000;
       border-radius: 0 0 16px 16px;
       pointer-events: auto;
-      object-fit: cover;
+      /* Remove object-fit to allow Twitch player natural scaling */
     }
     
     .twitch-embed-container {
@@ -331,25 +331,23 @@
       background: #000;
       border-radius: 0;
       overflow: hidden;
-      object-fit: cover;
+      /* Remove object-fit to allow natural Twitch player scaling */
     }
 
     @media (max-width: 1200px) {
       .grid {
         grid-template-columns: repeat(2, 1fr);
         gap: clamp(16px, 3vw, 40px);
-        height: calc(100vh - 280px);
+        /* Remove fixed height to maintain aspect ratio */
       }
     }
 
     @media (max-width: 800px) {
       .grid {
         grid-template-columns: 1fr;
-        height: calc(100vh - 250px);
+        /* Remove fixed height to maintain aspect ratio */
       }
-      iframe {
-        min-height: clamp(200px, 35vh, 400px);
-      }
+      /* Remove min-height constraint to allow natural 16:9 aspect ratio */
       .controls {
         grid-template-columns: 1fr;
       }
