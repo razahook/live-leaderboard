@@ -607,7 +607,13 @@ function injectClipControlsInModal(modalContent) {
     console.log('Clip controls injected successfully:', clipControls);
     
     // AGGRESSIVE approach to hide duplicate clip controls
-    setupAggressiveClipControlHiding(modalContent);
+    console.log('About to call setupAggressiveClipControlHiding with:', modalContent);
+    try {
+        setupAggressiveClipControlHiding(modalContent);
+        console.log('setupAggressiveClipControlHiding completed successfully');
+    } catch (error) {
+        console.error('Error in setupAggressiveClipControlHiding:', error);
+    }
     
     // Force visibility check after a brief delay
     setTimeout(() => {
