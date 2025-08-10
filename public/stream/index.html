@@ -402,11 +402,17 @@
      // Define dropdowns outside try block so it's accessible in finally
      const dropdowns = ['s1', 's2', 's3'];
      
+     console.log('Starting populateStreamerDropdowns function...');
+     console.log('Dropdown IDs:', dropdowns);
+     
      try {
        // Show loading state
        dropdowns.forEach(id => {
          const dropdown = document.getElementById(id);
-         dropdown.classList.add('loading');
+         console.log('Found dropdown:', id, dropdown);
+         if (dropdown) {
+           dropdown.classList.add('loading');
+         }
        });
        
        // Get all players data - same as main page
@@ -429,9 +435,15 @@
        // If no cache, fetch from leaderboard API
        if (allPlayers.length === 0) {
          try {
-           const response = await fetch('/api/leaderboard/PC');
+           console.log('No cached data, fetching from API...');
+           const response = await fetch('/api/stats/PC');
+           console.log('API response:', response);
+           console.log('Response status:', response.status);
+           console.log('Response ok:', response.ok);
+           
            if (response.ok) {
              const data = await response.json();
+             console.log('API response data:', data);
              if (data.success && data.data) {
                allPlayers = data.data;
                console.log('Fetched player data from API:', allPlayers.length);
@@ -440,7 +452,11 @@
                  data: allPlayers,
                  timestamp: Date.now()
                }));
+             } else {
+               console.log('API response not successful or no data');
              }
+           } else {
+             console.error('API response not ok:', response.status, response.statusText);
            }
          } catch (fetchError) {
            console.error('Error fetching leaderboard:', fetchError);
