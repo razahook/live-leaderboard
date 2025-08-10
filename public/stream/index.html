@@ -429,7 +429,9 @@
        // If no cache, fetch from leaderboard API
        if (allPlayers.length === 0) {
          try {
-           const response = await fetch('/api/leaderboard/PC');
+           // Use absolute URL for API call to ensure it works from any server
+           const apiUrl = window.location.protocol + '//' + window.location.hostname + ':5000/api/leaderboard/PC';
+           const response = await fetch(apiUrl);
            if (response.ok) {
              const data = await response.json();
              if (data.success && data.data && data.data.players) {
