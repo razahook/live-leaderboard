@@ -1,0 +1,462 @@
+/* Multistream Clip Integration Styles */
+
+/* Main Controls */
+.multistream-clip-controls {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    flex-wrap: wrap;
+}
+
+.clip-btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #9146ff;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 120px;
+}
+
+.clip-btn:hover {
+    background: #7c3aed;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.clip-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.clip-btn:disabled {
+    background: #6b7280;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.medal-btn {
+    background: linear-gradient(135deg, #ff6b35, #ffa500);
+    position: relative;
+    overflow: hidden;
+}
+
+.medal-btn:hover {
+    background: linear-gradient(135deg, #e55a2b, #e69500);
+}
+
+.medal-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.medal-btn:hover::before {
+    left: 100%;
+}
+
+/* Modal Styles */
+.medal-import-modal,
+.my-clips-modal,
+.streamer-clips-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: #1f2937;
+    color: white;
+    padding: 24px;
+    border-radius: 12px;
+    width: 450px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    position: relative;
+}
+
+.large-modal {
+    width: 700px;
+}
+
+.modal-content h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #f9fafb;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #d1d5db;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    background: #374151;
+    color: white;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #9146ff;
+    box-shadow: 0 0 0 3px rgba(145, 70, 255, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 4px;
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.modal-actions {
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #9ca3af;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Notification Styles */
+.clip-success-notification,
+.medal-success-notification,
+.error-notification,
+.clip-loading-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10001;
+    animation: slideIn 0.3s ease;
+}
+
+.clip-notification {
+    background: #1f2937;
+    color: white;
+    padding: 18px;
+    border-radius: 12px;
+    border-left: 4px solid #10b981;
+    min-width: 320px;
+    max-width: 400px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.medal-style {
+    border-left-color: #ff6b35;
+    background: linear-gradient(135deg, #1f2937, #374151);
+}
+
+.error-style {
+    border-left-color: #ef4444;
+}
+
+.loading-style {
+    border-left-color: #3b82f6;
+}
+
+.clip-notification h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.clip-notification p {
+    margin: 4px 0;
+    color: #d1d5db;
+}
+
+.clip-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.clip-info {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #374151;
+}
+
+.clip-info small {
+    color: #9ca3af;
+    font-family: monospace;
+}
+
+/* Button Styles */
+.btn-primary,
+.btn-secondary,
+.btn-outline {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+}
+
+.btn-outline:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-loading {
+    opacity: 0.7;
+}
+
+/* Clips Display */
+.clips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.clip-item {
+    background: #374151;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #4b5563;
+}
+
+.clip-item h4 {
+    margin: 0 0 8px 0;
+    color: #f9fafb;
+    font-size: 14px;
+}
+
+.clip-item p {
+    margin: 4px 0;
+    color: #d1d5db;
+    font-size: 13px;
+}
+
+.no-clips,
+.error {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9ca3af;
+}
+
+.no-clips h4,
+.error h4 {
+    margin: 0 0 8px 0;
+    color: #d1d5db;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #374151;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin: 0 8px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .multistream-clip-controls {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .clip-btn {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .modal-content {
+        width: 95vw;
+        padding: 16px;
+    }
+    
+    .large-modal {
+        width: 95vw;
+    }
+    
+    .clip-success-notification,
+    .medal-success-notification,
+    .error-notification,
+    .clip-loading-notification {
+        right: 10px;
+        left: 10px;
+        top: 10px;
+    }
+    
+    .clip-notification {
+        min-width: auto;
+    }
+    
+    .clips-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .clip-actions {
+        flex-direction: column;
+    }
+    
+    .modal-actions {
+        flex-direction: column-reverse;
+    }
+}
+
+/* Dark theme compatibility */
+@media (prefers-color-scheme: dark) {
+    .modal-content {
+        background: #111827;
+        border: 1px solid #374151;
+    }
+    
+    .clip-notification {
+        background: #111827;
+        border: 1px solid #374151;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .clip-btn {
+        border: 2px solid currentColor;
+    }
+    
+    .modal-content {
+        border: 2px solid #9ca3af;
+    }
+    
+    .clip-notification {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .clip-btn,
+    .modal-content,
+    .clip-notification {
+        animation: none;
+        transition: none;
+    }
+    
+    .clip-btn:hover {
+        transform: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+    }
+}
