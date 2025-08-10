@@ -369,6 +369,95 @@ def create_clip(username):
     except Exception as e:
         return jsonify({"success": False, "error": f"Error creating clip: {str(e)}"}), 500
 
+@twitch_clips_bp.route('/saved-clips', methods=['GET'])
+def get_saved_clips():
+    """Get all saved clips from database"""
+    try:
+        sb = get_supabase()
+        if sb is None:
+            return jsonify({"success": False, "error": "Database not available"}), 500
+        
+        # Get all clips from database
+        result = sb.table('clips').select('*').order('created_at', desc=True).limit(100).execute()
+        
+        if result.data:
+            return jsonify({
+                "success": True,
+                "data": {
+                    "clips": result.data,
+                    "count": len(result.data),
+                    "source": "database"
+                }
+            })
+        else:
+            return jsonify({
+                "success": True,
+                "data": {
+                    "clips": [],
+                    "count": 0,
+                    "source": "database",
+                    "message": "No saved clips found"
+                }
+            })
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@twitch_clips_bp.route('/saved-clips/<username>', methods=['GET'])
+def get_saved_clips_for_streamer(username):
+    """Get saved clips for a specific streamer"""
+    try:
+        sb = get_supabase()
+        if sb is None:
+            return jsonify({"success": False, "error": "Database not available"}), 500
+        
+        # Get clips for specific broadcaster
+        result = sb.table('clips').select('*').eq('broadcaster_login', username.lower()).order('created_at', desc=True).limit(50).execute()
+        
+        if result.data:
+            return jsonify({
+                "success": True,
+                "data": {
+                    "clips": result.data,
+                    "count": len(result.data),
+                    "source": "database",
+                    "streamer": username
+                }
+            })
+        else:
+            return jsonify({
+                "success": True,
+                "data": {
+                    "clips": [],
+                    "count": 0,
+                    "source": "database",
+                    "streamer": username,
+                    "message": f"No saved clips found for {username}"
+                }
+            })
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@twitch_clips_bp.route('/my-clips', methods=['GET'])
+def get_my_clips():
+    """Get clips created by the current user (requires authentication)"""
+    try:
+        # This would need OAuth user context in a real implementation
+        # For now, return empty response
+        return jsonify({
+            "success": True,
+            "data": {
+                "clips": [],
+                "count": 0,
+                "source": "user",
+                "message": "User authentication required"
+            }
+        })
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @twitch_clips_bp.route('/stream-clips/batch', methods=['POST'])
 def get_clips_batch():
     try:

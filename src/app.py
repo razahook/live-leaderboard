@@ -73,6 +73,12 @@ except ImportError as e:
     logger.warning(f"Could not import twitch_clips routes: {e}")
 
 try:
+    from routes.medal_clips import medal_clips_bp
+    imported_blueprints.append(('medal_clips_bp', medal_clips_bp))
+except ImportError as e:
+    logger.warning(f"Could not import medal_clips routes: {e}")
+
+try:
     from routes.twitch_vod_downloader import twitch_vod_bp
     imported_blueprints.append(('twitch_vod_bp', twitch_vod_bp))
 except ImportError as e:
