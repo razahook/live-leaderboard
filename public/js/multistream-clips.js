@@ -606,32 +606,8 @@ function injectClipControlsInModal(modalContent) {
     
     console.log('Clip controls injected successfully:', clipControls);
     
-    // Hide any duplicate or conflicting clip controls that might show on individual stream panels
-    try {
-        // Wait a bit for the streams to load their individual controls
-        setTimeout(() => {
-            // Hide individual stream "📎 Clip" buttons since we have centralized controls now
-            const individualClipBtns = modalContent.querySelectorAll('button[onclick*="createLiveClip"], button:contains("📎 Clip"), button[title*="clip"]');
-            individualClipBtns.forEach(btn => {
-                if (!btn.closest('.multistream-clip-controls') && btn.textContent.includes('📎')) {
-                    btn.style.display = 'none';
-                    console.log('Hidden individual stream clip button:', btn);
-                }
-            });
-            
-            // Also hide any buttons with clip icons/emojis
-            const allButtons = modalContent.querySelectorAll('button');
-            allButtons.forEach(btn => {
-                if (!btn.closest('.multistream-clip-controls') && 
-                    (btn.textContent.includes('📎') || btn.textContent.toLowerCase().includes('clip'))) {
-                    btn.style.display = 'none';
-                    console.log('Hidden duplicate clip control:', btn.textContent.trim());
-                }
-            });
-        }, 1000); // Wait for streams to load
-    } catch (e) {
-        console.log('No duplicate controls found to hide');
-    }
+    // AGGRESSIVE approach to hide duplicate clip controls
+    setupAggressiveClipControlHiding(modalContent);
     
     // Force visibility check after a brief delay
     setTimeout(() => {
@@ -643,6 +619,115 @@ function injectClipControlsInModal(modalContent) {
             console.error('Controls not found in DOM after injection!');
         }
     }, 100);
+}
+
+function setupAggressiveClipControlHiding(modalContent) {
+    console.log('=== SETTING UP AGGRESSIVE CLIP CONTROL HIDING ===');
+    
+    // Add CSS rules to immediately hide individual clip buttons
+    const hideStyle = document.createElement('style');
+    hideStyle.innerHTML = `
+        /* Hide individual stream clip buttons - keep only our centralized ones */
+        #multiStreamModal button[onclick*="createLiveClip"]:not(.multistream-clip-controls *) {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        
+        #multiStreamModal button[title*="Create clip"]:not(.multistream-clip-controls *) {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        
+        #multiStreamModal button.bg-orange-600:not(.multistream-clip-controls *) {
+            display: none !important;
+            visibility: hidden !important;
+        }
+    `;
+    document.head.appendChild(hideStyle);
+    console.log('Added targeted CSS rules to hide individual clip buttons');
+    
+    // Function to hide clip buttons
+    function hideClipButtons() {
+        const selectors = [
+            'button[onclick*="createLiveClip"]',
+            'button[title*="clip"]', 
+            'button[title*="Clip"]',
+            'button:contains("📎")',
+            '.stream-controls button',
+            '.player-controls button',
+            '[class*="stream"] button',
+        ];
+        
+        let hiddenCount = 0;
+        
+        selectors.forEach(selector => {
+            try {
+                const buttons = modalContent.querySelectorAll(selector);
+                buttons.forEach(btn => {
+                    // Don't hide if it's part of our centralized controls
+                    if (!btn.closest('.multistream-clip-controls')) {
+                        const btnText = btn.textContent.trim().toLowerCase();
+                        const btnTitle = (btn.title || '').toLowerCase();
+                        const btnOnclick = (btn.onclick || btn.getAttribute('onclick') || '').toString();
+                        
+                        // Check if it's a clip-related button
+                        if (btnText.includes('📎') || btnText.includes('clip') || 
+                            btnTitle.includes('clip') || btnOnclick.includes('clip')) {
+                            btn.style.display = 'none';
+                            btn.style.visibility = 'hidden';
+                            hiddenCount++;
+                            console.log(`Hidden clip button: "${btnText}" (${selector})`);
+                        }
+                    }
+                });
+            } catch (e) {
+                // Selector might not work, skip it
+            }
+        });
+        
+        if (hiddenCount > 0) {
+            console.log(`=== HIDDEN ${hiddenCount} duplicate clip buttons ===`);
+        }
+    }
+    
+    // Hide immediately
+    hideClipButtons();
+    
+    // Hide again after delays to catch dynamically loaded content
+    setTimeout(hideClipButtons, 500);
+    setTimeout(hideClipButtons, 1500);
+    setTimeout(hideClipButtons, 3000);
+    
+    // Set up MutationObserver to catch new elements
+    const observer = new MutationObserver((mutations) => {
+        let shouldCheck = false;
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // Element node
+                        const isButton = node.tagName === 'BUTTON';
+                        const hasButtons = node.querySelector && node.querySelector('button');
+                        if (isButton || hasButtons) {
+                            shouldCheck = true;
+                        }
+                    }
+                });
+            }
+        });
+        
+        if (shouldCheck) {
+            console.log('New buttons detected, running clip control cleanup...');
+            setTimeout(hideClipButtons, 100);
+        }
+    });
+    
+    // Watch for new elements being added
+    observer.observe(modalContent, {
+        childList: true,
+        subtree: true
+    });
+    
+    console.log('MutationObserver set up to watch for new clip buttons');
 }
 
 // Export functions for global access
