@@ -222,13 +222,14 @@
     }
 
     .grid {
-      margin-top: 24px;
+      margin-top: 32px;
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: clamp(20px, 4vw, 60px);
+      gap: clamp(32px, 5vw, 80px);
       width: 100%;
-      height: calc(100vh - 300px);
+      height: calc(100vh - 320px);
       align-items: stretch;
+      padding: 0 clamp(16px, 3vw, 48px);
     }
 
     .tile {
@@ -305,7 +306,7 @@
       flex-grow: 1;
       background: #000;
       position: relative;
-      min-height: clamp(400px, 45vh, 800px);
+      min-height: clamp(450px, 50vh, 900px);
       border-radius: 0 0 16px 16px;
       height: 100%;
       width: 100%;
@@ -316,11 +317,10 @@
       height: 100%;
       border: none;
       display: block;
-      aspect-ratio: 16 / 9;
       background: #000;
       border-radius: 0 0 16px 16px;
       pointer-events: auto;
-      min-height: clamp(400px, 45vh, 800px);
+      object-fit: cover;
     }
 
     @media (max-width: 1200px) {
