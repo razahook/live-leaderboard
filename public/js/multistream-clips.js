@@ -423,7 +423,6 @@ async function loadClipsForStreamer(streamerName) {
         const result = await response.json();
         
         if (result.success) {
-            console.log(`Clips for ${streamerName}:`, result.data);
             // You can implement a modal or sidebar to show these clips
             showStreamerClipsModal(streamerName, result.data.clips);
         }
@@ -524,14 +523,10 @@ function injectClipControls(container) {
 function injectClipControlsInModal(modalContent) {
     // Check if controls already exist
     if (modalContent.querySelector('.multistream-clip-controls')) {
-        console.log('Clip controls already exist, skipping injection');
         return;
     }
     
-    console.log('Injecting clip controls into modal...', modalContent);
     
-    // Debug: log all children of modalContent
-    console.log('Modal content children:', Array.from(modalContent.children));
     
     // Try to find the header more aggressively
     let header = modalContent.querySelector('h2');
@@ -539,7 +534,6 @@ function injectClipControlsInModal(modalContent) {
         header = modalContent.querySelector('.flex.justify-between.items-center');
         if (!header) {
             header = modalContent.firstElementChild;
-            console.log('Using first child as header:', header);
         }
     }
     
@@ -611,13 +605,10 @@ function injectClipControlsInModal(modalContent) {
         header.parentNode.appendChild(clipControls);
     }
     
-    console.log('Clip controls injected successfully:', clipControls);
     
     // AGGRESSIVE approach to hide duplicate clip controls
-    console.log('About to call setupAggressiveClipControlHiding with:', modalContent);
     try {
         setupAggressiveClipControlHiding(modalContent);
-        console.log('setupAggressiveClipControlHiding completed successfully');
     } catch (error) {
         console.error('Error in setupAggressiveClipControlHiding:', error);
     }
@@ -625,23 +616,33 @@ function injectClipControlsInModal(modalContent) {
     // Force visibility check after a brief delay
     setTimeout(() => {
         const injectedControls = modalContent.querySelector('.multistream-clip-controls');
-        if (injectedControls) {
-            console.log('Controls confirmed in DOM:', injectedControls);
-            console.log('Controls position:', injectedControls.getBoundingClientRect());
-        } else {
+        if (!injectedControls) {
             console.error('Controls not found in DOM after injection!');
         }
     }, 100);
 }
 
 function setupAggressiveClipControlHiding(modalContent) {
-    console.log('=== SETTING UP AGGRESSIVE CLIP CONTROL HIDING ===');
     
     // Add targeted CSS rules to hide only individual stream clip buttons  
     const hideStyle = document.createElement('style');
     hideStyle.innerHTML = `
         /* Target ONLY clip buttons, preserve VOD, PiP, and other tabs */
         #multiStreamModal button[onclick*="createLiveClip"]:not(.multistream-clip-controls *) {
+            display: none !important;
+        }
+        
+        /* Hide Medal.tv and My Clips buttons specifically */
+        #multiStreamModal button[onclick*="openMedalImport"]:not(.multistream-clip-controls *),
+        #multiStreamModal button[onclick*="viewMyClips"]:not(.multistream-clip-controls *) {
+            display: none !important;
+        }
+        
+        /* Hide by text content - side panel buttons */
+        #multiStreamModal button:not(.multistream-clip-controls *):contains("Medal"),
+        #multiStreamModal button:not(.multistream-clip-controls *):contains("My Clips"),
+        #multiStreamModal button:not(.multistream-clip-controls *):contains("🏅"),
+        #multiStreamModal button:not(.multistream-clip-controls *):contains("📋") {
             display: none !important;
         }
         
@@ -657,7 +658,6 @@ function setupAggressiveClipControlHiding(modalContent) {
         
     `;
     document.head.appendChild(hideStyle);
-    console.log('Added CSS rules to hide clip buttons and useless tabs');
     
     // Function to hide only clip-related buttons, preserve VOD/PiP tabs
     function hideClipButtons() {
@@ -679,6 +679,16 @@ function setupAggressiveClipControlHiding(modalContent) {
                     btnOnclick.includes('createLiveClip')
                 );
                 
+                // Check for Medal.tv and My Clips buttons specifically
+                const isMedalOrMyClipsButton = (
+                    btnText.includes('medal') ||
+                    btnText.includes('🏅') ||
+                    btnText.includes('my clips') ||
+                    btnText.includes('📋') ||
+                    btnOnclick.includes('openMedalImport') ||
+                    btnOnclick.includes('viewMyClips')
+                );
+                
                 // Check if it's a useless tab that should be hidden
                 const isUselessTab = (
                     btnText.includes('tab') ||
@@ -688,19 +698,15 @@ function setupAggressiveClipControlHiding(modalContent) {
                     btnText.includes('debug')
                 );
                 
-                // Hide clip buttons OR useless tabs
-                if (isClipButton || isUselessTab) {
+                // Hide clip buttons OR Medal/My Clips buttons OR useless tabs
+                if (isClipButton || isMedalOrMyClipsButton || isUselessTab) {
                     btn.style.display = 'none';
                     btn.style.visibility = 'hidden';
                     hiddenCount++;
-                    console.log(`Hidden button: "${btnText}"`);
                 }
             }
         });
         
-        if (hiddenCount > 0) {
-            console.log(`=== HIDDEN ${hiddenCount} duplicate clip buttons ===`);
-        }
     }
     
     // Hide immediately
@@ -729,7 +735,6 @@ function setupAggressiveClipControlHiding(modalContent) {
         });
         
         if (shouldCheck) {
-            console.log('New buttons detected, running clip control cleanup...');
             setTimeout(hideClipButtons, 100);
         }
     });
@@ -740,7 +745,6 @@ function setupAggressiveClipControlHiding(modalContent) {
         subtree: true
     });
     
-    console.log('MutationObserver set up to watch for new clip buttons');
 }
 
 // Export functions for global access
