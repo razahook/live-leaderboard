@@ -3818,6 +3818,22 @@
             multiStreamModal.classList.add('show');
             populateStreamerDropdowns();
             restoreMultiSelection();
+            
+            // Inject clip controls directly when modal opens
+            setTimeout(() => {
+                try {
+                    const modalContent = multiStreamModal.querySelector('.modal-content');
+                    if (modalContent && window.injectClipControlsInModal) {
+                        console.log('=== INJECTING CLIP CONTROLS ===');
+                        window.injectClipControlsInModal(modalContent);
+                    } else {
+                        console.log('Modal content or injection function not found');
+                    }
+                } catch (e) {
+                    console.error('Failed to inject clip controls:', e);
+                }
+            }, 100);
+            
             // Auto-load after restoring selection so the panel appears immediately
             setTimeout(() => {
                 try { loadMultiStreams(); } catch {}

@@ -625,3 +625,4 @@ window.viewMyClips = viewMyClips;
 window.closeMedalModal = closeMedalModal;
 window.closeMyClipsModal = closeMyClipsModal;
 window.closeStreamerClipsModal = closeStreamerClipsModal;
+window.injectClipControlsInModal = injectClipControlsInModal;
