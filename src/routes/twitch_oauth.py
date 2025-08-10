@@ -19,7 +19,7 @@ twitch_oauth_bp = Blueprint('twitch_oauth', __name__)
 TWITCH_CLIENT_ID = os.environ.get('TWITCH_CLIENT_ID')
 TWITCH_CLIENT_SECRET = os.environ.get('TWITCH_CLIENT_SECRET')
 # Default redirect URI for Vercel deployment
-REDIRECT_URI = "https://live-leaderboard-plum.vercel.app/api/session/complete"
+REDIRECT_URI = "https://live-leaderboard-git-performance-fixes-razahooks-projects.vercel.app/api/session/complete"
 # Optional override to force a single base across preview/prod (avoids Twitch mismatch)
 REDIRECT_BASE_OVERRIDE = os.environ.get('TWITCH_REDIRECT_BASE')
 
@@ -109,7 +109,7 @@ def _verify_state(state: str, max_age_seconds: int = 600) -> bool:
     except Exception:
         return False
 
-@twitch_oauth_bp.route('/session/start')
+@twitch_oauth_bp.route('/api/session/start')
 def oauth_login():
     """Initiate OAuth flow for clip creation permissions"""
     from flask import request
@@ -139,7 +139,7 @@ def oauth_login():
             if 'ngrok' in current_url or 'ngrok-free.app' in current_url:
                 redirect_uri = "https://adapted-cunning-rhino.ngrok-free.app/api/session/complete"
             elif 'vercel.app' in current_url or 'live-leaderboard-plum.vercel.app' in current_url:
-                redirect_uri = "https://live-leaderboard-plum.vercel.app/api/session/complete"
+                redirect_uri = "https://live-leaderboard-git-performance-fixes-razahooks-projects.vercel.app/api/session/complete"
             else:
                 redirect_uri = REDIRECT_URI
         
@@ -167,7 +167,7 @@ def oauth_login():
             'error': f'Failed to initiate OAuth: {str(e)}'
         }), 500
 
-@twitch_oauth_bp.route('/session/complete')
+@twitch_oauth_bp.route('/api/session/complete')
 def oauth_callback():
     """Handle OAuth callback from Twitch"""
     from flask import request
@@ -347,7 +347,7 @@ def oauth_callback():
         </body></html>
         """, 500
 
-@twitch_oauth_bp.route('/session/check')
+@twitch_oauth_bp.route('/api/session/check')
 def oauth_status():
     """Check if user has authorized clip creation"""
     try:

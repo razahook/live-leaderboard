@@ -3253,20 +3253,19 @@ ${(() => {
                     return;
                 }
                 
-                // Load user data as JavaScript file
-                const script = document.createElement('script');
-                script.src = `${NGROK_BASE_URL}/assets/user.js`;
-                script.onload = () => {
-                    if (window.userData && window.userData.success && window.userData.authorized) {
+                // Check OAuth status via API
+                const response = await fetch('/api/session/check');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.authorized) {
                         currentUser = {
-                            username: window.userData.username,
-                            display_name: window.userData.display_name
+                            username: data.username,
+                            display_name: data.display_name
                         };
                         localStorage.setItem('twitchUser', JSON.stringify(currentUser));
                         updateLoginUI();
                     }
-                };
-                document.head.appendChild(script);
+                }
             } catch (error) {
                 console.error('Error checking login status:', error);
             }
@@ -3274,14 +3273,14 @@ ${(() => {
         
         const startTwitchLogin = async () => {
             try {
-                // Pass current URL to OAuth endpoint
-                const script = document.createElement('script');
-                script.src = `${NGROK_BASE_URL}/assets/login.js?current_url=${encodeURIComponent(window.location.href)}`;
-                script.onload = () => {
-                    if (window.loginData && window.loginData.success) {
+                // Get OAuth URL from API
+                const response = await fetch('/api/session/start');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.auth_url) {
                         // Open OAuth in popup
                         const popup = window.open(
-                            window.loginData.oauth_url,
+                            data.auth_url,
                             'twitchOAuth',
                             'width=600,height=700,scrollbars=yes,resizable=yes'
                         );
@@ -3309,9 +3308,12 @@ ${(() => {
                                 popup.close();
                             }
                         });
+                    } else {
+                        alert('Failed to get OAuth URL. Please try again.');
                     }
-                };
-                document.head.appendChild(script);
+                } else {
+                    alert('Failed to start OAuth flow. Please try again.');
+                }
             } catch (error) {
                 console.error('Error starting OAuth:', error);
                 alert('Failed to start Twitch login. Please try again.');
