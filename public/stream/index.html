@@ -471,8 +471,8 @@
            if (twitchUsername) {
              const option = document.createElement('option');
              option.value = twitchUsername;
-             option.textContent = `${player.name || player.player_name || twitchUsername} (${viewerCount.toLocaleString()} viewers)`;
-             option.dataset.playerName = player.name || player.player_name;
+             option.textContent = `${player.player_name || player.name || twitchUsername} (${viewerCount.toLocaleString()} viewers)`;
+             option.dataset.playerName = player.player_name || player.name;
              dropdown.appendChild(option);
            }
          });
