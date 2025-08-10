@@ -606,6 +606,33 @@ function injectClipControlsInModal(modalContent) {
     
     console.log('Clip controls injected successfully:', clipControls);
     
+    // Hide any duplicate or conflicting clip controls that might show on individual stream panels
+    try {
+        // Wait a bit for the streams to load their individual controls
+        setTimeout(() => {
+            // Hide individual stream "📎 Clip" buttons since we have centralized controls now
+            const individualClipBtns = modalContent.querySelectorAll('button[onclick*="createLiveClip"], button:contains("📎 Clip"), button[title*="clip"]');
+            individualClipBtns.forEach(btn => {
+                if (!btn.closest('.multistream-clip-controls') && btn.textContent.includes('📎')) {
+                    btn.style.display = 'none';
+                    console.log('Hidden individual stream clip button:', btn);
+                }
+            });
+            
+            // Also hide any buttons with clip icons/emojis
+            const allButtons = modalContent.querySelectorAll('button');
+            allButtons.forEach(btn => {
+                if (!btn.closest('.multistream-clip-controls') && 
+                    (btn.textContent.includes('📎') || btn.textContent.toLowerCase().includes('clip'))) {
+                    btn.style.display = 'none';
+                    console.log('Hidden duplicate clip control:', btn.textContent.trim());
+                }
+            });
+        }, 1000); // Wait for streams to load
+    } catch (e) {
+        console.log('No duplicate controls found to hide');
+    }
+    
     // Force visibility check after a brief delay
     setTimeout(() => {
         const injectedControls = modalContent.querySelector('.multistream-clip-controls');
