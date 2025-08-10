@@ -323,6 +323,14 @@
       pointer-events: auto;
       object-fit: cover;
     }
+    
+    .twitch-embed-container {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #000;
+      border-radius: 0 0 16px 16px;
+    }
 
     @media (max-width: 1200px) {
       .grid {
@@ -644,11 +652,59 @@
       
       console.log('Final parent domain for Twitch embed:', parent);
       
-      // Create a unique ID for this iframe
-      const iframeId = `twitch-iframe-${channel}-${Date.now()}`;
+      // Create a unique ID for this player
+      const playerId = `twitch-player-${channel}-${Date.now()}`;
       
-      // Return the iframe HTML with the correct parent domain
-      return `<iframe id="${iframeId}" allowfullscreen allow="autoplay; fullscreen" src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(parent)}&muted=true"></iframe>`;
+      // Return the div that will contain the Twitch player
+      return `<div id="${playerId}" class="twitch-embed-container"></div>`;
+    }
+    
+    function initializeTwitchPlayer(playerId, channel) {
+      // Use the correct parent domain
+      let parent = location.hostname;
+      
+      console.log('Initializing Twitch player:', { playerId, channel, parent });
+      
+      // Wait for Twitch embed library to be available
+      if (typeof Twitch === 'undefined') {
+        console.error('Twitch embed library not loaded');
+        return;
+      }
+      
+      try {
+        // Create the Twitch player using the JavaScript API
+        const player = new Twitch.Player(playerId, {
+          width: '100%',
+          height: '100%',
+          channel: channel,
+          parent: [parent],
+          autoplay: false,
+          muted: true,
+          // These options help control the layout
+          layout: 'video',
+          theme: 'dark'
+        });
+        
+        // Add event listeners for better control
+        player.addEventListener(Twitch.Player.READY, () => {
+          console.log('Twitch player ready for:', channel);
+          // Try to optimize the player sizing
+          player.setVolume(0.5);
+        });
+        
+        player.addEventListener(Twitch.Player.PLAY, () => {
+          console.log('Twitch player started for:', channel);
+        });
+        
+        return player;
+      } catch (error) {
+        console.error('Failed to create Twitch player:', error);
+        // Fallback to iframe if JavaScript API fails
+        const container = document.getElementById(playerId);
+        if (container) {
+          container.innerHTML = `<iframe src="https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(parent)}&muted=true&autoplay=false" width="100%" height="100%" allowfullscreen></iframe>`;
+        }
+      }
     }
     
     function setTile(idx, channel) {
@@ -663,25 +719,24 @@
       
       if (channel && channel.trim()) {
         header.textContent = channel;
-        const iframe = twitchIframe(channel);
-        console.log('Created iframe HTML:', iframe);
-        player.innerHTML = iframe;
+        const playerContainer = twitchIframe(channel);
+        console.log('Created player container HTML:', playerContainer);
+        player.innerHTML = playerContainer;
+        
+        // Extract the player ID from the container HTML
+        const match = playerContainer.match(/id="([^"]+)"/);
+        const playerId = match ? match[1] : null;
+        
+        if (playerId) {
+          // Wait for DOM to update, then initialize the Twitch player
+          setTimeout(() => {
+            initializeTwitchPlayer(playerId, channel);
+          }, 100);
+        }
+        
         tile.dataset.username = channel;
         tile.classList.add('has-stream');
         console.log('Tile updated with stream:', channel);
-        
-        // Add error handling for the iframe
-        setTimeout(() => {
-          const iframeElement = player.querySelector('iframe');
-          if (iframeElement) {
-            iframeElement.onerror = () => {
-              console.error(`Failed to load Twitch iframe for ${channel}`);
-            };
-            iframeElement.onload = () => {
-              console.log(`Twitch iframe loaded successfully for ${channel}`);
-            };
-          }
-        }, 100);
       } else {
         header.textContent = 'Empty';
         player.innerHTML = '';
