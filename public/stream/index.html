@@ -429,7 +429,7 @@
        // If no cache, fetch from leaderboard API
        if (allPlayers.length === 0) {
          try {
-           const response = await fetch('/api/leaderboard/PC');
+           const response = await fetch('/api/stats/PC');
            if (response.ok) {
              const data = await response.json();
              if (data.success && data.data) {
