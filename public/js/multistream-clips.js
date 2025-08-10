@@ -1,6 +1,48 @@
 // Enhanced Multistream Clip Integration
 // Auto-link clips to streamers and Medal.tv import functionality
 
+// --- NEW FUNCTION TO HIDE SIDEBAR BUTTONS ---
+/**
+ * @description Finds and hides the original, duplicate clip-related buttons in the main sidebar.
+ * It uses a MutationObserver to handle dynamically loaded content, ensuring the buttons
+ * stay hidden even in a single-page application. This prevents duplicate controls from showing.
+ */
+function hideSidebarClipButtons() {
+    const hideLogic = () => {
+        // Select all buttons on the page
+        const allButtons = document.querySelectorAll('body button');
+
+        allButtons.forEach(btn => {
+            // Check if the button's text content matches the ones we want to hide
+            const btnText = btn.textContent.trim();
+            const isTargetButton =
+                btnText.includes('Create Clip') ||
+                btnText.includes('Import Medal.tv') ||
+                btnText.includes('My Clips');
+
+            // Check that the button is NOT part of our injected "Clip Management" controls
+            const isInjectedControl = btn.closest('.multistream-clip-controls');
+
+            // If it's a target button and NOT one of ours, hide it.
+            if (isTargetButton && !isInjectedControl) {
+                // Hide the button. Using setProperty is a robust way to apply the style.
+                btn.style.setProperty('display', 'none', 'important');
+            }
+        });
+    };
+
+    // Run the logic once on initial page load
+    hideLogic();
+
+    // Set up a MutationObserver to re-run the logic whenever the page's DOM changes.
+    // This is crucial for modern websites that load content dynamically.
+    const observer = new MutationObserver(hideLogic);
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
 // Enhanced clip creation function
 async function createClipForStreamer(streamerUsername, userId = null) {
     try {
@@ -464,6 +506,10 @@ function closeStreamerClipsModal() {
 
 // Initialize clip controls when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    // --- MODIFICATION ---
+    // Run the function to hide the original sidebar buttons as soon as the page is ready.
+    hideSidebarClipButtons();
+
     // Auto-inject clip controls if multistream container exists
     const multistreamContainer = document.querySelector('.multistream-container, #multistream, .streams-container, .multistream-modal');
     if (multistreamContainer) {
@@ -606,12 +652,6 @@ function injectClipControlsInModal(modalContent) {
     }
     
     
-    // AGGRESSIVE approach to hide duplicate clip controls
-    try {
-        setupAggressiveClipControlHiding(modalContent);
-    } catch (error) {
-        console.error('Error in setupAggressiveClipControlHiding:', error);
-    }
     
     // Force visibility check after a brief delay
     setTimeout(() => {
@@ -622,130 +662,6 @@ function injectClipControlsInModal(modalContent) {
     }, 100);
 }
 
-function setupAggressiveClipControlHiding(modalContent) {
-    
-    // Add targeted CSS rules to hide only individual stream clip buttons  
-    const hideStyle = document.createElement('style');
-    hideStyle.innerHTML = `
-        /* Target ONLY clip buttons, preserve VOD, PiP, and other tabs */
-        #multiStreamModal button[onclick*="createLiveClip"]:not(.multistream-clip-controls *) {
-            display: none !important;
-        }
-        
-        /* Hide Medal.tv and My Clips buttons specifically */
-        #multiStreamModal button[onclick*="openMedalImport"]:not(.multistream-clip-controls *),
-        #multiStreamModal button[onclick*="viewMyClips"]:not(.multistream-clip-controls *) {
-            display: none !important;
-        }
-        
-        /* Hide by text content - side panel buttons */
-        #multiStreamModal button:not(.multistream-clip-controls *):contains("Medal"),
-        #multiStreamModal button:not(.multistream-clip-controls *):contains("My Clips"),
-        #multiStreamModal button:not(.multistream-clip-controls *):contains("🏅"),
-        #multiStreamModal button:not(.multistream-clip-controls *):contains("📋") {
-            display: none !important;
-        }
-        
-        #multiStreamModal button.bg-orange-600:not(.multistream-clip-controls *) {
-            display: none !important;
-        }
-        
-        /* Hide useless tabs by color classes */
-        #multiStreamModal button.bg-blue-600:not(.multistream-clip-controls *),
-        #multiStreamModal button.bg-yellow-600:not(.multistream-clip-controls *) {
-            display: none !important;
-        }
-        
-    `;
-    document.head.appendChild(hideStyle);
-    
-    // Function to hide only clip-related buttons, preserve VOD/PiP tabs
-    function hideClipButtons() {
-        const buttons = modalContent.querySelectorAll('button');
-        let hiddenCount = 0;
-        
-        buttons.forEach(btn => {
-            // Don't hide if it's part of our centralized controls
-            if (!btn.closest('.multistream-clip-controls')) {
-                const btnText = btn.textContent.trim().toLowerCase();
-                const btnTitle = (btn.title || '').toLowerCase();
-                const btnOnclick = (btn.onclick || btn.getAttribute('onclick') || '').toString();
-                
-                // Only hide if it's specifically a clip button
-                const isClipButton = (
-                    btnText.includes('📎') || 
-                    btnText.includes('clip') ||
-                    btnTitle.includes('clip') ||
-                    btnOnclick.includes('createLiveClip')
-                );
-                
-                // Check for Medal.tv and My Clips buttons specifically
-                const isMedalOrMyClipsButton = (
-                    btnText.includes('medal') ||
-                    btnText.includes('🏅') ||
-                    btnText.includes('my clips') ||
-                    btnText.includes('📋') ||
-                    btnOnclick.includes('openMedalImport') ||
-                    btnOnclick.includes('viewMyClips')
-                );
-                
-                // Check if it's a useless tab that should be hidden
-                const isUselessTab = (
-                    btnText.includes('tab') ||
-                    btnText.includes('pip') ||
-                    btnText.includes('vod') ||
-                    btnText.includes('test') ||
-                    btnText.includes('debug')
-                );
-                
-                // Hide clip buttons OR Medal/My Clips buttons OR useless tabs
-                if (isClipButton || isMedalOrMyClipsButton || isUselessTab) {
-                    btn.style.display = 'none';
-                    btn.style.visibility = 'hidden';
-                    hiddenCount++;
-                }
-            }
-        });
-        
-    }
-    
-    // Hide immediately
-    hideClipButtons();
-    
-    // Hide again after delays to catch dynamically loaded content
-    setTimeout(hideClipButtons, 500);
-    setTimeout(hideClipButtons, 1500);
-    setTimeout(hideClipButtons, 3000);
-    
-    // Set up MutationObserver to catch new elements
-    const observer = new MutationObserver((mutations) => {
-        let shouldCheck = false;
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                mutation.addedNodes.forEach(node => {
-                    if (node.nodeType === 1) { // Element node
-                        const isButton = node.tagName === 'BUTTON';
-                        const hasButtons = node.querySelector && node.querySelector('button');
-                        if (isButton || hasButtons) {
-                            shouldCheck = true;
-                        }
-                    }
-                });
-            }
-        });
-        
-        if (shouldCheck) {
-            setTimeout(hideClipButtons, 100);
-        }
-    });
-    
-    // Watch for new elements being added
-    observer.observe(modalContent, {
-        childList: true,
-        subtree: true
-    });
-    
-}
 
 // Export functions for global access
 window.createClipForCurrentStream = createClipForCurrentStream;
