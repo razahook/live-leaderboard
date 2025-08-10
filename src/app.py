@@ -278,6 +278,38 @@ def health_check():
         'blueprints_loaded': [name for name, _ in imported_blueprints]
     })
 
+# Serve the stream page
+@app.route('/stream')
+def stream_page():
+    """Serve the stream/multistream page"""
+    try:
+        stream_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'public', 'stream', 'index.html')
+        return send_file(stream_file_path)
+    except Exception as e:
+        logger.error(f"Error serving stream page: {e}")
+        return f"Error loading stream page: {e}", 500
+
+# Serve static files from public directory
+@app.route('/js/<path:filename>')
+def serve_js(filename):
+    """Serve JavaScript files"""
+    try:
+        js_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'public', 'js', filename)
+        return send_file(js_file_path)
+    except Exception as e:
+        logger.error(f"Error serving JS file {filename}: {e}")
+        return f"Error loading JS file: {e}", 404
+
+@app.route('/css/<path:filename>')
+def serve_css(filename):
+    """Serve CSS files"""
+    try:
+        css_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'public', 'css', filename)
+        return send_file(css_file_path)
+    except Exception as e:
+        logger.error(f"Error serving CSS file {filename}: {e}")
+        return f"Error loading CSS file: {e}", 404
+
 # Create database tables (only if database is available)
 if DB_AVAILABLE and db:
     with app.app_context():
