@@ -78,12 +78,13 @@
       user-select: none;
     }
 
-    .multistream-clip-controls {
-      margin-top: 16px;
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
+         .multistream-clip-controls {
+       margin-top: 16px;
+       display: flex;
+       flex-direction: column;
+       gap: 12px;
+       width: 100%;
+     }
 
     .btn {
       padding: 12px 20px;
@@ -127,10 +128,10 @@
       box-shadow: 0 6px 18px rgba(124, 58, 237, 0.8);
     }
 
-    .multistream-clip-controls button {
-      flex: 1 1 auto;
-      min-width: 120px;
-    }
+         .multistream-clip-controls button {
+       width: 100%;
+       min-width: auto;
+     }
 
     .controls {
       margin-top: 18px;
@@ -280,8 +281,13 @@
 <body class="stream-mode">
   <div class="container">
     <div class="header">
-      <h1>🎬 Multi-Stream Viewer</h1>
-      <p>Watch multiple Twitch streams simultaneously</p>
+      <h1>🎬 Clip Management</h1>
+      <p>Create and manage clips for your selected streams</p>
+      <div class="multistream-clip-controls">
+        <button class="btn btn-primary" onclick="createClipForCurrentStream()">📹 Create Clip</button>
+        <button class="btn btn-warning" onclick="openMedalImport()">🏅 Import Medal.tv</button>
+        <button class="btn btn-accent" onclick="viewMyClips()">📋 My Clips</button>
+      </div>
       <div class="controls">
         <input id="s1" placeholder="Streamer 1 (twitch login)">
         <input id="s2" placeholder="Streamer 2 (twitch login)">
@@ -349,9 +355,10 @@
       const focused = document.querySelector('[data-selected="true"][data-idx]');
       return focused ? (focused.dataset.username || null) : null;
     }
-  </script>
+     </script>
 
-</body>
-</html>
+   <script src="/js/multistream-clips.js?v=stream-1"></script>
+ </body>
+ </html>
 
 
