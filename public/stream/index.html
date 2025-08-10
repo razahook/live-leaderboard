@@ -397,7 +397,7 @@
   </div>
 
   <script>
-       // Function to populate streamer dropdowns with live streamers
+          // Function to populate streamer dropdowns with live streamers
    async function populateStreamerDropdowns() {
      // Define dropdowns outside try block so it's accessible in finally
      const dropdowns = ['s1', 's2', 's3'];
@@ -409,22 +409,52 @@
          dropdown.classList.add('loading');
        });
        
-       // Fetch live streamers directly from the API
-       let liveStreamersData = [];
+       // Get all players data - same as main page
+       let allPlayers = [];
        
-       try {
-         const response = await fetch('/twitch/live-streamers');
-         if (response.ok) {
-           const data = await response.json();
-           liveStreamersData = data.streamers || [];
-           console.log('Fetched live streamers from API:', liveStreamersData.length);
+       // First try localStorage cache
+       const cachedData = localStorage.getItem('leaderboardCache');
+       if (cachedData) {
+         try {
+           const cache = JSON.parse(cachedData);
+           if (cache.data) {
+             allPlayers = cache.data;
+             console.log('Using cached player data:', allPlayers.length);
+           }
+         } catch (e) {
+           console.error('Error parsing cache:', e);
          }
-       } catch (fetchError) {
-         console.error('Error fetching live streamers:', fetchError);
        }
-               
-       // Use the live streamers data from API
-       console.log('Live streamers found:', liveStreamersData.length);
+       
+       // If no cache, fetch from leaderboard API
+       if (allPlayers.length === 0) {
+         try {
+           const response = await fetch('/api/leaderboard/PC');
+           if (response.ok) {
+             const data = await response.json();
+             if (data.success && data.data) {
+               allPlayers = data.data;
+               console.log('Fetched player data from API:', allPlayers.length);
+               // Cache it
+               localStorage.setItem('leaderboardCache', JSON.stringify({
+                 data: allPlayers,
+                 timestamp: Date.now()
+               }));
+             }
+           }
+         } catch (fetchError) {
+           console.error('Error fetching leaderboard:', fetchError);
+         }
+       }
+       
+       // Filter for live streamers - same logic as main page
+       const liveStreamers = allPlayers.filter(player => {
+         const twitchLive = player.twitch_live?.is_live === true;
+         const hasUser = !!(player.stream?.twitchUser || player.canonical_twitch_username || player.twitch_link);
+         return twitchLive && hasUser;
+       });
+       
+       console.log('Live streamers found:', liveStreamers.length);
        
        // Populate all three dropdowns
        dropdowns.forEach(dropdownId => {
@@ -433,18 +463,16 @@
          dropdown.innerHTML = '';
          dropdown.appendChild(placeholder);
          
-         // Add live streamers from API
-         liveStreamersData.forEach(streamer => {
-           // The API returns streamers with username and viewer_count
-           const twitchUsername = streamer.username || streamer.twitch_username || streamer.channel;
-           const viewerCount = streamer.viewer_count || streamer.viewers || 0;
-           const displayName = streamer.display_name || streamer.name || twitchUsername;
+         // Add live streamers - same as main page
+         liveStreamers.forEach(player => {
+           const twitchUsername = player.stream?.twitchUser || player.canonical_twitch_username || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
+           const viewerCount = player.stream?.viewers || 0;
            
            if (twitchUsername) {
              const option = document.createElement('option');
              option.value = twitchUsername;
-             option.textContent = `${displayName} (${viewerCount.toLocaleString()} viewers)`;
-             option.dataset.displayName = displayName;
+             option.textContent = `${player.name || player.player_name || twitchUsername} (${viewerCount.toLocaleString()} viewers)`;
+             option.dataset.playerName = player.name || player.player_name;
              dropdown.appendChild(option);
            }
          });
@@ -460,8 +488,8 @@
         });
                
        // Show success message
-       if (liveStreamersData.length > 0) {
-         showMessage(`Found ${liveStreamersData.length} live streamers!`, 'success');
+       if (liveStreamers.length > 0) {
+         showMessage(`Found ${liveStreamers.length} live streamers!`, 'success');
        } else {
          showMessage('No live streamers found. Try refreshing.', 'info');
        }
@@ -478,6 +506,13 @@
           dropdown.classList.remove('loading');
         });
       }
+    }
+    
+    // Helper function to extract username from Twitch link
+    function extractUsernameFromLink(link) {
+      if (!link) return null;
+      const match = link.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
+      return match ? match[1].toLowerCase() : null;
     }
     
     const tiles = [null, document.getElementById('tile-1'), document.getElementById('tile-2'), document.getElementById('tile-3')];
