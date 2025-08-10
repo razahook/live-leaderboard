@@ -18,7 +18,11 @@ def _resolve_streamer_id(supabase_client, medal_username: str):
         ins = supabase_client.table('streamers').insert({
             'medal_username': username,
             'apex_names': [],
-            'twitch_login': None
+            'twitch_login': None,
+            'twitch_display_name': None,
+            'twitch_id': None,
+            'country_code': None,
+            'profile_image_url': None
         }).execute()
         if ins.data:
             return ins.data[0]['id']
@@ -42,11 +46,12 @@ def _save_medal_clip_metadata(clip_data: dict, username: str):
                     'broadcaster_login': username.lower(),
                     'streamer_id': streamer_id,
                     'creator_login': username,
+                    'created_by_user_id': None,  # Would need auth context
                     'title': clip_data['title'],
                     'duration': clip_data['duration'],
                     'view_count': clip_data['view_count'],
-                    'thumbnail_url': clip_data['thumbnail_url'],
-                    'extra': str(clip_data)
+                    'thumbnail_url': clip_data.get('thumbnail_url'),
+                    'extra': clip_data  # Use dict directly for JSONB
                 }
                 
                 # Check if clip already exists

@@ -67,8 +67,12 @@ def _resolve_streamer_id(supabase_client, twitch_login: str):
         # Create minimal row
         ins = supabase_client.table('streamers').insert({
             'twitch_login': login,
+            'twitch_display_name': None,
+            'twitch_id': None,
+            'medal_username': None,
             'apex_names': [],
-            'medal_id': None
+            'country_code': None,
+            'profile_image_url': None
         }).execute()
         if ins.data:
             return ins.data[0]['id']
@@ -97,7 +101,13 @@ def _save_clip_metadata(clip_id: str, username: str, edit_url: str, url: str, em
                     'embed_url': embed_url,
                     'edit_url': edit_url,
                     'broadcaster_login': username.lower(),
+                    'creator_login': creator_login,
+                    'created_by_user_id': created_by_user_id,
                     'streamer_id': streamer_id,
+                    'title': None,  # Would need to fetch from Twitch API
+                    'duration': None,  # Would need to fetch from Twitch API  
+                    'view_count': None,  # Would need to fetch from Twitch API
+                    'thumbnail_url': None,  # Would need to fetch from Twitch API
                     'extra': extra,
                 }
                 # Upsert by external_id to avoid dupes
@@ -455,6 +465,76 @@ def get_my_clips():
             }
         })
             
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@twitch_clips_bp.route('/favorites', methods=['GET'])
+def get_user_favorites():
+    """Get user's favorite clips (requires authentication)"""
+    try:
+        # In a real implementation, you'd get user_id from JWT/session
+        # For now, return example structure
+        return jsonify({
+            "success": True,
+            "data": {
+                "favorites": [],
+                "count": 0,
+                "source": "favorites",
+                "message": "User authentication required to view favorites"
+            }
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@twitch_clips_bp.route('/favorites/<clip_id>', methods=['POST'])
+def add_favorite(clip_id):
+    """Add a clip to user's favorites (requires authentication)"""
+    try:
+        sb = get_supabase()
+        if sb is None:
+            return jsonify({"success": False, "error": "Database not available"}), 500
+        
+        # In a real implementation, get user_id from JWT token
+        # For now, return auth required message
+        return jsonify({
+            "success": False, 
+            "error": "Authentication required",
+            "message": "You must be logged in to add favorites"
+        }), 401
+        
+        # Real implementation would be:
+        # user_id = get_current_user_id()  # From JWT/session
+        # sb.table('favorites').insert({
+        #     'user_id': user_id,
+        #     'clip_id': clip_id
+        # }).execute()
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@twitch_clips_bp.route('/favorites/<clip_id>', methods=['DELETE'])
+def remove_favorite(clip_id):
+    """Remove a clip from user's favorites (requires authentication)"""
+    try:
+        sb = get_supabase()
+        if sb is None:
+            return jsonify({"success": False, "error": "Database not available"}), 500
+        
+        # In a real implementation, get user_id from JWT token
+        # For now, return auth required message
+        return jsonify({
+            "success": False, 
+            "error": "Authentication required",
+            "message": "You must be logged in to remove favorites"
+        }), 401
+        
+        # Real implementation would be:
+        # user_id = get_current_user_id()  # From JWT/session  
+        # sb.table('favorites').delete().match({
+        #     'user_id': user_id,
+        #     'clip_id': clip_id
+        # }).execute()
+        
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
