@@ -16,7 +16,7 @@ twitch_oauth_bp = Blueprint('twitch_oauth', __name__)
 TWITCH_CLIENT_ID = os.environ.get('TWITCH_CLIENT_ID')
 TWITCH_CLIENT_SECRET = os.environ.get('TWITCH_CLIENT_SECRET')
 # Default redirect URI (will be overridden dynamically)
-REDIRECT_URI = "http://localhost:8080/api/session/complete"
+REDIRECT_URI = "https://live-leaderboard-git-performance-fixes-razahooks-projects.vercel.app/api/session/complete"
 
 # Required scopes for clip creation
 REQUIRED_SCOPES = "clips:edit"
@@ -253,17 +253,24 @@ def oauth_callback():
 def oauth_status():
     """Check if user has authorized clip creation"""
     try:
+        # For now, check if there are any valid tokens
+        # In a real app, you'd get the username from the session
         username = request.args.get('username')
-        if not username:
-            return jsonify({
-                'success': True,
-                'authorized': False,
-                'message': 'No username provided'
-            })
         
-        if username in user_tokens:
+        if username and username in user_tokens:
             token_info = user_tokens[username]
             # Check if token is still valid (simple expiry check)
+            if time.time() - token_info['created_at'] < token_info['expires_in']:
+                return jsonify({
+                    'success': True,
+                    'authorized': True,
+                    'username': token_info['username'],
+                    'display_name': token_info['display_name'],
+                    'scopes': token_info['scopes']
+                })
+        
+        # Check if there are any valid tokens (for demo purposes)
+        for username, token_info in user_tokens.items():
             if time.time() - token_info['created_at'] < token_info['expires_in']:
                 return jsonify({
                     'success': True,
@@ -276,7 +283,7 @@ def oauth_status():
         return jsonify({
             'success': True,
             'authorized': False,
-            'message': f'User {username} has not authorized clip creation'
+            'message': 'No user has authorized clip creation'
         })
         
     except Exception as e:

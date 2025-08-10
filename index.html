@@ -3277,13 +3277,13 @@ ${(() => {
                 const response = await fetch('/api/session/start');
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.success && data.auth_url) {
-                        // Open OAuth in popup
-                        const popup = window.open(
-                            data.auth_url,
-                            'twitchOAuth',
-                            'width=600,height=700,scrollbars=yes,resizable=yes'
-                        );
+                                    if (data.success && data.oauth_url) {
+                    // Open OAuth in popup
+                    const popup = window.open(
+                        data.oauth_url,
+                        'twitchOAuth',
+                        'width=600,height=700,scrollbars=yes,resizable=yes'
+                    );
                         
                         // Listen for popup completion
                         const checkClosed = setInterval(() => {
