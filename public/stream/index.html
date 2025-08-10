@@ -423,12 +423,16 @@
        if (cachedData) {
          try {
            const cache = JSON.parse(cachedData);
-           if (cache.data) {
+           if (cache.data && Array.isArray(cache.data)) {
              allPlayers = cache.data;
              console.log('Using cached player data:', allPlayers.length);
+           } else {
+             console.log('Cached data is not an array, will fetch from API');
+             allPlayers = [];
            }
          } catch (e) {
            console.error('Error parsing cache:', e);
+           allPlayers = [];
          }
        }
        
@@ -461,6 +465,12 @@
          } catch (fetchError) {
            console.error('Error fetching leaderboard:', fetchError);
          }
+       }
+       
+       // Ensure allPlayers is always an array before filtering
+       if (!Array.isArray(allPlayers)) {
+         console.log('allPlayers is not an array, resetting to empty array');
+         allPlayers = [];
        }
        
        // Filter for live streamers - same logic as main page
