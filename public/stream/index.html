@@ -479,18 +479,19 @@
       box-shadow: var(--shadow-heavy);
       opacity: 0;
       visibility: hidden;
+      display: none;
       transform: translateY(10px);
       transition: all 0.3s ease;
       min-width: 180px;
       z-index: 1001;
-      /* Debug positioning */
-      border: 2px solid yellow;
+
     }
 
     .bubble-options.show {
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
+      display: block;
     }
 
     /* Alternative positioning for better visibility */
@@ -498,17 +499,12 @@
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
+      display: block;
       /* Ensure it's above the main button */
       bottom: calc(100% + 15px);
     }
 
-    /* Debug: Make bubble options visible for testing */
-    .bubble-options.debug {
-      opacity: 1 !important;
-      visibility: visible !important;
-      transform: translateY(0) !important;
-      border: 2px solid red !important;
-    }
+
 
     .bubble-option {
       background: rgba(255, 255, 255, 0.05);
@@ -1034,8 +1030,7 @@
   <!-- Debug button for testing -->
   <div style="position: fixed; bottom: 2rem; left: 2rem; z-index: 2000;">
     <button onclick="testBubble()" style="background: red; color: white; padding: 0.5rem; border-radius: 8px; border: none; cursor: pointer;">
-      🧪 Test Bubble
-    </button>
+
   </div>
 
   <!-- Clip Management Modal -->
@@ -1922,63 +1917,14 @@
     }
 
     // Test function for debugging
-    function testBubble() {
-      console.log('🧪 Test button clicked');
-      console.log('Testing bubble elements...');
-      
-      const bubble = document.getElementById('clipBubble');
-      const bubbleOptions = document.getElementById('bubbleOptions');
-      const bubbleArrow = document.querySelector('.bubble-arrow');
-      
-      console.log('Bubble elements:', { bubble, bubbleOptions, bubbleArrow });
-      
-      if (bubbleOptions) {
-        console.log('Bubble options classes:', bubbleOptions.className);
-        console.log('Bubble options styles:', window.getComputedStyle(bubbleOptions));
-        
-        // Log positioning information
-        const rect = bubbleOptions.getBoundingClientRect();
-        console.log('Bubble options position:', {
-          top: rect.top,
-          left: rect.left,
-          bottom: rect.bottom,
-          right: rect.right,
-          width: rect.width,
-          height: rect.height
-        });
-        
-        // Log parent positioning
-        const bubbleRect = bubble.getBoundingClientRect();
-        console.log('Main bubble position:', {
-          top: bubbleRect.top,
-          left: bubbleRect.left,
-          bottom: bubbleRect.bottom,
-          right: bubbleRect.right
-        });
-      }
-      
-      // Force show the bubble
-      if (bubbleOptions && bubbleArrow) {
-        bubbleOptions.classList.add('show');
-        bubbleArrow.classList.add('rotated');
-        console.log('Forced bubble to show');
-        
-        // Add debug class for visibility
-        bubbleOptions.classList.add('debug');
-      }
-    }
+
 
     // Toggle clip bubble
     function toggleClipBubble() {
-      console.log('toggleClipBubble function called');
-      
       const bubbleOptions = document.getElementById('bubbleOptions');
       const bubbleArrow = document.querySelector('.bubble-arrow');
       
-      console.log('Found elements:', { bubbleOptions, bubbleArrow });
-      
       if (!bubbleOptions || !bubbleArrow) {
-        console.error('Missing bubble elements');
         return;
       }
       
