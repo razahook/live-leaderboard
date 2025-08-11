@@ -48,6 +48,11 @@ function hideSidebarClipButtons() {
 
         elements.forEach((el) => {
             if (el.closest('.multistream-clip-controls')) return; // keep our injected controls
+            if (el.closest('.medal-import-modal')) return; // keep modal elements
+            if (el.closest('.my-clips-modal')) return; // keep modal elements
+            if (el.closest('.streamer-clips-modal')) return; // keep modal elements
+            if (el.closest('.modal-overlay')) return; // keep modal overlays
+            if (el.closest('.modal-content')) return; // keep modal content
             if (el.dataset.hiddenByMultistream === '1') return; // already handled
 
             const computed = window.getComputedStyle(el);
