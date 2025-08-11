@@ -493,6 +493,8 @@
       z-index: 1001;
       /* Debug: Add a visible border to see positioning */
       border: 2px solid rgba(255, 255, 0, 0.5);
+      /* Force visibility for debugging */
+      background: rgba(255, 0, 0, 0.3) !important;
 
     }
 
@@ -1040,8 +1042,9 @@
   
   <!-- Debug button for testing -->
   <div style="position: fixed; bottom: 2rem; left: 2rem; z-index: 2000;">
-    <button onclick="testBubble()" style="background: red; color: white; padding: 0.5rem; border-radius: 8px; border: none; cursor: pointer;">
-
+    <button onclick="forceBubbleVisible()" style="background: red; color: white; padding: 0.5rem; border-radius: 8px; border: none; cursor: pointer;">
+      🔍 Debug Bubble
+    </button>
   </div>
 
   <!-- Clip Management Modal -->
@@ -1927,7 +1930,30 @@
       console.log('Medal modal closed');
     }
 
-    // Test function for debugging
+    // Debug function to force bubble visibility
+    function forceBubbleVisible() {
+      const bubbleOptions = document.getElementById('bubbleOptions');
+      if (bubbleOptions) {
+        // Force show with inline styles
+        bubbleOptions.style.display = 'block';
+        bubbleOptions.style.opacity = '1';
+        bubbleOptions.style.visibility = 'visible';
+        bubbleOptions.style.transform = 'translateY(0)';
+        bubbleOptions.style.zIndex = '9999';
+        bubbleOptions.style.position = 'fixed';
+        bubbleOptions.style.top = '50%';
+        bubbleOptions.style.left = '50%';
+        bubbleOptions.style.transform = 'translate(-50%, -50%)';
+        bubbleOptions.style.background = 'red';
+        bubbleOptions.style.border = '3px solid yellow';
+        bubbleOptions.style.padding = '20px';
+        bubbleOptions.style.minWidth = '300px';
+        
+        console.log('🔍 Forced bubble to center of screen with red background');
+        console.log('Bubble element:', bubbleOptions);
+        console.log('Bubble computed styles:', window.getComputedStyle(bubbleOptions));
+      }
+    }
 
 
     // Toggle clip bubble
