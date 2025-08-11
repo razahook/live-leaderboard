@@ -1650,24 +1650,24 @@
       
       console.log('Opening Medal Import modal...');
       
-      // Force modal to stay open
-      setTimeout(() => {
-        const modal = document.getElementById('medalModal');
-        if (modal) {
-          modal.style.display = 'block';
-          modal.style.setProperty('display', 'block', 'important');
-          document.getElementById('medalResults').innerHTML = '';
-          console.log('Medal modal forced open, display:', window.getComputedStyle(modal).display);
-        } else {
-          console.error('Medal modal not found!');
-        }
-      }, 10);
-      
-      // Also set it immediately
+      // Set modal to display immediately
       const modal = document.getElementById('medalModal');
       if (modal) {
         modal.style.display = 'block';
+        modal.style.setProperty('display', 'block', 'important');
+        document.getElementById('medalResults').innerHTML = '';
+        console.log('Medal modal opened, display:', window.getComputedStyle(modal).display);
+      } else {
+        console.error('Medal modal not found!');
       }
+      
+      // Force modal to stay open with additional timeout
+      setTimeout(() => {
+        if (modal) {
+          modal.style.display = 'block';
+          modal.style.setProperty('display', 'block', 'important');
+        }
+      }, 10);
     }
 
     function viewMyClips(event) {
@@ -1678,20 +1678,25 @@
       
       console.log('Opening My Clips modal...');
       
-      // Force modal to stay open
-      setTimeout(() => {
-        const modal = document.getElementById('clipModal');
-        if (modal) {
-          document.getElementById('clipModalTitle').textContent = 'My Clips';
-          document.getElementById('clipModalBody').innerHTML = `
-            <div class="loading-state">
-              <div class="loading-spinner"></div>
-              <div class="loading-text">Loading your clips...</div>
-            </div>
-          `;
+      // Set modal to display immediately
+      const modal = document.getElementById('clipModal');
+      if (modal) {
+        document.getElementById('clipModalTitle').textContent = 'My Clips';
+        document.getElementById('clipModalBody').innerHTML = `
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading your clips...</div>
+          </div>
+        `;
+        modal.style.display = 'block';
+        modal.style.setProperty('display', 'block', 'important');
+        console.log('My Clips modal opened, display:', window.getComputedStyle(modal).display);
+      
+        // Force modal to stay open with additional timeout
+        setTimeout(() => {
           modal.style.display = 'block';
           modal.style.setProperty('display', 'block', 'important');
-          console.log('My Clips modal forced open, display:', window.getComputedStyle(modal).display);
+        }, 10);
         } else {
           console.error('Clip modal not found!');
         }
