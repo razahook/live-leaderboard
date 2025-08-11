@@ -21,7 +21,7 @@
       --border-selected: #8b5cf6;
       --text-primary: #ffffff;
       --text-secondary: #a0aec0;
-      --accent-green: #00ff88;
+      --accent-green: #3b82f6;
       --accent-purple: #8b5cf6;
       --accent-blue: #3b82f6;
       --accent-orange: #f59e0b;
@@ -821,13 +821,18 @@
           if (cache) {
             try {
               const parsed = JSON.parse(cache);
-              // Ensure we get an array from cache
+              // Handle different cache structures
               if (Array.isArray(parsed.data)) {
+                // Cache format: { data: [players], timestamp: ... }
                 players = parsed.data;
               } else if (parsed.data && Array.isArray(parsed.data.players)) {
+                // API format cached: { data: { players: [...], last_updated: ... }, timestamp: ... }
                 players = parsed.data.players;
+              } else if (Array.isArray(parsed)) {
+                // Direct array cache (legacy)
+                players = parsed;
               } else {
-                console.warn('Invalid cache structure, clearing cache');
+                console.warn('Invalid cache structure, clearing cache. Structure:', typeof parsed, Object.keys(parsed || {}));
                 localStorage.removeItem('leaderboard_cache');
                 players = [];
               }
