@@ -156,11 +156,15 @@ function showMedalImportModal(currentStreamer) {
     document.querySelector('.medal-import-modal')?.remove();
     
     const modal = document.createElement('div');
-    modal.className = 'medal-import-modal';
+    modal.className = 'medal-import-modal modal';
+    modal.style.display = 'block';
     modal.innerHTML = `
-        <div class="modal-overlay" onclick="closeMedalModal()">
-            <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
                 <h3>🏅 Import Medal.tv Clip</h3>
+                <span class="close" onclick="closeMedalModal()">&times;</span>
+            </div>
+            <div class="modal-body">
                 
                 <form id="medalImportForm">
                     <div class="form-group">
@@ -187,12 +191,12 @@ function showMedalImportModal(currentStreamer) {
                         <input type="text" id="customStreamer" placeholder="streamer_name">
                     </div>
                     
-                    <div class="modal-actions">
-                        <button type="submit" class="btn-primary">
+                    <div class="form-actions">
+                        <button type="submit" class="action-btn">
                             <span class="btn-text">Import Clip</span>
                             <span class="btn-loading" style="display: none;">Importing...</span>
                         </button>
-                        <button type="button" onclick="closeMedalModal()" class="btn-secondary">Cancel</button>
+                        <button type="button" onclick="closeMedalModal()" class="action-btn secondary">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -433,16 +437,19 @@ function removeExistingNotifications() {
 
 function showMyClipsModal() {
     const modal = document.createElement('div');
-    modal.className = 'my-clips-modal';
+    modal.className = 'my-clips-modal modal';
+    modal.style.display = 'block';
     modal.innerHTML = `
-        <div class="modal-overlay" onclick="closeMyClipsModal()">
-            <div class="modal-content large-modal" onclick="event.stopPropagation()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
                 <h3>📋 My Clips</h3>
+                <span class="close" onclick="closeMyClipsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
                 <div id="myClipsContent">
                     <div class="loading-spinner"></div>
                     <p>Loading your clips...</p>
                 </div>
-                <button class="close-btn" onclick="closeMyClipsModal()">×</button>
             </div>
         </div>
     `;
@@ -507,11 +514,15 @@ async function loadClipsForStreamer(streamerName) {
 
 function showStreamerClipsModal(streamerName, clips) {
     const modal = document.createElement('div');
-    modal.className = 'streamer-clips-modal';
+    modal.className = 'streamer-clips-modal modal';
+    modal.style.display = 'block';
     modal.innerHTML = `
-        <div class="modal-overlay" onclick="closeStreamerClipsModal()">
-            <div class="modal-content large-modal" onclick="event.stopPropagation()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
                 <h3>📁 ${streamerName}'s Clips</h3>
+                <span class="close" onclick="closeStreamerClipsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
                 <div class="clips-grid">
                     ${clips.length > 0 ? clips.map(clip => `
                         <div class="clip-item">
@@ -519,12 +530,11 @@ function showStreamerClipsModal(streamerName, clips) {
                             <p>Source: ${clip.source}</p>
                             <p>Views: ${clip.view_count || 0}</p>
                             <div class="clip-actions">
-                                <button onclick="window.open('${clip.url}', '_blank')" class="btn-primary">Watch</button>
+                                <button onclick="window.open('${clip.url}', '_blank')" class="action-btn">Watch</button>
                             </div>
                         </div>
                     `).join('') : '<p>No clips found for this streamer.</p>'}
                 </div>
-                <button class="close-btn" onclick="closeStreamerClipsModal()">×</button>
             </div>
         </div>
     `;
