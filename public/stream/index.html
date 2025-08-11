@@ -1374,6 +1374,9 @@
       app = new ModernStreamViewer();
       window.app = app;
       
+      // Setup modal close handlers
+      setupModalCloseHandlers();
+      
       // Expose debugging functions
       window.debugStreams = () => {
         console.log('Current Streams:', Array.from(app.streams.entries()));
@@ -1474,6 +1477,7 @@
     }
 
     function viewMyClips() {
+      console.log('Opening My Clips modal...');
       document.getElementById('clipModalTitle').textContent = 'My Clips';
       document.getElementById('clipModalBody').innerHTML = `
         <div class="loading-state">
@@ -1483,11 +1487,34 @@
       `;
       document.getElementById('clipModal').style.display = 'block';
       
-      // Fetch user clips
+      // Fetch user clips - try multiple endpoints
+      console.log('Fetching user clips...');
+      
+      // First try the my-clips endpoint
       fetch('/api/my-clips')
-        .then(response => response.json())
+        .then(response => {
+          console.log('My-clips response:', response.status, response.ok);
+          return response.json();
+        })
         .then(data => {
-          if (data.success && data.clips) {
+          console.log('My-clips data:', data);
+          if (data.success && data.clips && data.clips.length > 0) {
+            displayUserClips(data.clips);
+          } else {
+            // Try saved-clips endpoint as fallback
+            console.log('No clips in my-clips, trying saved-clips...');
+            return fetch('/api/saved-clips');
+          }
+        })
+        .then(response => {
+          if (response && response.ok) {
+            return response.json();
+          }
+          throw new Error('No response from saved-clips');
+        })
+        .then(data => {
+          console.log('Saved-clips data:', data);
+          if (data.success && data.clips && data.clips.length > 0) {
             displayUserClips(data.clips);
           } else {
             document.getElementById('clipModalBody').innerHTML = `
@@ -1502,7 +1529,7 @@
           console.error('Failed to fetch clips:', error);
           document.getElementById('clipModalBody').innerHTML = `
             <div class="error-state">
-              <div class="error-message">Failed to load clips</div>
+              <div class="error-message">Failed to load clips: ${error.message}</div>
               <button class="retry-btn" onclick="viewMyClips()">Retry</button>
             </div>
           `;
@@ -1510,6 +1537,7 @@
     }
 
     function openFavorites() {
+      console.log('Opening Favorites modal...');
       document.getElementById('clipModalTitle').textContent = 'My Favorites';
       document.getElementById('clipModalBody').innerHTML = `
         <div class="loading-state">
@@ -1520,10 +1548,15 @@
       document.getElementById('clipModal').style.display = 'block';
       
       // Fetch user favorites
+      console.log('Fetching favorites...');
       fetch('/api/favorites')
-        .then(response => response.json())
+        .then(response => {
+          console.log('Favorites response:', response.status, response.ok);
+          return response.json();
+        })
         .then(data => {
-          if (data.success && data.favorites) {
+          console.log('Favorites data:', data);
+          if (data.success && data.favorites && data.favorites.length > 0) {
             displayFavorites(data.favorites);
           } else {
             document.getElementById('clipModalBody').innerHTML = `
@@ -1538,7 +1571,7 @@
           console.error('Failed to fetch favorites:', error);
           document.getElementById('clipModalBody').innerHTML = `
             <div class="error-state">
-              <div class="error-message">Failed to load favorites</div>
+              <div class="error-message">Failed to load favorites: ${error.message}</div>
               <button class="retry-btn" onclick="openFavorites()">Retry</button>
             </div>
           `;
@@ -1546,16 +1579,24 @@
     }
 
     function createTwitchClip(channel) {
+      console.log('Creating Twitch clip for channel:', channel);
       app.showToast('Creating clip...', 'info');
       
-      fetch(`/api/stream-clips/create/${channel}`, {
+      const endpoint = `/api/stream-clips/create/${channel}`;
+      console.log('Fetching from endpoint:', endpoint);
+      
+      fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         }
       })
-      .then(response => response.json())
+      .then(response => {
+        console.log('Clip creation response:', response.status, response.ok);
+        return response.json();
+      })
       .then(data => {
+        console.log('Clip creation data:', data);
         if (data.success) {
           app.showToast(`Clip created successfully!`, 'success');
           closeClipModal();
@@ -1577,6 +1618,8 @@
       const username = document.getElementById('medalUsername').value.trim();
       const game = document.getElementById('medalGame').value;
       
+      console.log('Searching Medal clips for:', { username, game });
+      
       if (!username) {
         app.showToast('Please enter a Medal.tv username', 'error');
         return;
@@ -1594,10 +1637,16 @@
         ? `/api/medal-clips/trending/apex-legends`
         : `/api/medal-clips/${username}`;
 
+      console.log('Fetching from endpoint:', endpoint);
+
       fetch(endpoint)
-        .then(response => response.json())
+        .then(response => {
+          console.log('Medal search response:', response.status, response.ok);
+          return response.json();
+        })
         .then(data => {
-          if (data.success && data.clips) {
+          console.log('Medal search data:', data);
+          if (data.success && data.clips && data.clips.length > 0) {
             displayMedalClips(data.clips);
           } else {
             resultsDiv.innerHTML = `
@@ -1612,7 +1661,7 @@
           console.error('Medal search failed:', error);
           resultsDiv.innerHTML = `
             <div class="error-state">
-              <div class="error-message">Failed to search clips</div>
+              <div class="error-message">Failed to search clips: ${error.message}</div>
               <button class="retry-btn" onclick="searchMedalClips()">Retry</button>
             </div>
           `;
@@ -1771,10 +1820,36 @@
 
     function closeClipModal() {
       document.getElementById('clipModal').style.display = 'none';
+      console.log('Clip modal closed');
     }
 
     function closeMedalModal() {
       document.getElementById('medalModal').style.display = 'none';
+      console.log('Medal modal closed');
+    }
+
+    // Add click outside to close functionality
+    function setupModalCloseHandlers() {
+      // Close modals when clicking outside
+      window.onclick = function(event) {
+        const clipModal = document.getElementById('clipModal');
+        const medalModal = document.getElementById('medalModal');
+        
+        if (event.target === clipModal) {
+          closeClipModal();
+        }
+        if (event.target === medalModal) {
+          closeMedalModal();
+        }
+      };
+
+      // Close modals with Escape key
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          closeClipModal();
+          closeMedalModal();
+        }
+      });
     }
 
     // Compatibility functions
