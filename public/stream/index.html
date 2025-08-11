@@ -12,236 +12,312 @@
     }
 
     :root {
-      --bg-primary: #0a0e1a;
-      --bg-secondary: #141923;
+      --bg-primary: #0f0f23;
+      --bg-secondary: #1a1a2e;
+      --bg-card: #16213e;
       --bg-stream: #000000;
-      --border-color: #2a3441;
-      --border-active: #22c55e;
+      --border-color: #2d3748;
+      --border-active: #00ff88;
       --border-selected: #8b5cf6;
       --text-primary: #ffffff;
-      --text-secondary: #94a3b8;
-      --accent-green: #22c55e;
+      --text-secondary: #a0aec0;
+      --accent-green: #00ff88;
       --accent-purple: #8b5cf6;
+      --accent-blue: #3b82f6;
       --accent-orange: #f59e0b;
+      --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.2);
+      --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: var(--bg-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
       color: var(--text-primary);
       overflow-x: hidden;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
+      min-height: 100vh;
+      line-height: 1.6;
     }
 
-    /* Header Bar */
-    .control-bar {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border-color);
-      padding: 1rem;
+    /* Modern Header */
+    .header {
+      background: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow-medium);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+
+    .header-title {
       display: flex;
       align-items: center;
       gap: 1rem;
-      flex-shrink: 0;
-      z-index: 100;
     }
 
-    .control-bar h1 {
-      font-size: 1.25rem;
+    .header-title h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-title .badge {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
       font-weight: 600;
-      color: var(--text-primary);
-      margin-right: auto;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .stream-selectors {
+    .controls {
       display: flex;
-      gap: 0.75rem;
       align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .stream-selector {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--text-primary);
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
       font-size: 0.9rem;
-      min-width: 180px;
+      min-width: 200px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
     }
 
     .stream-selector:hover {
-      border-color: var(--accent-purple);
-      background: rgba(139, 92, 246, 0.1);
+      border-color: var(--accent-green);
+      background: rgba(0, 255, 136, 0.1);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
     }
 
     .stream-selector:focus {
       outline: none;
-      border-color: var(--accent-purple);
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-    }
-
-    .quick-actions {
-      display: flex;
-      gap: 0.75rem;
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
     }
 
     .action-btn {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-secondary);
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent-green), #00cc6a);
+      border: none;
+      color: var(--bg-primary);
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
       font-size: 0.9rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: var(--shadow-light);
     }
 
     .action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-heavy);
+      background: linear-gradient(135deg, #00cc6a, var(--accent-green));
+    }
+
+    .action-btn.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .action-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
       border-color: var(--accent-green);
-      color: var(--accent-green);
-      background: rgba(34, 197, 94, 0.1);
     }
 
-    .action-btn.primary {
-      background: var(--accent-green);
-      border-color: var(--accent-green);
-      color: var(--bg-primary);
-      font-weight: 500;
+    /* Main Container */
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
     }
 
-    .action-btn.primary:hover {
-      background: #16a34a;
-      border-color: #16a34a;
-    }
-
-    /* Stream Container */
-    .stream-container {
-      flex: 1;
+    /* Stream Grid */
+    .stream-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-      gap: 20px;
-      background: var(--bg-primary);
-      padding: 20px;
-      overflow: auto;
+      grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
     }
 
-    /* Individual Stream Wrapper */
-    .stream-wrapper {
-      position: relative;
-      background: var(--bg-stream);
-      border: 2px solid var(--border-color);
-      border-radius: 12px;
-      transition: all 0.3s ease;
+    /* Stream Card */
+    .stream-card {
+      background: var(--bg-card);
+      border-radius: 20px;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      min-height: 400px;
+      box-shadow: var(--shadow-heavy);
+      transition: all 0.4s ease;
+      border: 2px solid transparent;
+      position: relative;
     }
 
-    .stream-wrapper.active {
-      border-color: var(--border-active);
-      box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    .stream-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+      border-color: rgba(0, 255, 136, 0.3);
     }
 
-    .stream-wrapper.selected {
-      border-color: var(--border-selected);
-      box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+    .stream-card.active {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    }
+
+    .stream-card.selected {
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.4);
       transform: scale(1.02);
-      z-index: 10;
     }
 
-    .stream-wrapper.loading {
-      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    .stream-card.loading {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
     }
 
     /* Stream Header */
     .stream-header {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
-      padding: 1rem;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4));
+      padding: 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 20;
-      opacity: 0;
-      transition: opacity 0.3s;
+      backdrop-filter: blur(10px);
     }
 
-    .stream-wrapper:hover .stream-header {
-      opacity: 1;
+    .stream-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
-    .stream-name {
-      font-size: 1rem;
+    .stream-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .stream-details h3 {
+      font-size: 1.1rem;
       font-weight: 600;
-      color: var(--text-primary);
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      margin-bottom: 0.25rem;
+    }
+
+    .stream-status {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
     .stream-actions {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
 
     .stream-btn {
-      background: rgba(0,0,0,0.7);
-      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: var(--text-primary);
-      padding: 0.4rem 0.8rem;
-      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
       font-size: 0.8rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       font-weight: 500;
+      backdrop-filter: blur(10px);
     }
 
     .stream-btn:hover {
-      background: rgba(139, 92, 246, 0.9);
+      background: var(--accent-purple);
       border-color: var(--accent-purple);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
     }
 
-    /* Stream Player Area */
+    /* Stream Player */
     .stream-player {
-      flex: 1;
       position: relative;
-      min-height: 400px;
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%; /* 16:9 aspect ratio */
       background: var(--bg-stream);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
     }
 
-    /* Twitch iframe styling */
-    .twitch-iframe {
+    .stream-player iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       border: none;
-      border-radius: 8px;
+      border-radius: 0 0 20px 20px;
     }
 
     /* Loading State */
-    .loading-indicator {
+    .loading-state {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 1.5rem;
-      padding: 2rem;
     }
 
-    .spinner {
+    .loading-spinner {
       width: 60px;
       height: 60px;
-      border: 4px solid var(--border-color);
-      border-top-color: var(--accent-purple);
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top: 4px solid var(--accent-green);
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
@@ -256,153 +332,175 @@
       font-weight: 500;
     }
 
-    /* Error State */
-    .error-state {
-      text-align: center;
-      padding: 3rem 2rem;
-    }
-
-    .error-icon {
-      font-size: 3rem;
-      margin-bottom: 1.5rem;
-      opacity: 0.7;
-    }
-
-    .error-message {
-      color: var(--text-secondary);
-      margin-bottom: 1.5rem;
-      font-size: 1.1rem;
-    }
-
-    .retry-btn {
-      background: var(--accent-green);
-      border: none;
-      color: var(--bg-primary);
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: all 0.2s;
-    }
-
-    .retry-btn:hover {
-      background: #16a34a;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-    }
-
     /* Empty State */
     .empty-state {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100%;
-      padding: 2rem;
+      gap: 1.5rem;
       text-align: center;
+      padding: 2rem;
     }
 
     .empty-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      opacity: 0.5;
+      font-size: 4rem;
+      opacity: 0.6;
+      filter: grayscale(1);
     }
 
     .empty-text {
       color: var(--text-secondary);
-      font-size: 1.1rem;
-      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      font-weight: 600;
     }
 
     .empty-hint {
       color: var(--text-secondary);
       font-size: 0.9rem;
-      opacity: 0.7;
+      opacity: 0.8;
+      max-width: 300px;
+      line-height: 1.5;
     }
 
-    /* Floating Clip Panel */
-    .clip-panel {
+    /* Error State */
+    .error-state {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .error-icon {
+      font-size: 4rem;
+      color: #ef4444;
+      opacity: 0.8;
+    }
+
+    .error-message {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .retry-btn {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border: none;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .retry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    /* Floating Action Panel */
+    .action-panel {
       position: fixed;
       bottom: 2rem;
       right: 2rem;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1rem;
+      background: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-heavy);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .action-panel:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .action-panel-title {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      font-weight: 600;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .action-btn-group {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-      z-index: 200;
-      opacity: 0.95;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
     }
 
-    .clip-panel:hover {
-      opacity: 1;
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.7);
-    }
-
-    .clip-panel-title {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      text-align: center;
-    }
-
-    .clip-btn {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
+    .action-btn-small {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--text-primary);
       padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
       font-weight: 500;
+      min-width: 140px;
     }
 
-    .clip-btn:hover {
-      background: var(--accent-purple);
-      border-color: var(--accent-purple);
-      transform: translateY(-1px);
-    }
-
-    .clip-btn.create {
-      background: var(--accent-green);
+    .action-btn-small:hover {
+      background: rgba(255, 255, 255, 0.1);
       border-color: var(--accent-green);
+      transform: translateY(-2px);
+    }
+
+    .action-btn-small.primary {
+      background: linear-gradient(135deg, var(--accent-green), #00cc6a);
       color: var(--bg-primary);
+      border: none;
       font-weight: 600;
     }
 
-    .clip-btn.create:hover {
-      background: #16a34a;
-      border-color: #16a34a;
+    .action-btn-small.primary:hover {
+      background: linear-gradient(135deg, #00cc6a, var(--accent-green));
+      transform: translateY(-2px);
     }
 
     /* Toast Notifications */
     .toast {
       position: fixed;
-      top: 5rem;
+      top: 6rem;
       right: 2rem;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
+      background: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-left: 4px solid var(--accent-green);
       padding: 1rem 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-      z-index: 1000;
+      border-radius: 12px;
+      box-shadow: var(--shadow-heavy);
+      z-index: 2000;
       animation: slideIn 0.4s ease;
       max-width: 400px;
-      backdrop-filter: blur(10px);
+      color: var(--text-primary);
     }
 
     @keyframes slideIn {
@@ -417,7 +515,7 @@
     }
 
     .toast.error {
-      border-left-color: #dc2626;
+      border-left-color: #ef4444;
     }
 
     .toast.success {
@@ -425,195 +523,235 @@
     }
 
     .toast.info {
-      border-left-color: var(--accent-purple);
+      border-left-color: var(--accent-blue);
     }
 
     /* Responsive Design */
     @media (max-width: 1400px) {
-      .stream-container {
-        grid-template-columns: repeat(2, 1fr);
+      .stream-grid {
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 1.5rem;
       }
     }
 
-    @media (max-width: 1000px) {
-      .stream-container {
+    @media (max-width: 1200px) {
+      .stream-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
-        padding: 16px;
+        max-width: 800px;
+        margin: 0 auto 2rem auto;
       }
       
-      .stream-wrapper {
-        min-height: 350px;
+      .header-content {
+        flex-direction: column;
+        gap: 1.5rem;
       }
       
-      .stream-player {
-        min-height: 350px;
+      .controls {
+        justify-content: center;
       }
     }
 
     @media (max-width: 768px) {
-      .control-bar {
-        flex-wrap: wrap;
-        padding: 0.75rem;
-        gap: 0.75rem;
+      .header {
+        padding: 1rem;
       }
-
-      .control-bar h1 {
-        width: 100%;
-        margin-bottom: 0.5rem;
-        text-align: center;
+      
+      .main-container {
+        padding: 1rem;
       }
-
-      .stream-selectors {
-        flex-wrap: wrap;
-        width: 100%;
-        justify-content: center;
+      
+      .stream-grid {
+        gap: 1rem;
       }
-
+      
       .stream-selector {
-        flex: 1;
-        min-width: 140px;
+        min-width: 150px;
       }
-
-      .quick-actions {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .action-btn {
-        flex: 1;
-        max-width: 120px;
-      }
-
-      .clip-panel {
+      
+      .action-panel {
         bottom: 1rem;
         right: 1rem;
         left: 1rem;
-        padding: 0.75rem;
-      }
-
-      .stream-wrapper {
-        min-height: 300px;
+        padding: 1rem;
       }
       
-      .stream-player {
-        min-height: 300px;
+      .action-btn-group {
+        flex-direction: row;
+        justify-content: center;
+      }
+      
+      .action-btn-small {
+        min-width: auto;
+        flex: 1;
       }
     }
 
     /* Scrollbar Styling */
-    .stream-container::-webkit-scrollbar {
+    ::-webkit-scrollbar {
       width: 8px;
     }
 
-    .stream-container::-webkit-scrollbar-track {
+    ::-webkit-scrollbar-track {
       background: var(--bg-secondary);
     }
 
-    .stream-container::-webkit-scrollbar-thumb {
-      background: var(--border-color);
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent-green);
       border-radius: 4px;
     }
 
-    .stream-container::-webkit-scrollbar-thumb:hover {
-      background: var(--accent-purple);
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00cc6a;
+    }
+
+    /* Animations */
+    .fade-in {
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-up {
+      animation: slideUp 0.4s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <!-- Control Bar -->
-  <div class="control-bar">
-    <h1>🎮 Apex Legends Stream Viewer</h1>
-    
-    <div class="stream-selectors">
-      <select id="stream1" class="stream-selector">
-        <option value="">Select Streamer 1</option>
-      </select>
-      <select id="stream2" class="stream-selector">
-        <option value="">Select Streamer 2</option>
-      </select>
-      <select id="stream3" class="stream-selector">
-        <option value="">Select Streamer 3</option>
-      </select>
-    </div>
-
-    <div class="quick-actions">
-      <button class="action-btn" onclick="refreshStreamers()">🔄 Refresh</button>
-      <button class="action-btn" onclick="loadSampleStreams()">📺 Sample</button>
-      <button class="action-btn primary" onclick="loadSelectedStreams()">Load Streams</button>
-    </div>
-  </div>
-
-  <!-- Main Stream Container -->
-  <div class="stream-container" id="streamContainer">
-    <!-- Stream 1 -->
-    <div class="stream-wrapper" id="stream-tile-1" data-index="1">
-      <div class="stream-header">
-        <span class="stream-name">Empty</span>
-        <div class="stream-actions">
-          <button class="stream-btn" onclick="selectStream(1)">Select</button>
-        </div>
+  <!-- Modern Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>🎮 Apex Legends</h1>
+        <span class="badge">Live Streams</span>
       </div>
-      <div class="stream-player" id="player-1">
-        <div class="empty-state">
-          <div class="empty-icon">📺</div>
-          <div class="empty-text">No Stream Selected</div>
-          <div class="empty-hint">Choose a streamer from the dropdown above</div>
-        </div>
+      
+      <div class="controls">
+        <select id="stream1" class="stream-selector">
+          <option value="">Select Streamer 1</option>
+        </select>
+        <select id="stream2" class="stream-selector">
+          <option value="">Select Streamer 2</option>
+        </select>
+        <select id="stream3" class="stream-selector">
+          <option value="">Select Streamer 3</option>
+        </select>
+        
+        <button class="action-btn secondary" onclick="refreshStreamers()">🔄 Refresh</button>
+        <button class="action-btn secondary" onclick="loadSampleStreams()">📺 Sample</button>
+        <button class="action-btn" onclick="loadSelectedStreams()">Load Streams</button>
       </div>
     </div>
+  </header>
 
-    <!-- Stream 2 -->
-    <div class="stream-wrapper" id="stream-tile-2" data-index="2">
-      <div class="stream-header">
-        <span class="stream-name">Empty</span>
-        <div class="stream-actions">
-          <button class="stream-btn" onclick="selectStream(2)">Select</button>
+  <!-- Main Container -->
+  <main class="main-container">
+    <div class="stream-grid" id="streamGrid">
+      <!-- Stream 1 -->
+      <div class="stream-card" id="stream-tile-1" data-index="1">
+        <div class="stream-header">
+          <div class="stream-info">
+            <div class="stream-avatar">1</div>
+            <div class="stream-details">
+              <h3>No Stream Selected</h3>
+              <div class="stream-status">
+                <span class="status-dot"></span>
+                Ready to stream
+              </div>
+            </div>
+          </div>
+          <div class="stream-actions">
+            <button class="stream-btn" onclick="selectStream(1)">Select</button>
+          </div>
+        </div>
+        <div class="stream-player" id="player-1">
+          <div class="empty-state">
+            <div class="empty-icon">📺</div>
+            <div class="empty-text">No Stream Selected</div>
+            <div class="empty-hint">Choose a streamer from the dropdown above to start watching live Apex Legends gameplay</div>
+          </div>
         </div>
       </div>
-      <div class="stream-player" id="player-2">
-        <div class="empty-state">
-          <div class="empty-icon">📺</div>
-          <div class="empty-text">No Stream Selected</div>
-          <div class="empty-hint">Choose a streamer from the dropdown above</div>
+
+      <!-- Stream 2 -->
+      <div class="stream-card" id="stream-tile-2" data-index="2">
+        <div class="stream-header">
+          <div class="stream-info">
+            <div class="stream-avatar">2</div>
+            <div class="stream-details">
+              <h3>No Stream Selected</h3>
+              <div class="stream-status">
+                <span class="status-dot"></span>
+                Ready to stream
+              </div>
+            </div>
+          </div>
+          <div class="stream-actions">
+            <button class="stream-btn" onclick="selectStream(2)">Select</button>
+          </div>
+        </div>
+        <div class="stream-player" id="player-2">
+          <div class="empty-state">
+            <div class="empty-icon">📺</div>
+            <div class="empty-text">No Stream Selected</div>
+            <div class="empty-hint">Choose a streamer from the dropdown above to start watching live Apex Legends gameplay</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stream 3 -->
+      <div class="stream-card" id="stream-tile-3" data-index="3">
+        <div class="stream-header">
+          <div class="stream-info">
+            <div class="stream-avatar">3</div>
+            <div class="stream-details">
+              <h3>No Stream Selected</h3>
+              <div class="stream-status">
+                <span class="status-dot"></span>
+                Ready to stream
+              </div>
+            </div>
+          </div>
+          <div class="stream-actions">
+            <button class="stream-btn" onclick="selectStream(3)">Select</button>
+          </div>
+        </div>
+        <div class="stream-player" id="player-3">
+          <div class="empty-state">
+            <div class="empty-icon">📺</div>
+            <div class="empty-text">No Stream Selected</div>
+            <div class="empty-hint">Choose a streamer from the dropdown above to start watching live Apex Legends gameplay</div>
+          </div>
         </div>
       </div>
     </div>
+  </main>
 
-    <!-- Stream 3 -->
-    <div class="stream-wrapper" id="stream-tile-3" data-index="3">
-      <div class="stream-header">
-        <span class="stream-name">Empty</span>
-        <div class="stream-actions">
-          <button class="stream-btn" onclick="selectStream(3)">Select</button>
-        </div>
-      </div>
-      <div class="stream-player" id="player-3">
-        <div class="empty-state">
-          <div class="empty-icon">📺</div>
-          <div class="empty-text">No Stream Selected</div>
-          <div class="empty-hint">Choose a streamer from the dropdown above</div>
-        </div>
-      </div>
+  <!-- Floating Action Panel -->
+  <div class="action-panel">
+    <div class="action-panel-title">Stream Tools</div>
+    <div class="action-btn-group">
+      <button class="action-btn-small primary" onclick="createClipForSelected()">
+        📹 Create Clip
+      </button>
+      <button class="action-btn-small" onclick="openMedalImport()">
+        🏅 Import Medal
+      </button>
+      <button class="action-btn-small" onclick="viewMyClips()">
+        📋 My Clips
+      </button>
     </div>
-  </div>
-
-  <!-- Floating Clip Panel -->
-  <div class="clip-panel">
-    <div class="clip-panel-title">Clip Tools</div>
-    <button class="clip-btn create" onclick="createClipForSelected()">
-      📹 Create Clip
-    </button>
-    <button class="clip-btn" onclick="openMedalImport()">
-      🏅 Import Medal
-    </button>
-    <button class="clip-btn" onclick="viewMyClips()">
-      📋 My Clips
-    </button>
   </div>
 
   <script>
-    class StreamViewerApp {
+    class ModernStreamViewer {
       constructor() {
         this.streams = new Map();
         this.selectedIndex = null;
@@ -621,13 +759,13 @@
       }
 
       async init() {
-        console.log('🚀 Initializing Stream Viewer App');
+        console.log('🚀 Initializing Modern Stream Viewer');
         this.setupEventListeners();
         await this.populateStreamers();
+        this.addAnimations();
       }
 
       setupEventListeners() {
-        // Auto-load on dropdown change
         ['stream1', 'stream2', 'stream3'].forEach((id, index) => {
           const dropdown = document.getElementById(id);
           dropdown.addEventListener('change', () => {
@@ -644,7 +782,6 @@
         console.log('📊 Fetching live streamers...');
         
         try {
-          // Check cache first
           let players = [];
           const cache = localStorage.getItem('leaderboard_cache');
           
@@ -653,7 +790,6 @@
             players = parsed.data || [];
           }
 
-          // Fetch fresh data if no cache
           if (players.length === 0) {
             const response = await fetch('/api/stats/PC');
             if (response.ok) {
@@ -668,13 +804,11 @@
             }
           }
 
-          // Filter live streamers
           const liveStreamers = players.filter(p => 
             p.twitch_live?.is_live && 
             (p.stream?.twitchUser || p.canonical_twitch_username || p.twitch_link)
           );
 
-          // Populate dropdowns
           ['stream1', 'stream2', 'stream3'].forEach(id => {
             const dropdown = document.getElementById(id);
             const current = dropdown.value;
@@ -714,25 +848,19 @@
         
         const tile = document.getElementById(`stream-tile-${index}`);
         const player = document.getElementById(`player-${index}`);
-        const header = tile.querySelector('.stream-name');
+        const header = tile.querySelector('h3');
+        const status = tile.querySelector('.stream-status');
 
-        // Show loading
         this.showLoading(index);
         tile.classList.add('loading');
 
         try {
-          // Clear existing
           this.clearStream(index);
 
-          // Create iframe using official Twitch embed
           const iframe = document.createElement('iframe');
-          iframe.className = 'twitch-iframe';
           iframe.src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(this.getParentDomain())}&muted=true&autoplay=false`;
           iframe.allowfullscreen = true;
-          iframe.width = '100%';
-          iframe.height = '100%';
 
-          // Add load/error handlers
           iframe.onload = () => {
             console.log(`✅ Stream loaded: ${channel}`);
             this.hideLoading(index);
@@ -740,6 +868,8 @@
             tile.classList.remove('loading');
             this.streams.set(index, channel);
             header.textContent = channel;
+            status.innerHTML = '<span class="status-dot"></span> Live Now';
+            tile.classList.add('fade-in');
           };
 
           iframe.onerror = () => {
@@ -760,7 +890,6 @@
       getParentDomain() {
         let host = location.hostname;
         
-        // Handle Vercel preview deployments
         if (host.includes('vercel.app') && host.includes('git-')) {
           const match = host.match(/live-leaderboard-git-[^-]+-[^-]+-([^.]+)\.vercel\.app/);
           if (match) {
@@ -776,8 +905,8 @@
       showLoading(index) {
         const player = document.getElementById(`player-${index}`);
         player.innerHTML = `
-          <div class="loading-indicator">
-            <div class="spinner"></div>
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
             <div class="loading-text">Loading stream...</div>
           </div>
         `;
@@ -785,30 +914,30 @@
 
       hideLoading(index) {
         const player = document.getElementById(`player-${index}`);
-        const loading = player.querySelector('.loading-indicator');
+        const loading = player.querySelector('.loading-state');
         if (loading) {
           loading.style.display = 'none';
         }
       }
 
       clearStream(index) {
-        // Clear player
         const player = document.getElementById(`player-${index}`);
         const iframes = player.querySelectorAll('iframe');
         iframes.forEach(iframe => iframe.remove());
 
-        // Reset UI
         const tile = document.getElementById(`stream-tile-${index}`);
-        const header = tile.querySelector('.stream-name');
-        header.textContent = 'Empty';
+        const header = tile.querySelector('h3');
+        const status = tile.querySelector('.stream-status');
+        
+        header.textContent = 'No Stream Selected';
+        status.innerHTML = '<span class="status-dot"></span> Ready to stream';
         tile.classList.remove('active', 'selected', 'loading');
         
-        // Show empty state
         player.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">📺</div>
             <div class="empty-text">No Stream Selected</div>
-            <div class="empty-hint">Choose a streamer from the dropdown above</div>
+            <div class="empty-hint">Choose a streamer from the dropdown above to start watching live Apex Legends gameplay</div>
           </div>
         `;
         
@@ -827,17 +956,23 @@
       }
 
       selectStream(index) {
-        // Remove previous selection
-        document.querySelectorAll('.stream-wrapper').forEach(w => {
-          w.classList.remove('selected');
+        document.querySelectorAll('.stream-card').forEach(card => {
+          card.classList.remove('selected');
         });
 
-        // Add selection
         const tile = document.getElementById(`stream-tile-${index}`);
         tile.classList.add('selected');
         this.selectedIndex = index;
         
         console.log(`🎯 Selected stream ${index}`);
+      }
+
+      addAnimations() {
+        const cards = document.querySelectorAll('.stream-card');
+        cards.forEach((card, index) => {
+          card.style.animationDelay = `${index * 0.1}s`;
+          card.classList.add('slide-up');
+        });
       }
 
       showToast(message, type = 'info') {
@@ -856,11 +991,11 @@
     // Initialize app
     let app;
     document.addEventListener('DOMContentLoaded', () => {
-      app = new StreamViewerApp();
-      window.app = app; // Expose globally
+      app = new ModernStreamViewer();
+      window.app = app;
     });
 
-    // Global functions for buttons
+    // Global functions
     function refreshStreamers() {
       app.populateStreamers();
     }
@@ -891,7 +1026,6 @@
     function createClipForSelected() {
       const channel = app.streams.get(app.selectedIndex);
       if (channel) {
-        console.log(`Creating clip for ${channel}`);
         app.showToast(`Clip creation for ${channel} - Feature coming soon!`, 'info');
       } else {
         app.showToast('Please select a stream first', 'error');
@@ -899,16 +1033,14 @@
     }
 
     function openMedalImport() {
-      console.log('Opening Medal import');
       app.showToast('Medal.tv import - Feature coming soon!', 'info');
     }
 
     function viewMyClips() {
-      console.log('Viewing clips');
       app.showToast('My Clips viewer - Feature coming soon!', 'info');
     }
 
-    // Compatibility functions for multistream-clips.js
+    // Compatibility functions
     window.getCurrentStreamFocus = function() {
       return app ? app.streams.get(app.selectedIndex) : null;
     };
@@ -920,7 +1052,7 @@
     window.createClipForCurrentStream = createClipForSelected;
   </script>
 
-  <script src="/js/multistream-clips.js?v=stream-3"></script>
+  <script src="/js/multistream-clips.js?v=stream-4"></script>
 </body>
 </html>
 
