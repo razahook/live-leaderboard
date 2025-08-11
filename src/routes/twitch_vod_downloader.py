@@ -365,28 +365,16 @@ def get_channel_videos(channel_login):
             }
         }]
         
-        # GQL headers (matching the extension exactly)
+        # GQL headers (updated for current browser)
         gql_headers = {
             'accept': '*/*',
-            'accept-encoding': 'gzip, deflate, br, zstd',
             'accept-language': 'en-US',
             'client-id': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
-            'client-integrity': 'v4.local.EOvZGU3SI2Z3hQOEHt4NJvAW7hnpgb6RTghw6yw3K0PeQbs_sCoNV8gKG5T5Jd-xD5HRHF41chxNRh84-5KllcgxU46HzZxPtKye386WQVFVIjmTBrauqq5fEHZmok7O9kXMQvMhRDYTaEVuXK2rdwCo-lGT4K6wPEMxDU6TF0PCPXnaWy2R8xdvqZ5kdGLKRDvyaszTVxpr8wlFiL6Q5VKAQyIDXUYvfuyAx2Pcs3KDryMIwn2UsSbMAxTWVPgtbRad-3QynJ3tnDfs9LaQnteHeDueWg0mMPPqyCGoXIN7BAVcfMhqt9hdPsOuo2YNKOxN2FWx0AOWXe487zR56I3ge1lu00OfDY5JdRXCvXciqZ2ozQxNqDmuVwKj4wV-MVZGTYL_0JrF8ec2Q5uXtoUT3uotdwJRWOjRAb0QHarD',
-            'client-session-id': '079e64c94a114adf',
-            'client-version': '7f8e8ffc-0924-405b-b2a6-28f0c305c7af',
             'content-type': 'text/plain;charset=UTF-8',
             'origin': 'https://www.twitch.tv',
-            'priority': 'u=1, i',
             'referer': 'https://www.twitch.tv/',
-            'sec-ch-ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Brave";v="138"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-site',
-            'sec-gpc': '1',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'x-device-id': '1186880d7dab18d4'
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            'x-device-id': hashlib.md5(f'device_{channel_login}_{time.time()}'.encode()).hexdigest()[:16]
         }
         
         print(f"Making GQL request to get VODs")
@@ -830,10 +818,13 @@ def extract_hidden_vods_from_gql(channel_login):
         # Headers that mimic the browser extension
         gql_headers = {
             'accept': '*/*',
-            'accept-language': 'en-US,en;q=0.9',
+            'accept-language': 'en-US',
             'client-id': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
             'content-type': 'text/plain;charset=UTF-8',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
+            'origin': 'https://www.twitch.tv',
+            'referer': 'https://www.twitch.tv/',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            'x-device-id': hashlib.md5(f'device_{time.time()}'.encode()).hexdigest()[:16]
         }
         
         # Try both queries and combine results
@@ -1117,7 +1108,7 @@ def get_channel_videos_with_tokens_internal(channel_login):
             'origin': 'https://www.twitch.tv',
             'referer': 'https://www.twitch.tv/',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'x-device-id': '1186880d7dab18d4'
+            'x-device-id': hashlib.md5(f'device_global_{time.time()}'.encode()).hexdigest()[:16]
         }
         
         response = requests.post(gql_url, json=gql_payload, headers=gql_headers)
@@ -1231,7 +1222,7 @@ def get_channel_videos_with_tokens(channel_login):
             'origin': 'https://www.twitch.tv',
             'referer': 'https://www.twitch.tv/',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'x-device-id': '1186880d7dab18d4'
+            'x-device-id': hashlib.md5(f'device_global_{time.time()}'.encode()).hexdigest()[:16]
         }
         
         # Add client-integrity token if available
@@ -1550,7 +1541,7 @@ def get_live_stream(channel_login):
             "extensions": {
                 "persistedQuery": {
                     "version": 1,
-                    "sha256Hash": "0828119ded1c13477966434e15800ff57ddacf13ba1911c129dc2200705b0712"
+                    "sha256Hash": "36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11"
                 }
             }
         }
@@ -1576,7 +1567,7 @@ def get_live_stream(channel_login):
             'sec-fetch-site': 'same-site',
             'sec-gpc': '1',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'x-device-id': '1186880d7dab18d4'
+            'x-device-id': hashlib.md5(f'device_global_{time.time()}'.encode()).hexdigest()[:16]
         }
         
         token_response = requests.post(token_url, json=token_payload, headers=gql_headers)

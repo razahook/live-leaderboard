@@ -43,7 +43,8 @@
       "mcp__puppeteer__puppeteer_evaluate",
       "mcp__playwright__browser_select_option",
       "mcp__playwright__browser_take_screenshot",
-      "mcp__context7__resolve-library-id"
+      "mcp__context7__resolve-library-id",
+      "mcp__sequential-thinking__sequentialthinking"
     ],
     "deny": []
   }
