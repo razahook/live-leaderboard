@@ -786,8 +786,23 @@
           const cache = localStorage.getItem('leaderboard_cache');
           
           if (cache) {
-            const parsed = JSON.parse(cache);
-            players = parsed.data || [];
+            try {
+              const parsed = JSON.parse(cache);
+              // Ensure we get an array from cache
+              if (Array.isArray(parsed.data)) {
+                players = parsed.data;
+              } else if (parsed.data && Array.isArray(parsed.data.players)) {
+                players = parsed.data.players;
+              } else {
+                console.warn('Invalid cache structure, clearing cache');
+                localStorage.removeItem('leaderboard_cache');
+                players = [];
+              }
+            } catch (err) {
+              console.error('Failed to parse cache:', err);
+              localStorage.removeItem('leaderboard_cache');
+              players = [];
+            }
           }
 
           if (players.length === 0) {
@@ -795,13 +810,28 @@
             if (response.ok) {
               const data = await response.json();
               if (data.success && data.data) {
-                players = data.data.players || data.data || [];
+                // Ensure we extract the players array correctly
+                if (Array.isArray(data.data)) {
+                  players = data.data;
+                } else if (data.data.players && Array.isArray(data.data.players)) {
+                  players = data.data.players;
+                } else {
+                  console.warn('Unexpected data structure from API:', data);
+                  players = [];
+                }
+                
                 localStorage.setItem('leaderboard_cache', JSON.stringify({
                   data: players,
                   timestamp: Date.now()
                 }));
               }
             }
+          }
+
+          // Ensure players is always an array before filtering
+          if (!Array.isArray(players)) {
+            console.error('Players is not an array:', players);
+            players = [];
           }
 
           const liveStreamers = players.filter(p => 
