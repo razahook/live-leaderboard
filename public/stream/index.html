@@ -94,9 +94,9 @@
     }
 
     .stream-selector {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-primary);
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: #ffffff;
       padding: 0.75rem 1rem;
       border-radius: 12px;
       font-size: 0.9rem;
@@ -107,8 +107,8 @@
     }
 
     .stream-selector:hover {
-      border-color: var(--accent-green);
-      background: rgba(0, 255, 136, 0.1);
+      border-color: #4b5563;
+      background: #374151;
       transform: translateY(-2px);
       box-shadow: var(--shadow-medium);
     }
@@ -116,7 +116,28 @@
     .stream-selector:focus {
       outline: none;
       border-color: var(--accent-green);
-      box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
+      background: #374151;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    
+    /* Dropdown option styling */
+    .stream-selector option {
+      background: #1f2937;
+      color: #ffffff;
+      padding: 0.5rem;
+      border: none;
+    }
+    
+    .stream-selector option:hover,
+    .stream-selector option:focus {
+      background: #374151;
+      color: #ffffff;
+    }
+    
+    .stream-selector option:checked,
+    .stream-selector option:selected {
+      background: #4b5563;
+      color: #ffffff;
     }
 
     .action-btn {
