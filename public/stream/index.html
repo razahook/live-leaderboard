@@ -475,9 +475,9 @@
     }
 
     .bubble-options {
-      position: absolute;
-      bottom: calc(100% + 10px);
-      right: 0;
+      position: fixed;
+      bottom: 8rem;
+      right: 2rem;
       background: rgba(26, 26, 46, 0.98);
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -491,10 +491,7 @@
       transition: all 0.3s ease;
       min-width: 180px;
       z-index: 1001;
-      /* Debug: Add a visible border to see positioning */
-      border: 2px solid rgba(255, 255, 0, 0.5);
-      /* Force visibility for debugging */
-      background: rgba(255, 0, 0, 0.3) !important;
+
 
     }
 
@@ -513,8 +510,9 @@
       transform: translateY(0);
       display: block !important;
       z-index: 1001 !important;
-      /* Ensure it's above the main button */
-      bottom: calc(100% + 15px);
+      /* Fixed positioning above the main button */
+      bottom: 8rem;
+      right: 2rem;
     }
 
 
@@ -1041,11 +1039,7 @@
   </div>
   
   <!-- Debug button for testing -->
-  <div style="position: fixed; bottom: 2rem; left: 2rem; z-index: 2000;">
-    <button onclick="forceBubbleVisible()" style="background: red; color: white; padding: 0.5rem; border-radius: 8px; border: none; cursor: pointer;">
-      🔍 Debug Bubble
-    </button>
-  </div>
+
 
   <!-- Clip Management Modal -->
   <div id="clipModal" class="modal" style="display: none;">
@@ -1930,30 +1924,7 @@
       console.log('Medal modal closed');
     }
 
-    // Debug function to force bubble visibility
-    function forceBubbleVisible() {
-      const bubbleOptions = document.getElementById('bubbleOptions');
-      if (bubbleOptions) {
-        // Force show with inline styles
-        bubbleOptions.style.display = 'block';
-        bubbleOptions.style.opacity = '1';
-        bubbleOptions.style.visibility = 'visible';
-        bubbleOptions.style.transform = 'translateY(0)';
-        bubbleOptions.style.zIndex = '9999';
-        bubbleOptions.style.position = 'fixed';
-        bubbleOptions.style.top = '50%';
-        bubbleOptions.style.left = '50%';
-        bubbleOptions.style.transform = 'translate(-50%, -50%)';
-        bubbleOptions.style.background = 'red';
-        bubbleOptions.style.border = '3px solid yellow';
-        bubbleOptions.style.padding = '20px';
-        bubbleOptions.style.minWidth = '300px';
-        
-        console.log('🔍 Forced bubble to center of screen with red background');
-        console.log('Bubble element:', bubbleOptions);
-        console.log('Bubble computed styles:', window.getComputedStyle(bubbleOptions));
-      }
-    }
+
 
 
     // Toggle clip bubble
