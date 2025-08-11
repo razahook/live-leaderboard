@@ -223,11 +223,16 @@
       left: 0;
     }
     
-    /* Let Twitch handle the sizing and cropping */
+    /* Scale and crop the iframe to eliminate black bars */
     .twitch-embed-container iframe {
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 120%;
+      height: 120%;
+      transform: translate(-50%, -50%);
       border: none;
+      object-fit: cover;
     }
 
     /* Loading State */
@@ -671,34 +676,30 @@
         container.className = 'twitch-embed-container';
         player.appendChild(container);
 
-        try {
-          // Create Twitch embed with options to eliminate black bars
-          const embed = new Twitch.Embed(containerId, {
-            width: '100%',
-            height: '100%',
-            channel: channel,
-            parent: computeTwitchParents(),
-            layout: 'video',
-            theme: 'dark',
-            autoplay: false,
-            muted: true,
-            allowfullscreen: true,
-            scrolling: 'no',
-            frameborder: '0'
-          });
+                 try {
+           // Use direct Twitch player iframe for better control over sizing
+           const parent = computeTwitchParents()[0]; // Use first parent domain
+           const iframe = document.createElement('iframe');
+           iframe.src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(parent)}&muted=true&autoplay=false`;
+           iframe.width = '100%';
+           iframe.height = '100%';
+           iframe.frameBorder = '0';
+           iframe.allowFullscreen = true;
+           iframe.style.border = 'none';
+           
+           // Add the iframe directly to the container
+           container.appendChild(iframe);
+           
+           // Simulate embed instance for compatibility
+           const embed = {
+             destroy: () => {
+               container.innerHTML = '';
+             }
+           };
 
-          // Wait for ready
-          await new Promise((resolve) => {
-            embed.addEventListener(Twitch.Embed.VIDEO_READY, () => {
-              console.log(`✅ Stream ready: ${channel}`);
-              resolve();
-            });
-            setTimeout(resolve, 5000); // Timeout fallback
-          });
-
-          // Store reference
-          this.embedInstances.set(index, embed);
-          this.streams.set(index, channel);
+           // Store reference
+           this.embedInstances.set(index, embed);
+           this.streams.set(index, channel);
 
           // Update UI
           header.textContent = channel;
