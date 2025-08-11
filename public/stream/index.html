@@ -1697,22 +1697,8 @@
           modal.style.display = 'block';
           modal.style.setProperty('display', 'block', 'important');
         }, 10);
-        } else {
-          console.error('Clip modal not found!');
-        }
-      }, 10);
-      
-      // Also set it immediately
-      const modal = document.getElementById('clipModal');
-      if (modal) {
-        document.getElementById('clipModalTitle').textContent = 'My Clips';
-        document.getElementById('clipModalBody').innerHTML = `
-          <div class="loading-state">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Loading your clips...</div>
-          </div>
-        `;
-        modal.style.display = 'block';
+      } else {
+        console.error('Clip modal not found!');
       }
       
       // Fetch user clips - try multiple endpoints
