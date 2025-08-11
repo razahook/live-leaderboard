@@ -788,6 +788,10 @@
         
         this.setupEventListeners();
         await this.populateStreamers();
+        
+        // Check for autoload from multistream queue
+        this.checkAutoloadQueue();
+        
         this.addAnimations();
         
         // Log initial state
@@ -1147,6 +1151,68 @@
         document.body.appendChild(toast);
 
         setTimeout(() => toast.remove(), 4000);
+      }
+      
+      checkAutoloadQueue() {
+        console.log('🔍 Checking for multistream queue autoload...');
+        
+        // Check URL parameters for autoload flag
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldAutoload = urlParams.get('autoload') === 'true';
+        
+        if (shouldAutoload) {
+          // Get queue from localStorage
+          const queueData = localStorage.getItem('multistream_queue');
+          if (queueData) {
+            try {
+              const queue = JSON.parse(queueData);
+              console.log('📋 Found multistream queue:', queue);
+              
+              if (Array.isArray(queue) && queue.length > 0) {
+                // Auto-populate dropdowns and load streams
+                this.autoloadFromQueue(queue);
+                
+                // Clear the queue and URL parameter
+                localStorage.removeItem('multistream_queue');
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+                
+                this.showToast(`Auto-loaded ${queue.length} stream(s) from queue!`, 'success');
+              }
+            } catch (error) {
+              console.error('Failed to parse multistream queue:', error);
+              localStorage.removeItem('multistream_queue');
+            }
+          }
+        }
+      }
+      
+      autoloadFromQueue(queue) {
+        console.log('🚀 Auto-loading streams from queue:', queue);
+        
+        const dropdowns = ['stream1', 'stream2', 'stream3'];
+        
+        queue.slice(0, 3).forEach((streamer, index) => {
+          const dropdownId = dropdowns[index];
+          const dropdown = document.getElementById(dropdownId);
+          
+          if (dropdown) {
+            // Find the option that matches this streamer (case insensitive)
+            const option = Array.from(dropdown.options).find(opt => 
+              opt.value.toLowerCase() === streamer.toLowerCase()
+            );
+            
+            if (option) {
+              dropdown.value = option.value;
+              // Trigger the load
+              setTimeout(() => {
+                this.loadStream(index + 1, option.value);
+              }, index * 500); // Stagger the loads
+            } else {
+              console.warn(`Streamer ${streamer} not found in dropdown options`);
+            }
+          }
+        });
       }
     }
 
