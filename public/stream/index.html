@@ -21,7 +21,7 @@
       --border-selected: #8b5cf6;
       --text-primary: #ffffff;
       --text-secondary: #a0aec0;
-      --accent-green: #3b82f6;
+      --accent-green: #00ff88;
       --accent-purple: #8b5cf6;
       --accent-blue: #3b82f6;
       --accent-orange: #f59e0b;
@@ -94,9 +94,9 @@
     }
 
     .stream-selector {
-      background: #1f2937;
-      border: 1px solid #374151;
-      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
       padding: 0.75rem 1rem;
       border-radius: 12px;
       font-size: 0.9rem;
@@ -107,8 +107,8 @@
     }
 
     .stream-selector:hover {
-      border-color: #4b5563;
-      background: #374151;
+      border-color: var(--accent-green);
+      background: rgba(0, 255, 136, 0.1);
       transform: translateY(-2px);
       box-shadow: var(--shadow-medium);
     }
@@ -116,28 +116,7 @@
     .stream-selector:focus {
       outline: none;
       border-color: var(--accent-green);
-      background: #374151;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-    
-    /* Dropdown option styling */
-    .stream-selector option {
-      background: #1f2937;
-      color: #ffffff;
-      padding: 0.5rem;
-      border: none;
-    }
-    
-    .stream-selector option:hover,
-    .stream-selector option:focus {
-      background: #374151;
-      color: #ffffff;
-    }
-    
-    .stream-selector option:checked,
-    .stream-selector option:selected {
-      background: #4b5563;
-      color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
     }
 
     .action-btn {
@@ -667,6 +646,7 @@
         
         <button class="action-btn secondary" onclick="refreshStreamers()">🔄 Refresh</button>
         <button class="action-btn secondary" onclick="loadSampleStreams()">📺 Sample</button>
+        <button class="action-btn secondary" onclick="playAllStreams()">▶️ Play All</button>
         <button class="action-btn" onclick="loadSelectedStreams()">Load Streams</button>
       </div>
     </div>
@@ -788,10 +768,6 @@
         
         this.setupEventListeners();
         await this.populateStreamers();
-        
-        // Check for autoload from multistream queue
-        this.checkAutoloadQueue();
-        
         this.addAnimations();
         
         // Log initial state
@@ -846,18 +822,13 @@
           if (cache) {
             try {
               const parsed = JSON.parse(cache);
-              // Handle different cache structures
+              // Ensure we get an array from cache
               if (Array.isArray(parsed.data)) {
-                // Cache format: { data: [players], timestamp: ... }
                 players = parsed.data;
               } else if (parsed.data && Array.isArray(parsed.data.players)) {
-                // API format cached: { data: { players: [...], last_updated: ... }, timestamp: ... }
                 players = parsed.data.players;
-              } else if (Array.isArray(parsed)) {
-                // Direct array cache (legacy)
-                players = parsed;
               } else {
-                console.warn('Invalid cache structure, clearing cache. Structure:', typeof parsed, Object.keys(parsed || {}));
+                console.warn('Invalid cache structure, clearing cache');
                 localStorage.removeItem('leaderboard_cache');
                 players = [];
               }
@@ -959,7 +930,7 @@
           const parentParams = parentDomains.map(domain => `&parent=${encodeURIComponent(domain)}`).join('');
           
           const iframe = document.createElement('iframe');
-          const embedUrl = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}${parentParams}&muted=true&autoplay=false`;
+          const embedUrl = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}${parentParams}&muted=true&autoplay=true`;
           
           console.debug('CSP Debug - Embed URL:', embedUrl);
           iframe.src = embedUrl;
@@ -1152,68 +1123,6 @@
 
         setTimeout(() => toast.remove(), 4000);
       }
-      
-      checkAutoloadQueue() {
-        console.log('🔍 Checking for multistream queue autoload...');
-        
-        // Check URL parameters for autoload flag
-        const urlParams = new URLSearchParams(window.location.search);
-        const shouldAutoload = urlParams.get('autoload') === 'true';
-        
-        if (shouldAutoload) {
-          // Get queue from localStorage
-          const queueData = localStorage.getItem('multistream_queue');
-          if (queueData) {
-            try {
-              const queue = JSON.parse(queueData);
-              console.log('📋 Found multistream queue:', queue);
-              
-              if (Array.isArray(queue) && queue.length > 0) {
-                // Auto-populate dropdowns and load streams
-                this.autoloadFromQueue(queue);
-                
-                // Clear the queue and URL parameter
-                localStorage.removeItem('multistream_queue');
-                const newUrl = window.location.pathname;
-                window.history.replaceState({}, document.title, newUrl);
-                
-                this.showToast(`Auto-loaded ${queue.length} stream(s) from queue!`, 'success');
-              }
-            } catch (error) {
-              console.error('Failed to parse multistream queue:', error);
-              localStorage.removeItem('multistream_queue');
-            }
-          }
-        }
-      }
-      
-      autoloadFromQueue(queue) {
-        console.log('🚀 Auto-loading streams from queue:', queue);
-        
-        const dropdowns = ['stream1', 'stream2', 'stream3'];
-        
-        queue.slice(0, 3).forEach((streamer, index) => {
-          const dropdownId = dropdowns[index];
-          const dropdown = document.getElementById(dropdownId);
-          
-          if (dropdown) {
-            // Find the option that matches this streamer (case insensitive)
-            const option = Array.from(dropdown.options).find(opt => 
-              opt.value.toLowerCase() === streamer.toLowerCase()
-            );
-            
-            if (option) {
-              dropdown.value = option.value;
-              // Trigger the load
-              setTimeout(() => {
-                this.loadStream(index + 1, option.value);
-              }, index * 500); // Stagger the loads
-            } else {
-              console.warn(`Streamer ${streamer} not found in dropdown options`);
-            }
-          }
-        });
-      }
     }
 
     // Initialize app
@@ -1260,6 +1169,32 @@
         dropdown.value = channel;
         app.loadStream(i + 1, channel);
       });
+    }
+
+    function playAllStreams() {
+      // Try to trigger play on all loaded streams
+      const iframes = document.querySelectorAll('iframe[src*="player.twitch.tv"]');
+      console.log(`🎮 Attempting to play ${iframes.length} streams`);
+      
+      iframes.forEach((iframe, index) => {
+        try {
+          // Send play message to Twitch player
+          iframe.contentWindow.postMessage('play', 'https://player.twitch.tv');
+          
+          // Also try clicking the play button if visible
+          setTimeout(() => {
+            const playButton = iframe.contentDocument?.querySelector('[data-a-target="player-play-pause-button"]');
+            if (playButton) {
+              playButton.click();
+              console.log(`▶️ Clicked play button for stream ${index + 1}`);
+            }
+          }, 500);
+        } catch (error) {
+          console.debug(`Could not trigger play for stream ${index + 1}:`, error.message);
+        }
+      });
+      
+      app.showToast('Attempting to play all streams. Click individual play buttons if needed.', 'info');
     }
 
     function loadSelectedStreams() {

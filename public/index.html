@@ -1044,8 +1044,8 @@
                 toast.innerHTML = `
                     <div id="ms-queue-text" class="text-sm mb-2">Queued: ${label}</div>
                     <div class="flex gap-2">
-                        <button id="ms-queue-view" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-white text-xs">View Queue (${pendingMultiStreamQueue.length})</button>
-                        <button id="ms-queue-go" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded text-white text-xs">Go to Stream Viewer</button>
+                        <button id="ms-queue-view" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-white text-xs">Open Queue (${pendingMultiStreamQueue.length})</button>
+                        <button id="ms-queue-go" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded text-white text-xs">Load Now</button>
                         <button id="ms-queue-clear" class="px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded text-white text-xs">Clear</button>
                     </div>
                 `;
@@ -1088,18 +1088,10 @@
         }
 
         function loadQueueIntoMultistream() {
-            // Store queue in localStorage and redirect to new stream page
-            if (pendingMultiStreamQueue.length > 0) {
-                localStorage.setItem('multistream_queue', JSON.stringify(pendingMultiStreamQueue));
-                removeQueueToast();
-                pendingMultiStreamQueue = [];
-                window.location.href = '/stream?autoload=true';
-            } else {
-                // Fallback to old modal system if no queue
-                openQueueModal();
-                removeQueueToast();
-                loadMultiStreams();
-            }
+            openQueueModal();
+            removeQueueToast();
+            loadMultiStreams();
+            pendingMultiStreamQueue = [];
         }
         const modalTitle = document.getElementById('modalTitle');
         const modalContent = document.getElementById('modalContent');
@@ -2571,7 +2563,7 @@
                     window.__edgeFlags = flags;
 
                     // Apply feature flags to UI (e.g., show/hide Multi-Stream entry points)
-                        (function applyFeatureFlags() {
+                    (function applyFeatureFlags() {
                         try {
                             const enabled = !!(flags.feature_flags && flags.feature_flags.multistreamDock);
                             const msOpeners = document.querySelectorAll('[onclick*="showMultiStreamModal"]');
