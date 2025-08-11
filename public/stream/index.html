@@ -326,6 +326,10 @@
       to { transform: rotate(360deg); }
     }
 
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     .loading-text {
       color: var(--text-secondary);
       font-size: 1rem;
@@ -604,6 +608,193 @@
       background: #00cc6a;
     }
 
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 3000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      margin: 5% auto;
+      padding: 0;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: var(--shadow-heavy);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4));
+      padding: 1.5rem;
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      color: var(--text-primary);
+      font-size: 1.2rem;
+    }
+
+    .close {
+      color: var(--text-secondary);
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .close:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .medal-results {
+      margin-top: 2rem;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .clip-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .clip-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-green);
+    }
+
+    .clip-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .clip-meta {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .clip-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .clip-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .clip-btn.primary {
+      background: var(--accent-green);
+      color: var(--bg-primary);
+    }
+
+    .clip-btn.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .clip-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .text-secondary {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2rem;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top: 3px solid var(--accent-green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
     /* Animations */
     .fade-in {
       animation: fadeIn 0.6s ease;
@@ -737,7 +928,7 @@
 
   <!-- Floating Action Panel -->
   <div class="action-panel">
-    <div class="action-panel-title">Stream Tools</div>
+    <div class="action-panel-title">Clip Management</div>
     <div class="action-btn-group">
       <button class="action-btn-small primary" onclick="createClipForSelected()">
         📹 Create Clip
@@ -748,6 +939,50 @@
       <button class="action-btn-small" onclick="viewMyClips()">
         📋 My Clips
       </button>
+      <button class="action-btn-small" onclick="openFavorites()">
+        ⭐ Favorites
+      </button>
+    </div>
+  </div>
+
+  <!-- Clip Management Modal -->
+  <div id="clipModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="clipModalTitle">Clip Management</h3>
+        <span class="close" onclick="closeClipModal()">&times;</span>
+      </div>
+      <div class="modal-body" id="clipModalBody">
+        <!-- Content will be dynamically loaded -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Medal Import Modal -->
+  <div id="medalModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Import Medal.tv Clips</h3>
+        <span class="close" onclick="closeMedalModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="medalUsername">Medal.tv Username:</label>
+          <input type="text" id="medalUsername" placeholder="Enter Medal.tv username" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="medalGame">Game Category:</label>
+          <select id="medalGame" class="form-select">
+            <option value="5FsRVgww4b">Apex Legends</option>
+            <option value="trending">Trending</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button class="action-btn" onclick="searchMedalClips()">Search Clips</button>
+          <button class="action-btn secondary" onclick="closeMedalModal()">Cancel</button>
+        </div>
+        <div id="medalResults" class="medal-results"></div>
+      </div>
     </div>
   </div>
 
@@ -1213,19 +1448,333 @@
     // Clip functions
     function createClipForSelected() {
       const channel = app.streams.get(app.selectedIndex);
-      if (channel) {
-        app.showToast(`Clip creation for ${channel} - Feature coming soon!`, 'info');
-      } else {
+      if (!channel) {
         app.showToast('Please select a stream first', 'error');
+        return;
       }
+
+      // Show clip creation modal
+      document.getElementById('clipModalTitle').textContent = `Create Clip - ${channel}`;
+      document.getElementById('clipModalBody').innerHTML = `
+        <div class="form-group">
+          <label>Creating clip for: <strong>${channel}</strong></label>
+          <p class="text-secondary">This will create a clip on Twitch for the currently live stream.</p>
+        </div>
+        <div class="form-actions">
+          <button class="action-btn" onclick="createTwitchClip('${channel}')">Create Clip</button>
+          <button class="action-btn secondary" onclick="closeClipModal()">Cancel</button>
+        </div>
+      `;
+      document.getElementById('clipModal').style.display = 'block';
     }
 
     function openMedalImport() {
-      app.showToast('Medal.tv import - Feature coming soon!', 'info');
+      document.getElementById('medalModal').style.display = 'block';
+      document.getElementById('medalResults').innerHTML = '';
     }
 
     function viewMyClips() {
-      app.showToast('My Clips viewer - Feature coming soon!', 'info');
+      document.getElementById('clipModalTitle').textContent = 'My Clips';
+      document.getElementById('clipModalBody').innerHTML = `
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Loading your clips...</div>
+        </div>
+      `;
+      document.getElementById('clipModal').style.display = 'block';
+      
+      // Fetch user clips
+      fetch('/api/my-clips')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.clips) {
+            displayUserClips(data.clips);
+          } else {
+            document.getElementById('clipModalBody').innerHTML = `
+              <div class="empty-state">
+                <div class="empty-text">No clips found</div>
+                <div class="empty-hint">Create some clips to see them here</div>
+              </div>
+            `;
+          }
+        })
+        .catch(error => {
+          console.error('Failed to fetch clips:', error);
+          document.getElementById('clipModalBody').innerHTML = `
+            <div class="error-state">
+              <div class="error-message">Failed to load clips</div>
+              <button class="retry-btn" onclick="viewMyClips()">Retry</button>
+            </div>
+          `;
+        });
+    }
+
+    function openFavorites() {
+      document.getElementById('clipModalTitle').textContent = 'My Favorites';
+      document.getElementById('clipModalBody').innerHTML = `
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Loading favorites...</div>
+        </div>
+      `;
+      document.getElementById('clipModal').style.display = 'block';
+      
+      // Fetch user favorites
+      fetch('/api/favorites')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.favorites) {
+            displayFavorites(data.favorites);
+          } else {
+            document.getElementById('clipModalBody').innerHTML = `
+              <div class="empty-state">
+                <div class="empty-text">No favorites found</div>
+                <div class="empty-hint">Add clips to favorites to see them here</div>
+              </div>
+            `;
+          }
+        })
+        .catch(error => {
+          console.error('Failed to fetch favorites:', error);
+          document.getElementById('clipModalBody').innerHTML = `
+            <div class="error-state">
+              <div class="error-message">Failed to load favorites</div>
+              <button class="retry-btn" onclick="openFavorites()">Retry</button>
+            </div>
+          `;
+        });
+    }
+
+    function createTwitchClip(channel) {
+      app.showToast('Creating clip...', 'info');
+      
+      fetch(`/api/stream-clips/create/${channel}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          app.showToast(`Clip created successfully!`, 'success');
+          closeClipModal();
+          // Optionally open the clip
+          if (data.clip_url) {
+            window.open(data.clip_url, '_blank');
+          }
+        } else {
+          app.showToast(`Failed to create clip: ${data.message}`, 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Clip creation failed:', error);
+        app.showToast('Failed to create clip', 'error');
+      });
+    }
+
+    function searchMedalClips() {
+      const username = document.getElementById('medalUsername').value.trim();
+      const game = document.getElementById('medalGame').value;
+      
+      if (!username) {
+        app.showToast('Please enter a Medal.tv username', 'error');
+        return;
+      }
+
+      const resultsDiv = document.getElementById('medalResults');
+      resultsDiv.innerHTML = `
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Searching for clips...</div>
+        </div>
+      `;
+
+      const endpoint = game === 'trending' 
+        ? `/api/medal-clips/trending/apex-legends`
+        : `/api/medal-clips/${username}`;
+
+      fetch(endpoint)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.clips) {
+            displayMedalClips(data.clips);
+          } else {
+            resultsDiv.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-text">No clips found</div>
+                <div class="empty-hint">Try a different username or check the game category</div>
+              </div>
+            `;
+          }
+        })
+        .catch(error => {
+          console.error('Medal search failed:', error);
+          resultsDiv.innerHTML = `
+            <div class="error-state">
+              <div class="error-message">Failed to search clips</div>
+              <button class="retry-btn" onclick="searchMedalClips()">Retry</button>
+            </div>
+          `;
+        });
+    }
+
+    function displayUserClips(clips) {
+      const modalBody = document.getElementById('clipModalBody');
+      if (!clips || clips.length === 0) {
+        modalBody.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-text">No clips found</div>
+            <div class="empty-hint">Create some clips to see them here</div>
+          </div>
+        `;
+        return;
+      }
+
+      const clipsHtml = clips.map(clip => `
+        <div class="clip-item">
+          <div class="clip-title">${clip.title || 'Untitled Clip'}</div>
+          <div class="clip-meta">
+            ${clip.broadcaster_login} • ${clip.view_count ? clip.view_count.toLocaleString() + ' views' : 'Unknown views'}
+          </div>
+          <div class="clip-actions">
+            <button class="clip-btn primary" onclick="window.open('${clip.url}', '_blank')">Watch</button>
+            <button class="clip-btn secondary" onclick="addToFavorites('${clip.external_id}')">⭐ Favorite</button>
+          </div>
+        </div>
+      `).join('');
+
+      modalBody.innerHTML = clipsHtml;
+    }
+
+    function displayFavorites(favorites) {
+      const modalBody = document.getElementById('clipModalBody');
+      if (!favorites || favorites.length === 0) {
+        modalBody.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-text">No favorites found</div>
+            <div class="empty-hint">Add clips to favorites to see them here</div>
+          </div>
+        `;
+        return;
+      }
+
+      const favoritesHtml = favorites.map(fav => `
+        <div class="clip-item">
+          <div class="clip-title">${fav.title || 'Untitled Clip'}</div>
+          <div class="clip-meta">
+            ${fav.broadcaster_login} • ${fav.view_count ? fav.view_count.toLocaleString() + ' views' : 'Unknown views'}
+          </div>
+          <div class="clip-actions">
+            <button class="clip-btn primary" onclick="window.open('${fav.url}', '_blank')">Watch</button>
+            <button class="clip-btn secondary" onclick="removeFromFavorites('${fav.external_id}')">🗑️ Remove</button>
+          </div>
+        </div>
+      `).join('');
+
+      modalBody.innerHTML = favoritesHtml;
+    }
+
+    function displayMedalClips(clips) {
+      const resultsDiv = document.getElementById('medalResults');
+      if (!clips || clips.length === 0) {
+        resultsDiv.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-text">No clips found</div>
+            <div class="empty-hint">Try a different username or check the game category</div>
+          </div>
+        `;
+        return;
+      }
+
+      const clipsHtml = clips.map(clip => `
+        <div class="clip-item">
+          <div class="clip-title">${clip.title || 'Untitled Clip'}</div>
+          <div class="clip-meta">
+            ${clip.creator_login} • ${clip.view_count ? clip.view_count.toLocaleString() + ' views' : 'Unknown views'}
+            ${clip.duration ? ` • ${clip.duration}s` : ''}
+          </div>
+          <div class="clip-actions">
+            <button class="clip-btn primary" onclick="window.open('${clip.url}', '_blank')">Watch</button>
+            <button class="clip-btn secondary" onclick="importMedalClip('${clip.external_id}')">📥 Import</button>
+          </div>
+        </div>
+      `).join('');
+
+      resultsDiv.innerHTML = clipsHtml;
+    }
+
+    function addToFavorites(clipId) {
+      fetch(`/api/favorites/${clipId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          app.showToast('Added to favorites!', 'success');
+        } else {
+          app.showToast(`Failed to add to favorites: ${data.message}`, 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Failed to add to favorites:', error);
+        app.showToast('Failed to add to favorites', 'error');
+      });
+    }
+
+    function removeFromFavorites(clipId) {
+      fetch(`/api/favorites/${clipId}`, {
+        method: 'DELETE'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          app.showToast('Removed from favorites!', 'success');
+          // Refresh the favorites display
+          openFavorites();
+        } else {
+          app.showToast(`Failed to remove from favorites: ${data.message}`, 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Failed to remove from favorites:', error);
+        app.showToast('Failed to remove from favorites', 'error');
+      });
+    }
+
+    function importMedalClip(clipId) {
+      app.showToast('Importing clip...', 'info');
+      
+      fetch('/api/import-medal-clip', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ clip_id: clipId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          app.showToast('Clip imported successfully!', 'success');
+        } else {
+          app.showToast(`Failed to import clip: ${data.message}`, 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Clip import failed:', error);
+        app.showToast('Failed to import clip', 'error');
+      });
+    }
+
+    function closeClipModal() {
+      document.getElementById('clipModal').style.display = 'none';
+    }
+
+    function closeMedalModal() {
+      document.getElementById('medalModal').style.display = 'none';
     }
 
     // Compatibility functions
