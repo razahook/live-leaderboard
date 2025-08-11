@@ -483,12 +483,21 @@
       transform: translateY(10px);
       transition: all 0.3s ease;
       min-width: 180px;
+      z-index: 1001;
     }
 
     .bubble-options.show {
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
+    }
+
+    /* Debug: Make bubble options visible for testing */
+    .bubble-options.debug {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: translateY(0) !important;
+      border: 2px solid red !important;
     }
 
     .bubble-option {
@@ -1010,6 +1019,13 @@
         ⭐ Favorites
       </button>
     </div>
+  </div>
+  
+  <!-- Debug button for testing -->
+  <div style="position: fixed; bottom: 2rem; left: 2rem; z-index: 2000;">
+    <button onclick="testBubble()" style="background: red; color: white; padding: 0.5rem; border-radius: 8px; border: none; cursor: pointer;">
+      🧪 Test Bubble
+    </button>
   </div>
 
   <!-- Clip Management Modal -->
@@ -1895,18 +1911,55 @@
       console.log('Medal modal closed');
     }
 
-    // Toggle clip bubble
-    function toggleClipBubble() {
+    // Test function for debugging
+    function testBubble() {
+      console.log('🧪 Test button clicked');
+      console.log('Testing bubble elements...');
+      
+      const bubble = document.getElementById('clipBubble');
       const bubbleOptions = document.getElementById('bubbleOptions');
       const bubbleArrow = document.querySelector('.bubble-arrow');
+      
+      console.log('Bubble elements:', { bubble, bubbleOptions, bubbleArrow });
+      
+      if (bubbleOptions) {
+        console.log('Bubble options classes:', bubbleOptions.className);
+        console.log('Bubble options styles:', window.getComputedStyle(bubbleOptions));
+      }
+      
+      // Force show the bubble
+      if (bubbleOptions && bubbleArrow) {
+        bubbleOptions.classList.add('show');
+        bubbleArrow.classList.add('rotated');
+        console.log('Forced bubble to show');
+      }
+    }
+
+    // Toggle clip bubble
+    function toggleClipBubble() {
+      console.log('toggleClipBubble function called');
+      
+      const bubbleOptions = document.getElementById('bubbleOptions');
+      const bubbleArrow = document.querySelector('.bubble-arrow');
+      
+      console.log('Found elements:', { bubbleOptions, bubbleArrow });
+      
+      if (!bubbleOptions || !bubbleArrow) {
+        console.error('Missing bubble elements');
+        return;
+      }
+      
       const isOpen = bubbleOptions.classList.contains('show');
+      console.log('Current state - isOpen:', isOpen);
       
       if (isOpen) {
         bubbleOptions.classList.remove('show');
         bubbleArrow.classList.remove('rotated');
+        console.log('Bubble closed');
       } else {
         bubbleOptions.classList.add('show');
         bubbleArrow.classList.add('rotated');
+        console.log('Bubble opened');
       }
       
       console.log('Clip bubble toggled:', !isOpen);
