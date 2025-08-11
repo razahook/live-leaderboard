@@ -418,43 +418,80 @@
       box-shadow: var(--shadow-medium);
     }
 
-    /* Floating Action Panel */
-    .action-panel {
+    /* Compact Clip Management Speech Bubble */
+    .clip-bubble {
       position: fixed;
       bottom: 2rem;
       right: 2rem;
-      background: rgba(26, 26, 46, 0.95);
+      z-index: 1000;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .bubble-main {
+      background: linear-gradient(135deg, var(--accent-green), #00cc6a);
+      color: var(--bg-primary);
+      padding: 0.75rem 1.25rem;
+      border-radius: 25px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-heavy);
+      transition: all 0.3s ease;
+      user-select: none;
+      min-width: 160px;
+      justify-content: center;
+    }
+
+    .bubble-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(0, 255, 136, 0.3);
+    }
+
+    .bubble-icon {
+      font-size: 1.1rem;
+    }
+
+    .bubble-text {
+      font-weight: 600;
+    }
+
+    .bubble-arrow {
+      font-size: 0.8rem;
+      transition: transform 0.3s ease;
+    }
+
+    .bubble-arrow.rotated {
+      transform: rotate(180deg);
+    }
+
+    .bubble-options {
+      position: absolute;
+      bottom: 100%;
+      right: 0;
+      background: rgba(26, 26, 46, 0.98);
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 1.5rem;
+      border-radius: 16px;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
       box-shadow: var(--shadow-heavy);
-      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
       transition: all 0.3s ease;
+      min-width: 180px;
     }
 
-    .action-panel:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    .bubble-options.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
     }
 
-    .action-panel-title {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      margin-bottom: 1rem;
-      font-weight: 600;
-      text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .action-btn-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .action-btn-small {
+    .bubble-option {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--text-primary);
@@ -468,25 +505,44 @@
       justify-content: center;
       gap: 0.5rem;
       font-weight: 500;
-      min-width: 140px;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      text-align: left;
     }
 
-    .action-btn-small:hover {
+    .bubble-option:last-child {
+      margin-bottom: 0;
+    }
+
+    .bubble-option:hover {
       background: rgba(255, 255, 255, 0.1);
       border-color: var(--accent-green);
-      transform: translateY(-2px);
+      transform: translateX(5px);
     }
 
-    .action-btn-small.primary {
-      background: linear-gradient(135deg, var(--accent-green), #00cc6a);
-      color: var(--bg-primary);
+    .bubble-option.primary {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      color: white;
       border: none;
       font-weight: 600;
     }
 
-    .action-btn-small.primary:hover {
-      background: linear-gradient(135deg, #00cc6a, var(--accent-green));
-      transform: translateY(-2px);
+    .bubble-option.primary:hover {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      transform: translateX(5px);
+    }
+
+    /* Speech bubble tail */
+    .bubble-options::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      right: 1.5rem;
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid rgba(26, 26, 46, 0.98);
     }
 
     /* Toast Notifications */
@@ -572,21 +628,28 @@
         min-width: 150px;
       }
       
-      .action-panel {
+      .clip-bubble {
         bottom: 1rem;
         right: 1rem;
         left: 1rem;
-        padding: 1rem;
       }
       
-      .action-btn-group {
-        flex-direction: row;
+      .bubble-main {
         justify-content: center;
+        min-width: auto;
+        width: 100%;
       }
       
-      .action-btn-small {
+      .bubble-options {
+        right: 0;
+        left: 0;
         min-width: auto;
-        flex: 1;
+        width: 100%;
+      }
+      
+      .bubble-options::after {
+        right: 50%;
+        transform: translateX(50%);
       }
     }
 
@@ -926,20 +989,24 @@
     </div>
   </main>
 
-  <!-- Floating Action Panel -->
-  <div class="action-panel">
-    <div class="action-panel-title">Clip Management</div>
-    <div class="action-btn-group">
-      <button class="action-btn-small primary" onclick="createClipForSelected()">
+  <!-- Compact Clip Management Speech Bubble -->
+  <div class="clip-bubble" id="clipBubble">
+    <div class="bubble-main" onclick="toggleClipBubble()">
+      <span class="bubble-icon">📹</span>
+      <span class="bubble-text">Clip Management</span>
+      <span class="bubble-arrow">▼</span>
+    </div>
+    <div class="bubble-options" id="bubbleOptions">
+      <button class="bubble-option primary" onclick="createClipForSelected()">
         📹 Create Clip
       </button>
-      <button class="action-btn-small" onclick="openMedalImport()">
+      <button class="bubble-option" onclick="openMedalImport()">
         🏅 Import Medal
       </button>
-      <button class="action-btn-small" onclick="viewMyClips()">
+      <button class="bubble-option" onclick="viewMyClips()">
         📋 My Clips
       </button>
-      <button class="action-btn-small" onclick="openFavorites()">
+      <button class="bubble-option" onclick="openFavorites()">
         ⭐ Favorites
       </button>
     </div>
@@ -1828,26 +1895,58 @@
       console.log('Medal modal closed');
     }
 
+    // Toggle clip bubble
+    function toggleClipBubble() {
+      const bubbleOptions = document.getElementById('bubbleOptions');
+      const bubbleArrow = document.querySelector('.bubble-arrow');
+      const isOpen = bubbleOptions.classList.contains('show');
+      
+      if (isOpen) {
+        bubbleOptions.classList.remove('show');
+        bubbleArrow.classList.remove('rotated');
+      } else {
+        bubbleOptions.classList.add('show');
+        bubbleArrow.classList.add('rotated');
+      }
+      
+      console.log('Clip bubble toggled:', !isOpen);
+    }
+
     // Add click outside to close functionality
     function setupModalCloseHandlers() {
       // Close modals when clicking outside
       window.onclick = function(event) {
         const clipModal = document.getElementById('clipModal');
         const medalModal = document.getElementById('medalModal');
+        const clipBubble = document.getElementById('clipBubble');
         
+        // Close modals
         if (event.target === clipModal) {
           closeClipModal();
         }
         if (event.target === medalModal) {
           closeMedalModal();
         }
+        
+        // Close clip bubble if clicking outside
+        if (!clipBubble.contains(event.target)) {
+          const bubbleOptions = document.getElementById('bubbleOptions');
+          const bubbleArrow = document.querySelector('.bubble-arrow');
+          bubbleOptions.classList.remove('show');
+          bubbleArrow.classList.remove('rotated');
+        }
       };
 
-      // Close modals with Escape key
+      // Close modals and bubble with Escape key
       document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
           closeClipModal();
           closeMedalModal();
+          // Also close clip bubble
+          const bubbleOptions = document.getElementById('bubbleOptions');
+          const bubbleArrow = document.querySelector('.bubble-arrow');
+          bubbleOptions.classList.remove('show');
+          bubbleArrow.classList.remove('rotated');
         }
       });
     }
