@@ -1540,6 +1540,19 @@
         return `Fixed ${buttons.length} buttons`;
       };
       
+      // Test modal functions
+      window.testMedalModal = () => {
+        console.log('Testing Medal Modal...');
+        openMedalImport();
+        return 'Medal modal should be open';
+      };
+      
+      window.testClipsModal = () => {
+        console.log('Testing My Clips Modal...');
+        viewMyClips();
+        return 'My Clips modal should be open';
+      };
+      
       console.log('💡 Debug functions available:');
       console.log('  - debugStreams() : Show current state');
       console.log('  - testTwitchEmbed(channel) : Test loading a channel');
@@ -1636,8 +1649,25 @@
       }
       
       console.log('Opening Medal Import modal...');
-      document.getElementById('medalModal').style.display = 'block';
-      document.getElementById('medalResults').innerHTML = '';
+      
+      // Force modal to stay open
+      setTimeout(() => {
+        const modal = document.getElementById('medalModal');
+        if (modal) {
+          modal.style.display = 'block';
+          modal.style.setProperty('display', 'block', 'important');
+          document.getElementById('medalResults').innerHTML = '';
+          console.log('Medal modal forced open, display:', window.getComputedStyle(modal).display);
+        } else {
+          console.error('Medal modal not found!');
+        }
+      }, 10);
+      
+      // Also set it immediately
+      const modal = document.getElementById('medalModal');
+      if (modal) {
+        modal.style.display = 'block';
+      }
     }
 
     function viewMyClips(event) {
@@ -1647,14 +1677,38 @@
       }
       
       console.log('Opening My Clips modal...');
-      document.getElementById('clipModalTitle').textContent = 'My Clips';
-      document.getElementById('clipModalBody').innerHTML = `
-        <div class="loading-state">
-          <div class="loading-spinner"></div>
-          <div class="loading-text">Loading your clips...</div>
-        </div>
-      `;
-      document.getElementById('clipModal').style.display = 'block';
+      
+      // Force modal to stay open
+      setTimeout(() => {
+        const modal = document.getElementById('clipModal');
+        if (modal) {
+          document.getElementById('clipModalTitle').textContent = 'My Clips';
+          document.getElementById('clipModalBody').innerHTML = `
+            <div class="loading-state">
+              <div class="loading-spinner"></div>
+              <div class="loading-text">Loading your clips...</div>
+            </div>
+          `;
+          modal.style.display = 'block';
+          modal.style.setProperty('display', 'block', 'important');
+          console.log('My Clips modal forced open, display:', window.getComputedStyle(modal).display);
+        } else {
+          console.error('Clip modal not found!');
+        }
+      }, 10);
+      
+      // Also set it immediately
+      const modal = document.getElementById('clipModal');
+      if (modal) {
+        document.getElementById('clipModalTitle').textContent = 'My Clips';
+        document.getElementById('clipModalBody').innerHTML = `
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading your clips...</div>
+          </div>
+        `;
+        modal.style.display = 'block';
+      }
       
       // Fetch user clips - try multiple endpoints
       console.log('Fetching user clips...');
@@ -2079,7 +2133,9 @@
         // Don't process clicks on bubble buttons or modal content
         if (event.target.closest('.bubble-option') || 
             event.target.closest('.modal-content') ||
-            event.target.closest('.bubble-main')) {
+            event.target.closest('.bubble-main') ||
+            event.target.closest('.modal')) {
+          console.log('Ignoring click on modal/bubble element');
           return;
         }
         
