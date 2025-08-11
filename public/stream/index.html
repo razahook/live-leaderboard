@@ -30,6 +30,12 @@
       --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
 
+    /* Ensure body allows overflow for bubble options */
+    body {
+      overflow-x: visible;
+      overflow-y: auto;
+    }
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
@@ -425,6 +431,7 @@
       right: 2rem;
       z-index: 1000;
       font-family: 'Inter', sans-serif;
+      overflow: visible;
     }
 
     .bubble-main {
@@ -484,6 +491,8 @@
       transition: all 0.3s ease;
       min-width: 180px;
       z-index: 1001;
+      /* Debug: Add a visible border to see positioning */
+      border: 2px solid rgba(255, 255, 0, 0.5);
 
     }
 
@@ -491,7 +500,8 @@
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
-      display: block;
+      display: block !important;
+      z-index: 1001 !important;
     }
 
     /* Alternative positioning for better visibility */
@@ -499,7 +509,8 @@
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
-      display: block;
+      display: block !important;
+      z-index: 1001 !important;
       /* Ensure it's above the main button */
       bottom: calc(100% + 15px);
     }
@@ -1925,10 +1936,12 @@
       const bubbleArrow = document.querySelector('.bubble-arrow');
       
       if (!bubbleOptions || !bubbleArrow) {
+        console.error('Missing bubble elements');
         return;
       }
       
       const isOpen = bubbleOptions.classList.contains('show');
+      console.log('Bubble state:', { isOpen, element: bubbleOptions });
       console.log('Current state - isOpen:', isOpen);
       
       if (isOpen) {
