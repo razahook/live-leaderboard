@@ -36,7 +36,14 @@
       "WebFetch(domain:dev.twitch.tv)",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_click",
-      "mcp__playwright__browser_evaluate"
+      "mcp__playwright__browser_evaluate",
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "mcp__puppeteer__puppeteer_click",
+      "mcp__puppeteer__puppeteer_evaluate",
+      "mcp__playwright__browser_select_option",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__context7__resolve-library-id"
     ],
     "deny": []
   }

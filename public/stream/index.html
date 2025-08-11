@@ -760,21 +760,54 @@
 
       async init() {
         console.log('🚀 Initializing Modern Stream Viewer');
+        console.debug('Debug mode enabled - Verbose logging active');
+        console.debug('Current URL:', window.location.href);
+        console.debug('Current hostname:', window.location.hostname);
+        console.debug('User Agent:', navigator.userAgent);
+        
         this.setupEventListeners();
         await this.populateStreamers();
         this.addAnimations();
+        
+        // Log initial state
+        console.debug('Initial state:', {
+          streams: Array.from(this.streams.entries()),
+          selectedIndex: this.selectedIndex
+        });
       }
 
       setupEventListeners() {
+        console.debug('Setting up event listeners for stream dropdowns');
+        
         ['stream1', 'stream2', 'stream3'].forEach((id, index) => {
           const dropdown = document.getElementById(id);
-          dropdown.addEventListener('change', () => {
+          dropdown.addEventListener('change', (event) => {
+            console.debug(`Dropdown change event - ${id}:`, event.target.value);
+            
             if (dropdown.value) {
+              console.log(`📹 Stream ${index + 1} selection changed to: ${dropdown.value}`);
               this.loadStream(index + 1, dropdown.value);
             } else {
+              console.log(`🔄 Clearing stream ${index + 1}`);
               this.clearStream(index + 1);
             }
           });
+        });
+        
+        // Add global error handler for CSP violations
+        document.addEventListener('securitypolicyviolation', (event) => {
+          console.error('⚠️ CSP Violation detected:', {
+            violatedDirective: event.violatedDirective,
+            blockedURI: event.blockedURI,
+            sourceFile: event.sourceFile,
+            lineNumber: event.lineNumber,
+            columnNumber: event.columnNumber
+          });
+          
+          if (event.violatedDirective.includes('frame-ancestors')) {
+            console.error('🔒 Frame-ancestors CSP issue - The Twitch embed is being blocked');
+            this.showToast('Stream loading blocked by security policy. Trying alternative method...', 'error');
+          }
         });
       }
 
@@ -875,6 +908,7 @@
 
       async loadStream(index, channel) {
         console.log(`📺 Loading ${channel} to position ${index}`);
+        console.debug('CSP Debug - Starting loadStream for:', { index, channel });
         
         const tile = document.getElementById(`stream-tile-${index}`);
         const player = document.getElementById(`player-${index}`);
@@ -887,12 +921,26 @@
         try {
           this.clearStream(index);
 
+          // Get all possible parent domains for CSP
+          const parentDomains = this.getParentDomains();
+          console.debug('CSP Debug - Parent domains:', parentDomains);
+          
+          // Build the parent parameter string with multiple domains
+          const parentParams = parentDomains.map(domain => `&parent=${encodeURIComponent(domain)}`).join('');
+          
           const iframe = document.createElement('iframe');
-          iframe.src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${encodeURIComponent(this.getParentDomain())}&muted=true&autoplay=false`;
+          const embedUrl = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}${parentParams}&muted=true&autoplay=false`;
+          
+          console.debug('CSP Debug - Embed URL:', embedUrl);
+          iframe.src = embedUrl;
           iframe.allowfullscreen = true;
+          iframe.setAttribute('frameborder', '0');
+          iframe.setAttribute('scrolling', 'no');
+          iframe.setAttribute('allowfullscreen', 'true');
 
           iframe.onload = () => {
             console.log(`✅ Stream loaded: ${channel}`);
+            console.debug('CSP Debug - Stream loaded successfully:', { channel, index });
             this.hideLoading(index);
             tile.classList.add('active');
             tile.classList.remove('loading');
@@ -902,34 +950,74 @@
             tile.classList.add('fade-in');
           };
 
-          iframe.onerror = () => {
-            console.error(`Failed to load stream: ${channel}`);
+          iframe.onerror = (error) => {
+            console.error(`❌ Failed to load stream: ${channel}`, error);
+            console.debug('CSP Debug - iframe error:', { channel, index, error });
             this.showError(index, channel);
             tile.classList.remove('loading');
           };
 
+          // Add message listener for CSP errors
+          window.addEventListener('message', (event) => {
+            if (event.origin.includes('twitch.tv')) {
+              console.debug('CSP Debug - Message from Twitch:', event.data);
+            }
+          });
+
           player.appendChild(iframe);
+          console.debug('CSP Debug - iframe appended to player');
 
         } catch (error) {
-          console.error(`Failed to load ${channel}:`, error);
+          console.error(`❌ Failed to load ${channel}:`, error);
+          console.debug('CSP Debug - Catch block error:', { channel, index, error: error.message, stack: error.stack });
           this.showError(index, channel);
           tile.classList.remove('loading');
         }
       }
 
-      getParentDomain() {
-        let host = location.hostname;
+      getParentDomains() {
+        const domains = [];
+        const host = location.hostname;
         
-        if (host.includes('vercel.app') && host.includes('git-')) {
-          const match = host.match(/live-leaderboard-git-[^-]+-[^-]+-([^.]+)\.vercel\.app/);
-          if (match) {
-            return `live-leaderboard-${match[1]}.vercel.app`;
-          } else {
-            return 'live-leaderboard-razahooks-projects.vercel.app';
+        console.debug('CSP Debug - Current hostname:', host);
+        
+        // Add the actual current domain
+        domains.push(host);
+        
+        // Handle various Vercel deployment patterns
+        if (host.includes('vercel.app')) {
+          // Handle production domain
+          domains.push('live-leaderboard-plum.vercel.app');
+          
+          // Handle project-specific domain
+          domains.push('live-leaderboard-razahooks-projects.vercel.app');
+          
+          // Handle git-based preview deployments
+          if (host.includes('git-')) {
+            const gitMatch = host.match(/live-leaderboard-git-[^.]+\.vercel\.app/);
+            if (gitMatch) {
+              domains.push(gitMatch[0]);
+            }
+          }
+          
+          // Handle PR preview deployments
+          const prMatch = host.match(/live-leaderboard-[a-z0-9]+-razahooks-projects\.vercel\.app/);
+          if (prMatch) {
+            domains.push(prMatch[0]);
           }
         }
         
-        return host;
+        // Handle localhost development
+        if (host === 'localhost' || host === '127.0.0.1') {
+          domains.push('localhost');
+          domains.push('127.0.0.1');
+        }
+        
+        // Remove duplicates
+        const uniqueDomains = [...new Set(domains)];
+        
+        console.debug('CSP Debug - Resolved parent domains:', uniqueDomains);
+        return uniqueDomains;
       }
 
       showLoading(index) {
@@ -975,14 +1063,32 @@
       }
 
       showError(index, channel) {
+        console.error(`🔴 Showing error state for stream ${index} (${channel})`);
+        
         const player = document.getElementById(`player-${index}`);
-        player.innerHTML = `
+        const errorHtml = `
           <div class="error-state">
             <div class="error-icon">❌</div>
             <div class="error-message">Failed to load ${channel}</div>
-            <button class="retry-btn" onclick="app.loadStream(${index}, '${channel}')">Retry</button>
+            <div style="font-size: 0.8rem; color: #a0aec0; margin: 10px 0;">This may be due to CSP restrictions. Check console for details.</div>
+            <button class="retry-btn" onclick="app.retryStream(${index}, '${channel}')">Retry</button>
           </div>
         `;
+        
+        player.innerHTML = errorHtml;
+        
+        // Log debugging info
+        console.debug('Error state debug info:', {
+          index,
+          channel,
+          currentDomains: this.getParentDomains(),
+          expectedDomain: 'live-leaderboard-plum.vercel.app'
+        });
+      }
+
+      retryStream(index, channel) {
+        console.log(`🔄 Retrying stream ${index} for channel ${channel}`);
+        this.loadStream(index, channel);
       }
 
       selectStream(index) {
@@ -1021,8 +1127,33 @@
     // Initialize app
     let app;
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('='.repeat(50));
+      console.log('🎮 Apex Legends Stream Viewer - Debug Console');
+      console.log('='.repeat(50));
+      console.log('📍 Domain:', window.location.hostname);
+      console.log('🔗 Full URL:', window.location.href);
+      console.log('🕐 Timestamp:', new Date().toISOString());
+      console.log('='.repeat(50));
+      
       app = new ModernStreamViewer();
       window.app = app;
+      
+      // Expose debugging functions
+      window.debugStreams = () => {
+        console.log('Current Streams:', Array.from(app.streams.entries()));
+        console.log('Selected Index:', app.selectedIndex);
+        console.log('Parent Domains:', app.getParentDomains());
+      };
+      
+      window.testTwitchEmbed = (channel) => {
+        console.log(`Testing Twitch embed for channel: ${channel}`);
+        app.loadStream(1, channel || 'shroud');
+      };
+      
+      console.log('💡 Debug functions available:');
+      console.log('  - debugStreams() : Show current state');
+      console.log('  - testTwitchEmbed(channel) : Test loading a channel');
+      console.log('='.repeat(50));
     });
 
     // Global functions
