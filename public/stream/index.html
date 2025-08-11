@@ -469,14 +469,13 @@
 
     .bubble-options {
       position: absolute;
-      bottom: 100%;
+      bottom: calc(100% + 10px);
       right: 0;
       background: rgba(26, 26, 46, 0.98);
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 16px;
       padding: 0.75rem;
-      margin-bottom: 0.75rem;
       box-shadow: var(--shadow-heavy);
       opacity: 0;
       visibility: hidden;
@@ -484,12 +483,23 @@
       transition: all 0.3s ease;
       min-width: 180px;
       z-index: 1001;
+      /* Debug positioning */
+      border: 2px solid yellow;
     }
 
     .bubble-options.show {
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
+    }
+
+    /* Alternative positioning for better visibility */
+    .bubble-options.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      /* Ensure it's above the main button */
+      bottom: calc(100% + 15px);
     }
 
     /* Debug: Make bubble options visible for testing */
@@ -1925,6 +1935,26 @@
       if (bubbleOptions) {
         console.log('Bubble options classes:', bubbleOptions.className);
         console.log('Bubble options styles:', window.getComputedStyle(bubbleOptions));
+        
+        // Log positioning information
+        const rect = bubbleOptions.getBoundingClientRect();
+        console.log('Bubble options position:', {
+          top: rect.top,
+          left: rect.left,
+          bottom: rect.bottom,
+          right: rect.right,
+          width: rect.width,
+          height: rect.height
+        });
+        
+        // Log parent positioning
+        const bubbleRect = bubble.getBoundingClientRect();
+        console.log('Main bubble position:', {
+          top: bubbleRect.top,
+          left: bubbleRect.left,
+          bottom: bubbleRect.bottom,
+          right: bubbleRect.right
+        });
       }
       
       // Force show the bubble
@@ -1932,6 +1962,9 @@
         bubbleOptions.classList.add('show');
         bubbleArrow.classList.add('rotated');
         console.log('Forced bubble to show');
+        
+        // Add debug class for visibility
+        bubbleOptions.classList.add('debug');
       }
     }
 
