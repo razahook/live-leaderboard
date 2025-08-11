@@ -1015,7 +1015,7 @@
 
   <!-- Compact Clip Management Speech Bubble -->
   <div class="clip-bubble" id="clipBubble">
-    <div class="bubble-main" onclick="toggleClipBubble()">
+    <div class="bubble-main" onclick="toggleClipBubble(event)">
       <span class="bubble-icon">📹</span>
       <span class="bubble-text">Clip Management</span>
       <span class="bubble-arrow">▼</span>
@@ -1926,7 +1926,11 @@
 
 
     // Toggle clip bubble
-    function toggleClipBubble() {
+    function toggleClipBubble(event) {
+      if (event) {
+        event.stopPropagation(); // Prevent event bubbling
+      }
+      
       const bubbleOptions = document.getElementById('bubbleOptions');
       const bubbleArrow = document.querySelector('.bubble-arrow');
       
@@ -1947,6 +1951,16 @@
         bubbleOptions.classList.add('show');
         bubbleArrow.classList.add('rotated');
         console.log('Bubble opened');
+        
+        // Force all buttons to be visible (temporary fix until CSS deployment works)
+        setTimeout(() => {
+          const buttons = document.querySelectorAll('.bubble-option');
+          buttons.forEach((button, index) => {
+            button.style.setProperty('display', 'flex', 'important');
+            button.style.setProperty('visibility', 'visible', 'important');
+            button.style.setProperty('opacity', '1', 'important');
+          });
+        }, 50);
       }
       
       console.log('Clip bubble toggled:', !isOpen);
@@ -1955,10 +1969,11 @@
     // Add click outside to close functionality
     function setupModalCloseHandlers() {
       // Close modals when clicking outside
-      window.onclick = function(event) {
+      document.addEventListener('click', function(event) {
         const clipModal = document.getElementById('clipModal');
         const medalModal = document.getElementById('medalModal');
         const clipBubble = document.getElementById('clipBubble');
+        const bubbleMain = document.querySelector('.bubble-main');
         
         // Close modals
         if (event.target === clipModal) {
@@ -1968,14 +1983,18 @@
           closeMedalModal();
         }
         
-        // Close clip bubble if clicking outside
-        if (!clipBubble.contains(event.target)) {
-          const bubbleOptions = document.getElementById('bubbleOptions');
-          const bubbleArrow = document.querySelector('.bubble-arrow');
-          bubbleOptions.classList.remove('show');
-          bubbleArrow.classList.remove('rotated');
+        // Close clip bubble if clicking outside (but not on the bubble button itself)
+        if (clipBubble && !clipBubble.contains(event.target) && !bubbleMain?.contains(event.target)) {
+          setTimeout(() => {
+            const bubbleOptions = document.getElementById('bubbleOptions');
+            const bubbleArrow = document.querySelector('.bubble-arrow');
+            if (bubbleOptions && bubbleOptions.classList.contains('show')) {
+              bubbleOptions.classList.remove('show');
+              bubbleArrow?.classList.remove('rotated');
+            }
+          }, 10); // Small delay to prevent immediate close on bubble click
         }
-      };
+      });
 
       // Close modals and bubble with Escape key
       document.addEventListener('keydown', function(event) {
