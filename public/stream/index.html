@@ -2121,13 +2121,17 @@
         const bubbleMain = document.querySelector('.bubble-main');
         const bubbleOptions = document.getElementById('bubbleOptions');
         
-        // Don't process clicks on bubble buttons or modal content
-        if (event.target.closest('.bubble-option') || 
-            event.target.closest('.modal-content') ||
-            event.target.closest('.bubble-main') ||
+        // Only ignore clicks on modal content, not bubble buttons
+        if (event.target.closest('.modal-content') ||
             event.target.closest('.modal')) {
-          console.log('Ignoring click on modal/bubble element');
+          console.log('Ignoring click on modal element');
           return;
+        }
+        
+        // Allow bubble button clicks to proceed to their handlers
+        if (event.target.closest('.bubble-option')) {
+          console.log('Allowing bubble button click to proceed');
+          // Don't return here - let the button onclick handlers execute
         }
         
         // Close modals only if clicking on the modal backdrop
