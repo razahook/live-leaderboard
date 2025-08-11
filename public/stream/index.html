@@ -506,11 +506,34 @@
       right: 2rem;
     }
     
-    /* Force all bubble option buttons to be visible */
+    /* Force all bubble option buttons to be visible - MULTIPLE RULES FOR MAXIMUM OVERRIDE */
     .bubble-options.show .bubble-option {
       display: flex !important;
       visibility: visible !important;
       opacity: 1 !important;
+    }
+    
+    /* Additional specific overrides */
+    .clip-bubble .bubble-options.show button {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    /* Individual button targeting */
+    .bubble-options .bubble-option:nth-child(1),
+    .bubble-options .bubble-option:nth-child(2), 
+    .bubble-options .bubble-option:nth-child(3),
+    .bubble-options .bubble-option:nth-child(4) {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: relative !important;
+    }
+    
+    /* Force override any hidden states */
+    .bubble-option[style*="display: none"] {
+      display: flex !important;
     }
 
 
@@ -1483,6 +1506,40 @@
         app.loadStream(1, channel || 'shroud');
       };
       
+      // Debug function for clip bubble
+      window.debugClipBubble = () => {
+        const bubbleOptions = document.getElementById('bubbleOptions');
+        const buttons = document.querySelectorAll('.bubble-option');
+        
+        console.log('=== CLIP BUBBLE DEBUG ===');
+        console.log('Bubble options element:', bubbleOptions);
+        console.log('Bubble classes:', bubbleOptions?.classList.value);
+        console.log('Button count:', buttons.length);
+        
+        buttons.forEach((button, index) => {
+          const computed = window.getComputedStyle(button);
+          console.log(`Button ${index + 1}: "${button.textContent.trim()}"`);
+          console.log(`  Display: ${computed.display}`);
+          console.log(`  Visibility: ${computed.visibility}`);
+          console.log(`  Opacity: ${computed.opacity}`);
+          console.log(`  Position: ${computed.position}`);
+        });
+        
+        return { bubbleOptions, buttons: Array.from(buttons) };
+      };
+      
+      // Force fix function 
+      window.forceFixButtons = () => {
+        const buttons = document.querySelectorAll('.bubble-option');
+        buttons.forEach((button, index) => {
+          button.style.setProperty('display', 'flex', 'important');
+          button.style.setProperty('visibility', 'visible', 'important');
+          button.style.setProperty('opacity', '1', 'important');
+          console.log(`Fixed button ${index + 1}: ${button.textContent.trim()}`);
+        });
+        return `Fixed ${buttons.length} buttons`;
+      };
+      
       console.log('💡 Debug functions available:');
       console.log('  - debugStreams() : Show current state');
       console.log('  - testTwitchEmbed(channel) : Test loading a channel');
@@ -1952,15 +2009,35 @@
         bubbleArrow.classList.add('rotated');
         console.log('Bubble opened');
         
-        // Force all buttons to be visible (temporary fix until CSS deployment works)
-        setTimeout(() => {
+        // AGGRESSIVE MULTI-APPROACH BUTTON VISIBILITY FIX
+        const forceButtonsVisible = () => {
           const buttons = document.querySelectorAll('.bubble-option');
+          console.log(`Forcing ${buttons.length} buttons to be visible...`);
+          
           buttons.forEach((button, index) => {
+            // Method 1: Style property override
             button.style.setProperty('display', 'flex', 'important');
             button.style.setProperty('visibility', 'visible', 'important');
             button.style.setProperty('opacity', '1', 'important');
+            
+            // Method 2: Remove any display none classes
+            button.classList.remove('hidden', 'd-none');
+            
+            // Method 3: Direct style attribute manipulation
+            button.removeAttribute('hidden');
+            if (button.style.display === 'none') {
+              button.style.display = 'flex';
+            }
+            
+            console.log(`Button ${index + 1}: ${button.textContent.trim()} - Display: ${window.getComputedStyle(button).display}`);
           });
-        }, 50);
+        };
+        
+        // Run immediately and then multiple times with different delays
+        forceButtonsVisible();
+        setTimeout(forceButtonsVisible, 10);
+        setTimeout(forceButtonsVisible, 100);
+        setTimeout(forceButtonsVisible, 500);
       }
       
       console.log('Clip bubble toggled:', !isOpen);
