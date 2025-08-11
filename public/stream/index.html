@@ -1044,16 +1044,16 @@
       <span class="bubble-arrow">▼</span>
     </div>
     <div class="bubble-options" id="bubbleOptions">
-      <button class="bubble-option primary" onclick="createClipForSelected()">
+      <button class="bubble-option primary" onclick="createClipForSelected(event)">
         📹 Create Clip
       </button>
-      <button class="bubble-option" onclick="openMedalImport()">
+      <button class="bubble-option" onclick="openMedalImport(event)">
         🏅 Import Medal
       </button>
-      <button class="bubble-option" onclick="viewMyClips()">
+      <button class="bubble-option" onclick="viewMyClips(event)">
         📋 My Clips
       </button>
-      <button class="bubble-option" onclick="openFavorites()">
+      <button class="bubble-option" onclick="openFavorites(event)">
         ⭐ Favorites
       </button>
     </div>
@@ -1600,12 +1600,19 @@
     }
 
     // Clip functions
-    function createClipForSelected() {
+    function createClipForSelected(event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      
       const channel = app.streams.get(app.selectedIndex);
       if (!channel) {
         app.showToast('Please select a stream first', 'error');
         return;
       }
+
+      console.log('Opening Create Clip modal for:', channel);
 
       // Show clip creation modal
       document.getElementById('clipModalTitle').textContent = `Create Clip - ${channel}`;
@@ -1622,12 +1629,23 @@
       document.getElementById('clipModal').style.display = 'block';
     }
 
-    function openMedalImport() {
+    function openMedalImport(event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      
+      console.log('Opening Medal Import modal...');
       document.getElementById('medalModal').style.display = 'block';
       document.getElementById('medalResults').innerHTML = '';
     }
 
-    function viewMyClips() {
+    function viewMyClips(event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      
       console.log('Opening My Clips modal...');
       document.getElementById('clipModalTitle').textContent = 'My Clips';
       document.getElementById('clipModalBody').innerHTML = `
@@ -1687,7 +1705,12 @@
         });
     }
 
-    function openFavorites() {
+    function openFavorites(event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      
       console.log('Opening Favorites modal...');
       document.getElementById('clipModalTitle').textContent = 'My Favorites';
       document.getElementById('clipModalBody').innerHTML = `
@@ -2051,25 +2074,34 @@
         const medalModal = document.getElementById('medalModal');
         const clipBubble = document.getElementById('clipBubble');
         const bubbleMain = document.querySelector('.bubble-main');
+        const bubbleOptions = document.getElementById('bubbleOptions');
         
-        // Close modals
+        // Don't process clicks on bubble buttons or modal content
+        if (event.target.closest('.bubble-option') || 
+            event.target.closest('.modal-content') ||
+            event.target.closest('.bubble-main')) {
+          return;
+        }
+        
+        // Close modals only if clicking on the modal backdrop
         if (event.target === clipModal) {
+          console.log('Closing clip modal - clicked on backdrop');
           closeClipModal();
         }
         if (event.target === medalModal) {
+          console.log('Closing medal modal - clicked on backdrop');
           closeMedalModal();
         }
         
-        // Close clip bubble if clicking outside (but not on the bubble button itself)
-        if (clipBubble && !clipBubble.contains(event.target) && !bubbleMain?.contains(event.target)) {
+        // Close clip bubble if clicking outside (but not on bubble components)
+        if (clipBubble && !clipBubble.contains(event.target)) {
           setTimeout(() => {
-            const bubbleOptions = document.getElementById('bubbleOptions');
-            const bubbleArrow = document.querySelector('.bubble-arrow');
             if (bubbleOptions && bubbleOptions.classList.contains('show')) {
+              console.log('Closing clip bubble - clicked outside');
               bubbleOptions.classList.remove('show');
-              bubbleArrow?.classList.remove('rotated');
+              document.querySelector('.bubble-arrow')?.classList.remove('rotated');
             }
-          }, 10); // Small delay to prevent immediate close on bubble click
+          }, 50); // Increased delay to prevent interference with modal opening
         }
       });
 
