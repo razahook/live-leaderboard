@@ -78,11 +78,7 @@ try:
 except ImportError as e:
     logger.warning(f"Could not import medal_clips routes: {e}")
 
-try:
-    from routes.twitch_vod_downloader import twitch_vod_bp
-    imported_blueprints.append(('twitch_vod_bp', twitch_vod_bp))
-except ImportError as e:
-    logger.warning(f"Could not import twitch_vod_downloader routes: {e}")
+# Removed twitch_vod_downloader - Used deprecated PlaybackAccessToken GraphQL
 
 try:
     from routes.twitch_hidden_vods import twitch_hidden_vods_bp
@@ -162,7 +158,7 @@ try:
 except ImportError as e:
     logger.warning(f"Could not import leaderboard_proxy routes: {e}")
 
-# Stream proxy is handled inside twitch_vod_downloader blueprint
+# Stream proxy removed - was part of deprecated twitch_vod_downloader
 
 # Create Flask app - no static folder needed since Vercel handles static files
 app = Flask(__name__)
