@@ -3,1247 +3,813 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Multi-Stream Viewer - Enhanced</title>
+  <title>Apex Legends Stream Viewer</title>
   <style>
-    :root {
-      color-scheme: dark;
-      --color-bg: #0f172a;
-      --color-bg-alt: #1e293b;
-      --color-border: rgba(148,163,184,.2);
-      --color-border-strong: rgba(148,163,184,.35);
-      --color-primary-start: #22c55e;
-      --color-primary-end: #16a34a;
-      --color-accent-start: #8b5cf6;
-      --color-accent-end: #7c3aed;
-      --color-warning-start: #f59e0b;
-      --color-warning-end: #d97706;
-      --font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-    }
-
-    /* Reset & base */
-    *, *::before, *::after {
+    * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
 
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #141923;
+      --bg-stream: #000000;
+      --border-color: #2a3441;
+      --border-active: #22c55e;
+      --border-selected: #8b5cf6;
+      --text-primary: #ffffff;
+      --text-secondary: #94a3b8;
+      --accent-green: #22c55e;
+      --accent-purple: #8b5cf6;
+      --accent-orange: #f59e0b;
+    }
+
     body {
-      margin: 0;
-      font-family: var(--font-family);
-      background: var(--color-bg);
-      color: #e5e7eb;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      min-height: 100vh;
-      padding: 0;
-    }
-
-    .container {
-      max-width: 100vw;
-      width: 100%;
-      background: transparent;
-      border-radius: 0;
-      box-shadow: none;
-      padding: clamp(12px, 2vw, 24px);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      gap: clamp(16px, 2vw, 32px);
-      min-height: 100vh;
     }
 
-    .header {
-      background: rgba(30, 41, 59, 0.95);
-      border-radius: 20px;
-      padding: 24px 28px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-      border: 1.5px solid var(--color-border);
+    /* Minimal Header Bar */
+    .control-bar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+      z-index: 100;
     }
 
-    h1 {
-      margin: 0 0 8px 0;
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      color: #d1d5db;
-      user-select: none;
-    }
-
-    .header p {
-      margin: 0;
-      color: #94a3b8;
-      font-size: 15px;
-      font-weight: 500;
-      user-select: none;
-    }
-
-         .multistream-clip-controls {
-       margin-top: 16px;
-       display: flex;
-       flex-direction: column;
-       gap: 12px;
-       width: 100%;
-     }
-
-    .btn {
-      padding: 12px 20px;
-      border-radius: 14px;
-      border: none;
+    .control-bar h1 {
+      font-size: 1.1rem;
       font-weight: 600;
-      font-size: 15px;
+      color: var(--text-primary);
+      margin-right: auto;
+    }
+
+    .stream-selectors {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .stream-selector {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      min-width: 150px;
       cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+      transition: all 0.2s;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, var(--color-primary-start), var(--color-primary-end));
-      color: #f0fdf4;
-      box-shadow: 0 5px 15px rgba(34, 197, 94, 0.6);
-    }
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #16a34a, #22c55e);
-      box-shadow: 0 6px 18px rgba(22, 163, 74, 0.8);
+    .stream-selector:hover {
+      border-color: var(--accent-purple);
     }
 
-    .btn-warning {
-      background: linear-gradient(135deg, var(--color-warning-start), var(--color-warning-end));
-      color: #fff7ed;
-      box-shadow: 0 5px 15px rgba(245, 158, 11, 0.6);
-    }
-    .btn-warning:hover {
-      background: linear-gradient(135deg, #d97706, #f59e0b);
-      box-shadow: 0 6px 18px rgba(217, 119, 6, 0.8);
-    }
-
-    .btn-accent {
-      background: linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end));
-      color: #ede9fe;
-      box-shadow: 0 5px 15px rgba(139, 92, 246, 0.6);
-    }
-    .btn-accent:hover {
-      background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.8);
-    }
-
-         .multistream-clip-controls button {
-       width: 100%;
-       min-width: auto;
-     }
-
-    .controls {
-      margin-top: 18px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-    }
-
-    .controls input {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 16px;
-      border: 1.8px solid #334155;
-      background: #0b1220;
-      color: #e5e7eb;
-      font-size: 16px;
-      font-weight: 500;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-    .controls input::placeholder {
-      color: #64748b;
-      font-weight: 400;
-    }
-    .controls input:focus {
+    .stream-selector:focus {
       outline: none;
-      border-color: #8b5cf6;
-      box-shadow: 0 0 10px #8b5cf6aa;
-      background: #121a34;
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
     }
 
-    .controls select {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 16px;
-      border: 1.8px solid #334155;
-      background: #0b1220;
-      color: #e5e7eb;
-      font-size: 16px;
-      font-weight: 500;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    .quick-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
       cursor: pointer;
-    }
-    .controls select:focus {
-      outline: none;
-      border-color: #8b5cf6;
-      box-shadow: 0 0 10px #8b5cf6aa;
-      background: #121a34;
-    }
-    .controls select option {
-      background: #0b1220;
-      color: #e5e7eb;
-      padding: 8px;
-    }
-    
-    .streamer-dropdown {
-      position: relative;
-    }
-    
-    .streamer-dropdown.loading {
-      opacity: 0.7;
-      pointer-events: none;
-    }
-    
-    .streamer-dropdown.loading::after {
-      content: "⏳";
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 16px;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      from { transform: translateY(-50%) rotate(0deg); }
-      to { transform: translateY(-50%) rotate(360deg); }
+      transition: all 0.2s;
+      white-space: nowrap;
     }
 
-    #load-streams-btn {
-      margin-top: 20px;
-      width: 100%;
-      font-size: 18px;
-      padding: 14px 0;
-      border-radius: 16px;
-      font-weight: 700;
-      box-shadow: 0 7px 20px rgba(34, 197, 94, 0.6);
-      transition: background-color 0.35s ease, box-shadow 0.35s ease;
-    }
-    #load-streams-btn:hover {
-      background: linear-gradient(135deg, #16a34a, #22c55e);
-      box-shadow: 0 10px 28px rgba(22, 163, 74, 0.8);
+    .action-btn:hover {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      background: rgba(34, 197, 94, 0.1);
     }
 
-    .grid {
-      margin-top: 32px;
+    .action-btn.primary {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: var(--bg-primary);
+      font-weight: 500;
+    }
+
+    .action-btn.primary:hover {
+      background: #16a34a;
+      border-color: #16a34a;
+    }
+
+    /* Stream Container - Full Focus */
+    .stream-container {
+      flex: 1;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: clamp(32px, 5vw, 80px);
-      width: 100%;
-      /* Remove fixed height to allow natural aspect ratio */
-      align-items: stretch;
-      padding: 0 clamp(16px, 3vw, 48px);
-    }
-
-    .tile {
-      background: rgba(17, 24, 39, 0.85);
-      border-radius: 16px;
-      border: 1.5px solid var(--color-border);
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--bg-primary);
+      padding: 2px;
       overflow: hidden;
+    }
+
+    /* Individual Stream Wrapper */
+    .stream-wrapper {
       position: relative;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+      background: var(--bg-stream);
+      border: 2px solid transparent;
+      transition: border-color 0.3s;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      user-select: none;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .tile header {
+    .stream-wrapper.active {
+      border-color: var(--border-active);
+    }
+
+    .stream-wrapper.selected {
+      border-color: var(--border-selected);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+      z-index: 10;
+    }
+
+    .stream-wrapper.loading {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    }
+
+    /* Stream Header - Minimal */
+    .stream-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+      padding: 0.5rem 0.75rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 20px;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-      font-size: 14px;
-      font-weight: 600;
-      color: #cbd5e1;
-      background: rgba(31, 41, 55, 0.75);
-      text-transform: capitalize;
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 0.3s;
     }
 
-    .tile header span {
-      flex-grow: 1;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+    .stream-wrapper:hover .stream-header {
+      opacity: 1;
     }
 
-    .tile header button {
-      background: #334155;
-      color: #e5e7eb;
-      font-weight: 600;
-      font-size: 13px;
-      padding: 6px 14px;
-      border-radius: 14px;
-      border: none;
-      cursor: pointer;
-      user-select: none;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: background-color 0.3s ease;
-      flex-shrink: 0;
-      margin-left: 12px;
-    }
-    .tile header button:hover {
-      background: #475569;
-      box-shadow: 0 3px 9px rgba(71,85,105,0.6);
+    .stream-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
 
-    .tile[data-selected="true"] {
-      outline: 3px solid #8b5cf6;
-      box-shadow: 0 0 16px 3px #8b5cf6cc;
-      border-color: #8b5cf6;
-      z-index: 10;
-    }
-    
-    .tile.has-stream {
-      border-color: #22c55e;
-      box-shadow: 0 6px 18px rgba(34, 197, 94, 0.3);
-    }
-    
-    .tile.has-stream header span {
-      color: #22c55e;
-      font-weight: 700;
-    }
-
-    /* StreamManager State Styles */
-    .tile.loading {
-      background: linear-gradient(45deg, rgba(17, 24, 39, 0.85) 25%, rgba(31, 41, 55, 0.9) 25%, rgba(31, 41, 55, 0.9) 50%, rgba(17, 24, 39, 0.85) 50%, rgba(17, 24, 39, 0.85) 75%, rgba(31, 41, 55, 0.9) 75%);
-      background-size: 40px 40px;
-      animation: loading-stripe 1.5s linear infinite;
-      border-color: #8b5cf6;
-    }
-
-    .tile.error {
-      background: linear-gradient(135deg, rgba(17, 24, 39, 0.85) 0%, rgba(75, 20, 30, 0.9) 100%);
-      border-color: #dc2626;
-    }
-
-    .tile.offline {
-      background: linear-gradient(135deg, rgba(17, 24, 39, 0.85) 0%, rgba(75, 75, 20, 0.9) 100%);
-      border-color: #ca8a04;
-    }
-
-    @keyframes loading-stripe {
-      0% { background-position: 0 0; }
-      100% { background-position: 40px 40px; }
-    }
-
-    .stream-status {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(148, 163, 184, 0.3);
-      border-top: 4px solid #8b5cf6;
-      border-radius: 50%;
-      animation: spinner-spin 1s linear infinite;
-      margin: 0 auto 12px auto;
-    }
-
-    @keyframes spinner-spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .status-message {
-      color: #e5e7eb;
-      font-size: 14px;
-      font-weight: 600;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-      margin-bottom: 8px;
-    }
-
-    .error-message {
-      color: #fca5a5;
-    }
-
-    .offline-message {
-      color: #fcd34d;
-    }
-
-    .retry-button {
-      background: linear-gradient(135deg, var(--color-primary-start), var(--color-primary-end));
-      color: #f0fdf4;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      margin-top: 8px;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 6px rgba(34, 197, 94, 0.4);
-      pointer-events: auto;
-    }
-
-    .retry-button:hover {
-      background: linear-gradient(135deg, #16a34a, #22c55e);
-      box-shadow: 0 3px 8px rgba(22, 163, 74, 0.6);
-      transform: translateY(-1px);
-    }
-
-    .player {
-      /* Use aspect-ratio for perfect 16:9 ratio (1.778) matching official Twitch */
-      aspect-ratio: 16 / 9;
-      background: #000;
-      position: relative;
-      border-radius: 0 0 16px 16px;
-      width: 100%;
+    .stream-actions {
       display: flex;
-      align-items: stretch;
+      gap: 0.3rem;
     }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-      background: #000;
-      border-radius: 0 0 16px 16px;
-      pointer-events: auto;
-      /* Remove object-fit to allow Twitch player natural scaling */
+    .stream-btn {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text-primary);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    
+
+    .stream-btn:hover {
+      background: rgba(139, 92, 246, 0.8);
+      border-color: var(--accent-purple);
+    }
+
+    /* Stream Player Area */
+    .stream-player {
+      flex: 1;
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: var(--bg-stream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .twitch-embed-container {
       width: 100%;
       height: 100%;
-      display: block;
-      background: #000;
-      border-radius: 0;
-      overflow: hidden;
-      /* Remove object-fit to allow natural Twitch player scaling */
+      position: absolute;
+      top: 0;
+      left: 0;
     }
 
-    @media (max-width: 1200px) {
-      .grid {
+    /* Loading State */
+    .loading-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--accent-purple);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Error State */
+    .error-state {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .error-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .error-message {
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .retry-btn {
+      background: var(--accent-green);
+      border: none;
+      color: var(--bg-primary);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .retry-btn:hover {
+      background: #16a34a;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1400px) {
+      .stream-container {
         grid-template-columns: repeat(2, 1fr);
-        gap: clamp(16px, 3vw, 40px);
-        /* Remove fixed height to maintain aspect ratio */
       }
     }
 
-    @media (max-width: 800px) {
-      .grid {
-        grid-template-columns: 1fr;
-        /* Remove fixed height to maintain aspect ratio */
-      }
-      /* Remove min-height constraint to allow natural 16:9 aspect ratio */
-      .controls {
+    @media (max-width: 900px) {
+      .stream-container {
         grid-template-columns: 1fr;
       }
-      .multistream-clip-controls {
-        flex-direction: column;
+
+      .control-bar {
+        flex-wrap: wrap;
+        padding: 0.5rem;
       }
-      .multistream-clip-controls button {
+
+      .control-bar h1 {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+
+      .stream-selectors {
+        flex-wrap: wrap;
         width: 100%;
       }
-      .header > div:last-child {
-        flex-direction: column;
+
+      .stream-selector {
+        flex: 1;
+        min-width: 120px;
       }
-      .header > div:last-child button {
+
+      .quick-actions {
         width: 100%;
+        margin-top: 0.5rem;
       }
+
+      .action-btn {
+        flex: 1;
+      }
+    }
+
+    /* Floating Clip Panel */
+    .clip-panel {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      z-index: 200;
+      opacity: 0.9;
+      transition: opacity 0.2s;
+    }
+
+    .clip-panel:hover {
+      opacity: 1;
+    }
+
+    .clip-panel-title {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .clip-btn {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .clip-btn:hover {
+      background: var(--accent-purple);
+      border-color: var(--accent-purple);
+    }
+
+    .clip-btn.create {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: var(--bg-primary);
+    }
+
+    .clip-btn.create:hover {
+      background: #16a34a;
+    }
+
+    /* Toast Notifications */
+    .toast {
+      position: fixed;
+      top: 4rem;
+      right: 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent-green);
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.error {
+      border-left-color: #dc2626;
+    }
+
+    .toast.success {
+      border-left-color: var(--accent-green);
     }
   </style>
 </head>
-<body class="stream-mode">
-  <div class="container">
-    <div class="header">
-      <h1>🎬 Clip Management</h1>
-      <p>Create and manage clips for your selected streams</p>
-      <div class="multistream-clip-controls">
-        <button class="btn btn-primary" onclick="createClipForCurrentStream()">📹 Create Clip</button>
-        <button class="btn btn-warning" onclick="openMedalImport()">🏅 Import Medal.tv</button>
-        <button class="btn btn-accent" onclick="viewMyClips()">📋 My Clips</button>
+<body>
+  <!-- Minimal Control Bar -->
+  <div class="control-bar">
+    <h1>🎮 Apex Streams</h1>
+    
+    <div class="stream-selectors">
+      <select id="stream1" class="stream-selector">
+        <option value="">Stream 1</option>
+      </select>
+      <select id="stream2" class="stream-selector">
+        <option value="">Stream 2</option>
+      </select>
+      <select id="stream3" class="stream-selector">
+        <option value="">Stream 3</option>
+      </select>
+    </div>
+
+    <div class="quick-actions">
+      <button class="action-btn" onclick="refreshStreamers()">🔄 Refresh</button>
+      <button class="action-btn" onclick="loadSampleStreams()">📺 Sample</button>
+      <button class="action-btn primary" onclick="loadSelectedStreams()">Load Streams</button>
+    </div>
+  </div>
+
+  <!-- Main Stream Container -->
+  <div class="stream-container" id="streamContainer">
+    <!-- Stream 1 -->
+    <div class="stream-wrapper" id="stream-tile-1" data-index="1">
+      <div class="stream-header">
+        <span class="stream-name">Empty</span>
+        <div class="stream-actions">
+          <button class="stream-btn" onclick="selectStream(1)">Select</button>
+        </div>
       </div>
-      <div class="controls">
-        <select id="s1" class="streamer-dropdown">
-          <option value="">-- Select Streamer 1 --</option>
-        </select>
-        <select id="s2" class="streamer-dropdown">
-          <option value="">-- Select Streamer 2 --</option>
-        </select>
-        <select id="s3" class="streamer-dropdown">
-          <option value="">-- Select Streamer 3 --</option>
-        </select>
-      </div>
-      <div style="display: flex; gap: 12px; margin-top: 20px;">
-        <button class="btn btn-primary" id="load-streams-btn" style="flex: 1;">Load Streams</button>
-        <button class="btn btn-accent" onclick="loadSampleStreamers()" style="flex: 0 0 auto;">Load Sample</button>
-        <button class="btn btn-warning" onclick="populateStreamerDropdowns()" style="flex: 0 0 auto;">🔄 Refresh Live Streamers</button>
+      <div class="stream-player" id="player-1">
+        <div class="loading-indicator" style="display:none;">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading stream...</div>
+        </div>
       </div>
     </div>
 
-    <div id="multistream" class="grid" aria-label="Stream tiles">
-      <div class="tile" id="tile-1" data-idx="1" tabindex="0" aria-selected="false">
-        <header>
-          <span>Empty</span>
-          <button class="btn" style="background:#334155" onclick="selectTile(1)">Select</button>
-        </header>
-        <div class="player"></div>
+    <!-- Stream 2 -->
+    <div class="stream-wrapper" id="stream-tile-2" data-index="2">
+      <div class="stream-header">
+        <span class="stream-name">Empty</span>
+        <div class="stream-actions">
+          <button class="stream-btn" onclick="selectStream(2)">Select</button>
+        </div>
       </div>
-      <div class="tile" id="tile-2" data-idx="2" tabindex="0" aria-selected="false">
-        <header>
-          <span>Empty</span>
-          <button class="btn" style="background:#334155" onclick="selectTile(2)">Select</button>
-        </header>
-        <div class="player"></div>
+      <div class="stream-player" id="player-2">
+        <div class="loading-indicator" style="display:none;">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading stream...</div>
+        </div>
       </div>
-      <div class="tile" id="tile-3" data-idx="3" tabindex="0" aria-selected="false">
-        <header>
-          <span>Empty</span>
-          <button class="btn" style="background:#334155" onclick="selectTile(3)">Select</button>
-        </header>
-        <div class="player"></div>
+    </div>
+
+    <!-- Stream 3 -->
+    <div class="stream-wrapper" id="stream-tile-3" data-index="3">
+      <div class="stream-header">
+        <span class="stream-name">Empty</span>
+        <div class="stream-actions">
+          <button class="stream-btn" onclick="selectStream(3)">Select</button>
+        </div>
+      </div>
+      <div class="stream-player" id="player-3">
+        <div class="loading-indicator" style="display:none;">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading stream...</div>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Floating Clip Panel -->
+  <div class="clip-panel">
+    <div class="clip-panel-title">Clip Tools</div>
+    <button class="clip-btn create" onclick="createClipForSelected()">
+      📹 Create Clip
+    </button>
+    <button class="clip-btn" onclick="openMedalImport()">
+      🏅 Import Medal
+    </button>
+    <button class="clip-btn" onclick="viewMyClips()">
+      📋 My Clips
+    </button>
+  </div>
+
+  <!-- Twitch Embed Script -->
   <script src="https://embed.twitch.tv/embed/v1.js"></script>
+  
   <script>
-          // Function to populate streamer dropdowns with live streamers
-   async function populateStreamerDropdowns() {
-     // Define dropdowns outside try block so it's accessible in finally
-     const dropdowns = ['s1', 's2', 's3'];
-     
-     console.log('Starting populateStreamerDropdowns function...');
-     console.log('Dropdown IDs:', dropdowns);
-     
-     try {
-       // Show loading state
-       dropdowns.forEach(id => {
-         const dropdown = document.getElementById(id);
-         console.log('Found dropdown:', id, dropdown);
-         if (dropdown) {
-           dropdown.classList.add('loading');
-         }
-       });
-       
-       // First try localStorage cache - check both cache keys used by main page and stream page
-      let allPlayers = [];
-      const mainPageCache = localStorage.getItem('leaderboard_cache');
-      const streamPageCache = localStorage.getItem('leaderboardCache');
-      
-      if (mainPageCache) {
-        try {
-          const cache = JSON.parse(mainPageCache);
-          if (cache.data && Array.isArray(cache.data)) {
-            allPlayers = cache.data;
-            console.log('Using main page cached data:', allPlayers.length);
-          } else if (cache.data && cache.data.players && Array.isArray(cache.data.players)) {
-            allPlayers = cache.data.players;
-            console.log('Using main page cached data.players:', allPlayers.length);
-          } else {
-            console.log('Main page cached data structure not recognized:', cache);
-          }
-        } catch (e) {
-          console.error('Error parsing main page cache:', e);
-        }
-      }
-      
-      // If no main page cache, try stream page cache
-      if (allPlayers.length === 0 && streamPageCache) {
-        try {
-          const cache = JSON.parse(streamPageCache);
-          if (cache.data && Array.isArray(cache.data)) {
-            allPlayers = cache.data;
-            console.log('Using stream page cached data:', allPlayers.length);
-          } else {
-            console.log('Stream page cached data is not an array, will fetch from API');
-          }
-        } catch (e) {
-          console.error('Error parsing stream page cache:', e);
-        }
-      }
-      
-      // If no cache, fetch from leaderboard API
-      if (allPlayers.length === 0) {
-        try {
-          console.log('No cached data, fetching from API...');
-          const response = await fetch('/api/stats/PC');
-          console.log('API response:', response);
-          console.log('Response status:', response.status);
-          console.log('Response ok:', response.ok);
-          
-          if (response.ok) {
-            const data = await response.json();
-            console.log('API response data:', data);
-            console.log('data.data type:', typeof data.data);
-            console.log('data.data value:', data.data);
-            console.log('data.data keys:', data.data ? Object.keys(data.data) : 'null/undefined');
-            
-            if (data.success && data.data) {
-              // The main page shows data.data.players is where the actual player array is
-              if (data.data.players && Array.isArray(data.data.players)) {
-                allPlayers = data.data.players;
-                console.log('Found players array in data.data.players:', allPlayers.length);
-              } else if (Array.isArray(data.data)) {
-                allPlayers = data.data;
-                console.log('data.data is directly an array:', allPlayers.length);
-              } else {
-                console.log('data.data structure:', data.data);
-                console.log('data.data keys:', Object.keys(data.data));
-                // Try to find any array in the response
-                const findArray = (obj) => {
-                  if (Array.isArray(obj)) return obj;
-                  if (typeof obj === 'object' && obj !== null) {
-                    for (const key in obj) {
-                      if (Array.isArray(obj[key])) return obj[key];
-                      const result = findArray(obj[key]);
-                      if (result) return result;
-                    }
-                  }
-                  return null;
-                };
-                const foundArray = findArray(data);
-                if (foundArray) {
-                  allPlayers = foundArray;
-                  console.log('Found array in response:', foundArray.length);
-                } else {
-                  console.log('No array found in response');
-                }
-              }
-              
-              console.log('Final allPlayers:', allPlayers);
-              console.log('allPlayers length:', allPlayers ? allPlayers.length : 'null/undefined');
-             
-              if (allPlayers && allPlayers.length > 0) {
-                // Store in both cache keys for compatibility
-                try {
-                  localStorage.setItem('leaderboard_cache', JSON.stringify({
-                    data: allPlayers,
-                    timestamp: Date.now()
-                  }));
-                  localStorage.setItem('leaderboardCache', JSON.stringify({
-                    data: allPlayers,
-                    timestamp: Date.now()
-                  }));
-                  console.log('Cached data in both locations');
-                } catch (e) {
-                  console.warn('Failed to cache data:', e);
-                }
-              }
-            } else {
-              console.log('API response not successful or no data');
-            }
-          } else {
-            console.error('API response not ok:', response.status, response.statusText);
-          }
-        } catch (fetchError) {
-          console.error('Error fetching leaderboard:', fetchError);
-        }
-      }
-       
-       // Ensure allPlayers is always an array before filtering
-       if (!Array.isArray(allPlayers)) {
-         console.log('allPlayers is not an array, resetting to empty array');
-         allPlayers = [];
-       }
-       
-       // Filter for live streamers - same logic as main page
-       const liveStreamers = allPlayers.filter(player => {
-         const twitchLive = player.twitch_live?.is_live === true;
-         const hasUser = !!(player.stream?.twitchUser || player.canonical_twitch_username || player.twitch_link);
-         return twitchLive && hasUser;
-       });
-       
-       console.log('Live streamers found:', liveStreamers.length);
-       
-       // Populate all three dropdowns
-       dropdowns.forEach(dropdownId => {
-         const dropdown = document.getElementById(dropdownId);
-         const placeholder = dropdown.options[0];
-         dropdown.innerHTML = '';
-         dropdown.appendChild(placeholder);
-         
-         console.log(`Populating dropdown ${dropdownId} with ${liveStreamers.length} streamers`);
-         
-         // Add live streamers - same as main page
-         liveStreamers.forEach(player => {
-           const twitchUsername = player.stream?.twitchUser || player.canonical_twitch_username || (player.twitch_link ? extractUsernameFromLink(player.twitch_link) : null);
-           const viewerCount = player.stream?.viewers || 0;
-           
-           if (twitchUsername) {
-             const option = document.createElement('option');
-             option.value = twitchUsername;
-             option.textContent = `${player.name || player.player_name || twitchUsername} (${viewerCount.toLocaleString()} viewers)`;
-             option.dataset.playerName = player.name || player.player_name;
-             dropdown.appendChild(option);
-             console.log(`Added option: ${twitchUsername} - ${player.name || player.player_name} (${viewerCount} viewers)`);
-           }
-         });
-         
-         console.log(`Dropdown ${dropdownId} now has ${dropdown.options.length} options`);
-       });
-        
-        // Add change event listeners to auto-load streams
-        dropdowns.forEach(dropdownId => {
-          const dropdown = document.getElementById(dropdownId);
-          dropdown.onchange = () => {
-            console.log(`Dropdown ${dropdownId} changed to:`, dropdown.value);
-            // Auto-load streams when selection changes
-            setTimeout(() => loadStreams(), 100);
-          };
-        });
-               
-       // Show success message
-       if (liveStreamers.length > 0) {
-         showMessage(`Found ${liveStreamers.length} live streamers!`, 'success');
-       } else {
-         showMessage('No live streamers found. Try refreshing.', 'info');
-       }
-        
-      } catch (error) {
-        console.error('Error populating streamer dropdowns:', error);
-        showMessage('Failed to load live streamers.', 'info');
-      } finally {
-        // Remove loading state
-        dropdowns.forEach(id => {
-          const dropdown = document.getElementById(id);
-          dropdown.classList.remove('loading');
-        });
-      }
-    }
-    
-    // Helper function to extract username from Twitch link
-    function extractUsernameFromLink(link) {
-      if (!link) return null;
-      const match = link.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
-      return match ? match[1].toLowerCase() : null;
-    }
-    
-    // Modern StreamManager Class - Complete Streaming System Rewrite
-    class StreamManager {
+    // Stream Management System
+    class StreamViewerApp {
       constructor() {
-        this.streams = new Map(); // Map<tileIndex, {player, channel, container}>
-        this.tiles = [null, document.getElementById('tile-1'), document.getElementById('tile-2'), document.getElementById('tile-3')];
-        this.dropdowns = ['s1', 's2', 's3'];
-        this.selectedTileIndex = null;
-        this.loadingStates = new Map(); // Track loading states per tile
-        
+        this.streams = new Map();
+        this.selectedIndex = null;
+        this.embedInstances = new Map();
         this.init();
       }
-      
+
       async init() {
-        console.log('🎮 Initializing Modern StreamManager...');
-        
-        // Wait for Twitch embed library
-        await this.waitForTwitchAPI();
-        
-        // Setup dropdown change listeners for real-time loading
-        this.setupDropdownListeners();
-        
-        console.log('✅ StreamManager initialized successfully');
+        console.log('🚀 Initializing Stream Viewer App');
+        await this.waitForTwitch();
+        this.setupEventListeners();
+        await this.populateStreamers();
       }
-      
-      async waitForTwitchAPI() {
-        const maxAttempts = 50;
+
+      async waitForTwitch() {
         let attempts = 0;
-        
-        while (typeof Twitch === 'undefined' && attempts < maxAttempts) {
-          console.log(`⏳ Waiting for Twitch API... (${attempts + 1}/${maxAttempts})`);
+        while (typeof Twitch === 'undefined' && attempts < 50) {
           await new Promise(resolve => setTimeout(resolve, 100));
           attempts++;
         }
-        
         if (typeof Twitch === 'undefined') {
-          throw new Error('Twitch Embed API failed to load');
+          console.error('Twitch Embed API failed to load');
+          return false;
         }
-        
-        console.log('✅ Twitch Embed API loaded successfully');
+        console.log('✅ Twitch API ready');
+        return true;
       }
-      
-      setupDropdownListeners() {
-        this.dropdowns.forEach((dropdownId, index) => {
-          const dropdown = document.getElementById(dropdownId);
-          const tileIndex = index + 1;
-          
-          if (dropdown) {
-            // Remove any existing listeners
-            dropdown.removeEventListener('change', this.handleDropdownChange);
-            
-            // Add new listener with proper context binding
-            dropdown.addEventListener('change', async (event) => {
-              const selectedChannel = event.target.value.trim();
-              console.log(`🔄 Dropdown ${dropdownId} changed to: "${selectedChannel}"`);
-              
-              if (selectedChannel) {
-                await this.loadStreamToTile(tileIndex, selectedChannel);
-              } else {
-                await this.clearTile(tileIndex);
-              }
-              
-              // Auto-select first active tile
-              this.updateSelectedTile();
-            });
-            
-            console.log(`🎧 Listener attached to dropdown: ${dropdownId}`);
-          }
+
+      setupEventListeners() {
+        // Auto-load on dropdown change
+        ['stream1', 'stream2', 'stream3'].forEach((id, index) => {
+          const dropdown = document.getElementById(id);
+          dropdown.addEventListener('change', () => {
+            if (dropdown.value) {
+              this.loadStream(index + 1, dropdown.value);
+            } else {
+              this.clearStream(index + 1);
+            }
+          });
         });
       }
-      
-      async loadStreamToTile(tileIndex, channel) {
-        console.log(`🚀 Loading stream "${channel}" to tile ${tileIndex}`);
+
+      async populateStreamers() {
+        console.log('📊 Fetching live streamers...');
         
         try {
-          // Clear existing stream first
-          await this.clearTile(tileIndex);
+          // Check cache first
+          let players = [];
+          const cache = localStorage.getItem('leaderboard_cache');
           
-          // Show loading state
-          this.setLoadingState(tileIndex, true);
-          
-          // Create container for the new stream
-          const container = this.createStreamContainer(tileIndex, channel);
-          
-          // Initialize Twitch Embed
-          const player = await this.initializeTwitchEmbed(container.id, channel);
-          
-          // Store stream data
-          this.streams.set(tileIndex, {
-            player,
-            channel,
-            container,
-            tileIndex
-          });
-          
-          // Update tile UI
-          this.updateTileUI(tileIndex, channel, true);
-          
-          console.log(`✅ Successfully loaded stream "${channel}" to tile ${tileIndex}`);
-          
-        } catch (error) {
-          console.error(`❌ Failed to load stream "${channel}" to tile ${tileIndex}:`, error);
-          this.showStreamError(tileIndex, channel, error.message);
-        } finally {
-          this.setLoadingState(tileIndex, false);
-        }
-      }
-      
-      createStreamContainer(tileIndex, channel) {
-        const tile = this.tiles[tileIndex];
-        const playerDiv = tile.querySelector('.player');
-        
-        // Create unique container ID
-        const containerId = `twitch-embed-${tileIndex}-${Date.now()}`;
-        
-        // Create container with proper structure
-        playerDiv.innerHTML = `
-          <div id="${containerId}" class="twitch-embed-container" data-channel="${channel}"></div>
-        `;
-        
-        return document.getElementById(containerId);
-      }
-      
-      async initializeTwitchEmbed(containerId, channel) {
-        return new Promise((resolve, reject) => {
-          const parent = location.hostname;
-          
-          console.log(`🎬 Initializing Twitch Embed for "${channel}" in container "${containerId}"`);
-          
-          try {
-            const embed = new Twitch.Embed(containerId, {
-              width: '100%',
-              height: '100%',
-              channel: channel,
-              parent: [parent],
-              layout: 'video',
-              theme: 'dark',
-              autoplay: false,
-              muted: true,
-              allowfullscreen: false
-            });
-            
-            // Handle embed events
-            embed.addEventListener(Twitch.Embed.VIDEO_READY, () => {
-              console.log(`✅ Twitch embed ready for "${channel}"`);
-              
-              const player = embed.getPlayer();
-              if (player) {
-                // Set optimal volume
-                player.setVolume(0.5);
-                
-                // Add player event listeners
-                player.addEventListener(Twitch.Player.READY, () => {
-                  console.log(`🎮 Player ready for "${channel}"`);
-                });
-                
-                player.addEventListener(Twitch.Player.PLAY, () => {
-                  console.log(`▶️ Stream playing: "${channel}"`);
-                });
-                
-                player.addEventListener(Twitch.Player.PAUSE, () => {
-                  console.log(`⏸️ Stream paused: "${channel}"`);
-                });
-                
-                player.addEventListener(Twitch.Player.ENDED, () => {
-                  console.log(`⏹️ Stream ended: "${channel}"`);
-                });
-                
-                player.addEventListener(Twitch.Player.OFFLINE, () => {
-                  console.log(`📴 Stream offline: "${channel}"`);
-                  this.showStreamOffline(containerId, channel);
-                });
-              }
-              
-              resolve(embed);
-            });
-            
-            // Handle errors
-            embed.addEventListener(Twitch.Embed.VIDEO_PLAY, () => {
-              console.log(`▶️ Embed video playing: "${channel}"`);
-            });
-            
-            // Timeout fallback
-            setTimeout(() => {
-              if (embed) {
-                console.log(`⚠️ Embed loaded with timeout for "${channel}"`);
-                resolve(embed);
-              } else {
-                reject(new Error(`Timeout loading embed for "${channel}"`));
-              }
-            }, 10000);
-            
-          } catch (error) {
-            console.error(`❌ Twitch Embed creation failed for "${channel}":`, error);
-            reject(error);
+          if (cache) {
+            const parsed = JSON.parse(cache);
+            players = parsed.data || [];
           }
-        });
-      }
-      
-      async clearTile(tileIndex) {
-        console.log(`🧹 Clearing tile ${tileIndex}`);
-        
-        // Clean up existing stream
-        if (this.streams.has(tileIndex)) {
-          const streamData = this.streams.get(tileIndex);
-          
-          try {
-            // Destroy Twitch player
-            if (streamData.player && typeof streamData.player.destroy === 'function') {
-              streamData.player.destroy();
-              console.log(`🗑️ Destroyed player for tile ${tileIndex}`);
+
+          // Fetch fresh data if no cache
+          if (players.length === 0) {
+            const response = await fetch('/api/stats/PC');
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.data) {
+                players = data.data.players || data.data || [];
+                localStorage.setItem('leaderboard_cache', JSON.stringify({
+                  data: players,
+                  timestamp: Date.now()
+                }));
+              }
             }
-          } catch (error) {
-            console.warn(`⚠️ Error destroying player for tile ${tileIndex}:`, error);
           }
-          
-          this.streams.delete(tileIndex);
+
+          // Filter live streamers
+          const liveStreamers = players.filter(p => 
+            p.twitch_live?.is_live && 
+            (p.stream?.twitchUser || p.canonical_twitch_username || p.twitch_link)
+          );
+
+          // Populate dropdowns
+          ['stream1', 'stream2', 'stream3'].forEach(id => {
+            const dropdown = document.getElementById(id);
+            const current = dropdown.value;
+            dropdown.innerHTML = '<option value="">Select Streamer</option>';
+            
+            liveStreamers.forEach(player => {
+              const username = player.stream?.twitchUser || 
+                              player.canonical_twitch_username || 
+                              this.extractUsername(player.twitch_link);
+              
+              if (username) {
+                const option = document.createElement('option');
+                option.value = username;
+                option.textContent = `${player.name || username} (${(player.stream?.viewers || 0).toLocaleString()} viewers)`;
+                dropdown.appendChild(option);
+              }
+            });
+
+            if (current) dropdown.value = current;
+          });
+
+          this.showToast(`Found ${liveStreamers.length} live streamers`, 'success');
+        } catch (error) {
+          console.error('Failed to populate streamers:', error);
+          this.showToast('Failed to load streamers', 'error');
         }
-        
-        // Clear tile UI
-        this.updateTileUI(tileIndex, '', false);
-        
-        // Clear container
-        const tile = this.tiles[tileIndex];
-        const playerDiv = tile.querySelector('.player');
-        playerDiv.innerHTML = '';
-        
-        console.log(`✅ Tile ${tileIndex} cleared successfully`);
       }
-      
-      setLoadingState(tileIndex, isLoading) {
-        this.loadingStates.set(tileIndex, isLoading);
-        
-        const tile = this.tiles[tileIndex];
-        const playerDiv = tile.querySelector('.player');
-        
-        if (isLoading) {
-          playerDiv.innerHTML = `
-            <div class="stream-loading">
-              <div class="loading-spinner"></div>
-              <p>Loading stream...</p>
-            </div>
-          `;
-          tile.classList.add('loading');
-        } else {
-          tile.classList.remove('loading');
-        }
+
+      extractUsername(link) {
+        if (!link) return null;
+        const match = link.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
+        return match ? match[1].toLowerCase() : null;
       }
-      
-      updateTileUI(tileIndex, channel, hasStream) {
-        const tile = this.tiles[tileIndex];
-        const header = tile.querySelector('header span');
+
+      async loadStream(index, channel) {
+        console.log(`📺 Loading ${channel} to position ${index}`);
         
-        if (hasStream && channel) {
+        const tile = document.getElementById(`stream-tile-${index}`);
+        const player = document.getElementById(`player-${index}`);
+        const header = tile.querySelector('.stream-name');
+        const loading = player.querySelector('.loading-indicator');
+
+        // Show loading
+        loading.style.display = 'flex';
+        tile.classList.add('loading');
+
+        // Clear existing
+        this.clearStream(index);
+
+        // Create embed container
+        const containerId = `twitch-${index}-${Date.now()}`;
+        const container = document.createElement('div');
+        container.id = containerId;
+        container.className = 'twitch-embed-container';
+        player.appendChild(container);
+
+        try {
+          // Create Twitch embed
+          const embed = new Twitch.Embed(containerId, {
+            width: '100%',
+            height: '100%',
+            channel: channel,
+            parent: [location.hostname],
+            layout: 'video',
+            theme: 'dark',
+            autoplay: false,
+            muted: true
+          });
+
+          // Wait for ready
+          await new Promise((resolve) => {
+            embed.addEventListener(Twitch.Embed.VIDEO_READY, () => {
+              console.log(`✅ Stream ready: ${channel}`);
+              resolve();
+            });
+            setTimeout(resolve, 5000); // Timeout fallback
+          });
+
+          // Store reference
+          this.embedInstances.set(index, embed);
+          this.streams.set(index, channel);
+
+          // Update UI
           header.textContent = channel;
-          tile.dataset.username = channel;
-          tile.classList.add('has-stream');
-          tile.classList.remove('error');
-        } else {
-          header.textContent = 'Empty';
-          tile.dataset.username = '';
-          tile.classList.remove('has-stream', 'error');
+          tile.classList.add('active');
+          tile.classList.remove('loading');
+          loading.style.display = 'none';
+
+        } catch (error) {
+          console.error(`Failed to load ${channel}:`, error);
+          this.showError(index, channel);
+          tile.classList.remove('loading');
+          loading.style.display = 'none';
         }
       }
-      
-      showStreamError(tileIndex, channel, errorMessage) {
-        const tile = this.tiles[tileIndex];
-        const playerDiv = tile.querySelector('.player');
+
+      clearStream(index) {
+        // Destroy existing embed
+        if (this.embedInstances.has(index)) {
+          const embed = this.embedInstances.get(index);
+          if (embed && typeof embed.destroy === 'function') {
+            embed.destroy();
+          }
+          this.embedInstances.delete(index);
+        }
+
+        // Clear player
+        const player = document.getElementById(`player-${index}`);
+        const containers = player.querySelectorAll('.twitch-embed-container, .error-state');
+        containers.forEach(c => c.remove());
+
+        // Reset UI
+        const tile = document.getElementById(`stream-tile-${index}`);
+        const header = tile.querySelector('.stream-name');
+        header.textContent = 'Empty';
+        tile.classList.remove('active', 'selected', 'loading');
         
-        playerDiv.innerHTML = `
-          <div class="stream-error">
+        this.streams.delete(index);
+      }
+
+      showError(index, channel) {
+        const player = document.getElementById(`player-${index}`);
+        player.innerHTML = `
+          <div class="error-state">
             <div class="error-icon">❌</div>
-            <p class="error-title">Failed to load stream</p>
-            <p class="error-channel">"${channel}"</p>
-            <p class="error-message">${errorMessage}</p>
-            <button class="retry-btn" onclick="streamManager.retryStream(${tileIndex}, '${channel}')">
-              🔄 Retry
-            </button>
+            <div class="error-message">Failed to load ${channel}</div>
+            <button class="retry-btn" onclick="app.loadStream(${index}, '${channel}')">Retry</button>
           </div>
         `;
-        
-        tile.classList.add('error');
-        this.updateTileUI(tileIndex, channel, false);
-        
-        console.error(`💥 Stream error displayed for tile ${tileIndex}`);
       }
-      
-      showStreamOffline(containerId, channel) {
-        const container = document.getElementById(containerId);
-        if (container) {
-          container.innerHTML = `
-            <div class="stream-offline">
-              <div class="offline-icon">📴</div>
-              <p class="offline-title">Stream Offline</p>
-              <p class="offline-channel">"${channel}"</p>
-              <p class="offline-message">This streamer is currently offline</p>
-            </div>
-          `;
-        }
-      }
-      
-      async retryStream(tileIndex, channel) {
-        console.log(`🔄 Retrying stream "${channel}" on tile ${tileIndex}`);
-        await this.loadStreamToTile(tileIndex, channel);
-      }
-      
-      updateSelectedTile() {
-        // Auto-select first tile with active stream
-        const activeStreams = Array.from(this.streams.keys());
-        if (activeStreams.length > 0) {
-          const firstActive = Math.min(...activeStreams);
-          this.selectTile(firstActive);
-        }
-      }
-      
-      selectTile(tileIndex) {
-        console.log(`🎯 Selecting tile ${tileIndex}`);
-        
-        // Update visual selection
-        this.tiles.forEach((tile, idx) => {
-          if (tile) {
-            tile.removeAttribute('data-selected');
-            tile.setAttribute('aria-selected', 'false');
-          }
+
+      selectStream(index) {
+        // Remove previous selection
+        document.querySelectorAll('.stream-wrapper').forEach(w => {
+          w.classList.remove('selected');
         });
+
+        // Add selection
+        const tile = document.getElementById(`stream-tile-${index}`);
+        tile.classList.add('selected');
+        this.selectedIndex = index;
         
-        if (this.tiles[tileIndex]) {
-          this.tiles[tileIndex].setAttribute('data-selected', 'true');
-          this.tiles[tileIndex].setAttribute('aria-selected', 'true');
-          this.selectedTileIndex = tileIndex;
-        }
+        console.log(`🎯 Selected stream ${index}`);
       }
-      
-      // Public API methods
-      getCurrentSelectedStream() {
-        return this.selectedTileIndex ? this.streams.get(this.selectedTileIndex) : null;
-      }
-      
-      getAllActiveStreams() {
-        return Array.from(this.streams.values());
-      }
-      
-      async refreshAllStreams() {
-        console.log('🔄 Refreshing all active streams...');
-        
-        const refreshPromises = [];
-        for (const [tileIndex, streamData] of this.streams) {
-          refreshPromises.push(this.loadStreamToTile(tileIndex, streamData.channel));
-        }
-        
-        await Promise.all(refreshPromises);
-        console.log('✅ All streams refreshed');
-      }
-      
-      destroy() {
-        console.log('🧨 Destroying StreamManager...');
-        
-        // Clear all streams
-        const clearPromises = [];
-        for (const tileIndex of this.streams.keys()) {
-          clearPromises.push(this.clearTile(tileIndex));
-        }
-        
-        return Promise.all(clearPromises);
+
+      showToast(message, type = 'info') {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 3000);
       }
     }
-    
-    // Initialize the StreamManager
-    let streamManager = null;
-    
-    // Initialize StreamManager when page loads
-    async function initializeStreamManager() {
-      try {
-        console.log('🚀 Initializing StreamManager...');
-        streamManager = new StreamManager();
-        console.log('✅ StreamManager initialized successfully');
-      } catch (error) {
-        console.error('❌ Failed to initialize StreamManager:', error);
-        showMessage('Failed to initialize streaming system', 'error');
-      }
-    }
-    
-    // Legacy compatibility functions (for external scripts)
-    function selectTile(idx) {
-      if (streamManager) {
-        streamManager.selectTile(idx);
-      }
-    }
-    
-    function getCurrentStreamFocus() {
-      if (streamManager) {
-        const selectedStream = streamManager.getCurrentSelectedStream();
-        return selectedStream ? selectedStream.channel : null;
-      }
-      return null;
-    }
-    
-    // Modern loadStreams function - now works with StreamManager
-    async function loadStreams() {
-      if (!streamManager) {
-        console.warn('⚠️ StreamManager not initialized yet, waiting...');
-        setTimeout(() => loadStreams(), 500);
-        return;
-      }
-      
-      console.log('🚀 Loading streams via StreamManager...');
-      
-      const dropdowns = [
-        { id: 's1', tile: 1 },
-        { id: 's2', tile: 2 },
-        { id: 's3', tile: 3 }
-      ];
-      
-      const loadPromises = dropdowns.map(async ({ id, tile }) => {
-        const dropdown = document.getElementById(id);
-        const selectedChannel = dropdown.value.trim();
-        
-        if (selectedChannel) {
-          console.log(`📺 Loading "${selectedChannel}" to tile ${tile}`);
-          await streamManager.loadStreamToTile(tile, selectedChannel);
-        } else {
-          console.log(`🧹 Clearing tile ${tile} (no selection)`);
-          await streamManager.clearTile(tile);
-        }
-      });
-      
-      try {
-        await Promise.all(loadPromises);
-        console.log('✅ All streams loaded successfully');
-        showMessage('Streams loaded successfully!', 'success');
-      } catch (error) {
-        console.error('❌ Error loading streams:', error);
-        showMessage('Error loading some streams', 'error');
-      }
-    }
-    
-    function loadSampleStreamers() {
-      console.log('🎯 Loading sample streamers...');
-      
-      // Set sample streamers in dropdowns
-      const sampleStreamers = ['aceu', 'shroud', 'iitztimmy'];
-      const dropdowns = [
-        document.getElementById('s1'),
-        document.getElementById('s2'), 
-        document.getElementById('s3')
-      ];
-      
-      // Set sample streamers and trigger change events for auto-loading
-      sampleStreamers.forEach((username, index) => {
-        const dropdown = dropdowns[index];
-        if (dropdown) {
-          // Try to find the streamer in dropdown options first
-          let found = false;
-          for (let i = 0; i < dropdown.options.length; i++) {
-            if (dropdown.options[i].value === username) {
-              dropdown.selectedIndex = i;
-              found = true;
-              break;
-            }
-          }
-          
-          // If not found in options, set value directly
-          if (!found) {
-            dropdown.value = username;
-          }
-          
-          // Trigger change event to auto-load via StreamManager
-          dropdown.dispatchEvent(new Event('change'));
-          console.log(`📺 Set sample streamer "${username}" in dropdown ${index + 1}`);
-        }
-      });
-      
-      console.log('✅ Sample streamers configured and loading...');
-    }
-    
-    function showMessage(message, type = 'info') {
-      const existing = document.querySelector('.message');
-      if (existing) existing.remove();
-      
-      const msg = document.createElement('div');
-      msg.className = `message message-${type}`;
-      msg.textContent = message;
-      msg.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 12px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 600;
-        z-index: 1000;
-        background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#dc2626' : '#3b82f6'};
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      `;
-      
-      document.body.appendChild(msg);
-      setTimeout(() => msg.remove(), 3000);
-    }
-    
-    // Helpers used by multistream-clips.js
-    window.getCurrentStreamFocus = function () {
-      const focused = document.querySelector('[data-selected="true"][data-idx]');
-      return focused ? (focused.dataset.username || null) : null;
-    }
-    
-    // Auto-populate dropdowns with live streamers on page load
-    document.addEventListener('DOMContentLoaded', async function() {
-      console.log('🎬 Page loaded, initializing systems...');
-      
-      // First populate dropdowns with live streamers
-      await populateStreamerDropdowns();
-      
-      // Then initialize the modern StreamManager
-      await initializeStreamManager();
-      
-      // Hide the legacy Load Streams button since auto-loading is now active
-      const loadStreamsBtn = document.getElementById('load-streams-btn');
-      if (loadStreamsBtn) {
-        loadStreamsBtn.style.display = 'none';
-        console.log('✅ Legacy Load Streams button hidden - auto-loading is now active');
-      }
-      
-      console.log('🎉 All systems initialized successfully!');
+
+    // Initialize app
+    let app;
+    document.addEventListener('DOMContentLoaded', () => {
+      app = new StreamViewerApp();
+      window.app = app; // Expose globally
     });
+
+    // Global functions for buttons
+    function refreshStreamers() {
+      app.populateStreamers();
+    }
+
+    function loadSampleStreams() {
+      const samples = ['aceu', 'shroud', 'iitztimmy'];
+      samples.forEach((channel, i) => {
+        const dropdown = document.getElementById(`stream${i + 1}`);
+        dropdown.value = channel;
+        app.loadStream(i + 1, channel);
+      });
+    }
+
+    function loadSelectedStreams() {
+      ['stream1', 'stream2', 'stream3'].forEach((id, index) => {
+        const dropdown = document.getElementById(id);
+        if (dropdown.value) {
+          app.loadStream(index + 1, dropdown.value);
+        }
+      });
+    }
+
+    function selectStream(index) {
+      app.selectStream(index);
+    }
+
+    // Clip functions (compatibility)
+    function createClipForSelected() {
+      const channel = app.streams.get(app.selectedIndex);
+      if (channel) {
+        console.log(`Creating clip for ${channel}`);
+        // Implement clip creation
+      } else {
+        app.showToast('Please select a stream first', 'error');
+      }
+    }
+
+    function openMedalImport() {
+      console.log('Opening Medal import');
+      // Implement Medal import
+    }
+
+    function viewMyClips() {
+      console.log('Viewing clips');
+      // Implement clip viewer
+    }
+
+    // Compatibility functions for multistream-clips.js
+    window.getCurrentStreamFocus = function() {
+      return app ? app.streams.get(app.selectedIndex) : null;
+    };
+
+    window.populateStreamerDropdowns = function() {
+      if (app) app.populateStreamers();
+    };
+
+    window.createClipForCurrentStream = createClipForSelected;
   </script>
 
-   <script src="/js/multistream-clips.js?v=stream-1"></script>
- </body>
- </html>
+  <script src="/js/multistream-clips.js?v=stream-2"></script>
+</body>
+</html>
 
 

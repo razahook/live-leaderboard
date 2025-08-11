@@ -33,7 +33,10 @@
       "mcp__chrome-stdio__chrome_fill_or_select",
       "mcp__serena__replace_regex",
       "mcp__chrome-stdio__chrome_inject_script",
-      "WebFetch(domain:dev.twitch.tv)"
+      "WebFetch(domain:dev.twitch.tv)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_evaluate"
     ],
     "deny": []
   }
