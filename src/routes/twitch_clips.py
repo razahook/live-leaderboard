@@ -453,15 +453,64 @@ def get_saved_clips_for_streamer(username):
 def get_my_clips():
     """Get clips created by the current user (requires authentication)"""
     try:
-        # This would need OAuth user context in a real implementation
-        # For now, return empty response
+        # Check for user authentication via query parameter or session
+        username = request.args.get('username')
+        if not username:
+            return jsonify({
+                "success": True,
+                "data": {
+                    "clips": [],
+                    "count": 0,
+                    "source": "user",
+                    "message": "User authentication required"
+                }
+            })
+        
+        # Verify user is authenticated
+        from routes.twitch_oauth import user_tokens
+        if username not in user_tokens:
+            return jsonify({
+                "success": True,
+                "data": {
+                    "clips": [],
+                    "count": 0,
+                    "source": "user",
+                    "message": "User authentication required"
+                }
+            })
+        
+        # Check if token is still valid
+        token_info = user_tokens[username]
+        import time
+        if time.time() - token_info['created_at'] >= token_info['expires_in']:
+            return jsonify({
+                "success": True,
+                "data": {
+                    "clips": [],
+                    "count": 0,
+                    "source": "user",
+                    "message": "Authentication expired. Please re-authenticate."
+                }
+            })
+        
+        # Get clips from Supabase database for this user
+        sb = get_supabase()
+        if sb is None:
+            return jsonify({"success": False, "error": "Database not available"}), 500
+        
+        # Query clips created by this user
+        result = sb.table('clips').select('*').eq('creator_login', username).order('created_at', desc=True).limit(50).execute()
+        
+        clips = result.data if result.data else []
+        
         return jsonify({
             "success": True,
             "data": {
-                "clips": [],
-                "count": 0,
+                "clips": clips,
+                "count": len(clips),
                 "source": "user",
-                "message": "User authentication required"
+                "username": username,
+                "message": f"Found {len(clips)} clips created by {username}" if clips else "No clips created yet"
             }
         })
             

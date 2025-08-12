@@ -82,16 +82,18 @@ async function createClipForStreamer(streamerUsername, userId = null) {
         showClipLoading(streamerUsername);
         
         // Create the Twitch clip
-        const response = await fetch(`/api/stream-clips/create/${streamerUsername}`, {
+        const currentUsername = getCurrentUsername();
+        const response = await fetch(`/api/stream-clips/create/${streamerUsername}?as=${encodeURIComponent(currentUsername)}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-User-Id': userId,
                 'Authorization': `Bearer ${getUserToken()}` // If using auth
             },
             body: JSON.stringify({
                 broadcaster_login: streamerUsername,
                 created_by_user_id: userId,
-                creator_login: getCurrentUsername() // Get from session/auth
+                creator_login: currentUsername
             })
         });
         
@@ -468,7 +470,18 @@ function showMyClipsModal() {
 
 async function loadMyClips() {
     try {
-        const response = await fetch('/api/my-clips');
+        const username = getCurrentUsername();
+        if (!username || username === 'anonymous') {
+            document.getElementById('myClipsContent').innerHTML = `
+                <div class="no-clips">
+                    <h4>Not authenticated</h4>
+                    <p>Please connect your Twitch account to view your clips.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const response = await fetch(`/api/my-clips?username=${encodeURIComponent(username)}`);
         const result = await response.json();
         
         const content = document.getElementById('myClipsContent');
