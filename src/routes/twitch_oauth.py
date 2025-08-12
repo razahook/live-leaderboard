@@ -109,7 +109,7 @@ def _verify_state(state: str, max_age_seconds: int = 600) -> bool:
     except Exception:
         return False
 
-@twitch_oauth_bp.route('/api/session/start')
+@twitch_oauth_bp.route('/session/start')
 def oauth_login():
     """Initiate OAuth flow for clip creation permissions"""
     from flask import request
@@ -167,7 +167,7 @@ def oauth_login():
             'error': f'Failed to initiate OAuth: {str(e)}'
         }), 500
 
-@twitch_oauth_bp.route('/api/session/complete')
+@twitch_oauth_bp.route('/session/complete')
 def oauth_callback():
     """Handle OAuth callback from Twitch"""
     from flask import request
@@ -347,7 +347,7 @@ def oauth_callback():
         </body></html>
         """, 500
 
-@twitch_oauth_bp.route('/api/session/check')
+@twitch_oauth_bp.route('/session/check')
 def oauth_status():
     """Check if user has authorized clip creation"""
     try:
