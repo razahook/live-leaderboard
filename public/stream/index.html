@@ -100,9 +100,9 @@
     }
 
     .stream-selector {
-      background: rgba(255, 255, 255, 0.05);
+      background: #1f2937;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-primary);
+      color: #ffffff;
       padding: 0.75rem 1rem;
       border-radius: 12px;
       font-size: 0.9rem;
@@ -112,9 +112,27 @@
       backdrop-filter: blur(10px);
     }
 
+    .stream-selector option {
+      background: #1f2937;
+      color: #ffffff;
+      padding: 0.5rem;
+    }
+
+    .stream-selector option:hover,
+    .stream-selector option:focus {
+      background: #374151;
+      color: #ffffff;
+    }
+
+    .stream-selector option:checked,
+    .stream-selector option[selected] {
+      background: #4b5563;
+      color: #ffffff;
+    }
+
     .stream-selector:hover {
       border-color: var(--accent-green);
-      background: rgba(0, 255, 136, 0.1);
+      background: #374151;
       transform: translateY(-2px);
       box-shadow: var(--shadow-medium);
     }
@@ -937,10 +955,27 @@
       padding: 0.75rem 1rem;
       border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-primary);
+      background: #1f2937;
+      color: #ffffff;
       font-size: 0.9rem;
       transition: all 0.3s ease;
+    }
+
+    .form-select option {
+      background: #1f2937;
+      color: #ffffff;
+      padding: 0.5rem;
+    }
+
+    .form-select option:hover,
+    .form-select option:focus {
+      background: #374151;
+      color: #ffffff;
+    }
+
+    .form-select option:checked {
+      background: #4b5563;
+      color: #ffffff;
     }
 
     .form-input:focus, .form-select:focus {
