@@ -356,7 +356,7 @@ function getCurrentStreamFocus() {
     }
     
     // Check multistream dropdowns for selected streamers (thy specific IDs)
-    const streamSelects = ['streamer1', 'streamer2', 'streamer3'];
+    const streamSelects = ['stream1', 'stream2', 'stream3'];
     for (const selectId of streamSelects) {
         const select = document.getElementById(selectId);
         if (select && select.value && select.value !== '' && select.value !== 'none') {
