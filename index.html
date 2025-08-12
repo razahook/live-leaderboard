@@ -1036,7 +1036,7 @@
 
         function renderPlatformDistributionChart(data) {
             const ctx = document.getElementById('platformDistributionChart').getContext('2d');
-            const platformData = Object.values(data).filter(p => p.masters_count);
+            const platformData = Object.values(data).filter(p => p && p.masters_count);
             
             if (platformChart) platformChart.destroy();
 
