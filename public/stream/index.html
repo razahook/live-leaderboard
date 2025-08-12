@@ -1408,10 +1408,24 @@
             players = [];
           }
 
-          const liveStreamers = players.filter(p => 
+          // First, let's see what games are being played
+          const allLiveStreamers = players.filter(p => 
             p.twitch_live?.is_live && 
             (p.stream?.twitchUser || p.canonical_twitch_username || p.twitch_link)
           );
+          
+          // Log game information for debugging
+          console.log('🎮 Games being played by streamers:');
+          allLiveStreamers.forEach(p => {
+            const username = p.stream?.twitchUser || p.canonical_twitch_username || this.extractUsername(p.twitch_link);
+            console.log(`  ${username}: ${p.stream?.game || p.twitch_live?.game_name || 'Unknown game'}`);
+          });
+          
+          // Filter for Apex Legends only
+          const liveStreamers = allLiveStreamers.filter(p => {
+            const gameName = p.stream?.game || p.twitch_live?.game_name || '';
+            return gameName.toLowerCase().includes('apex');
+          });
 
           ['stream1', 'stream2', 'stream3'].forEach(id => {
             const dropdown = document.getElementById(id);
@@ -1434,7 +1448,7 @@
             if (current) dropdown.value = current;
           });
 
-          this.showToast(`Found ${liveStreamers.length} live streamers`, 'success');
+          this.showToast(`Found ${liveStreamers.length} Apex Legends streamers (${allLiveStreamers.length} total live)`, 'success');
         } catch (error) {
           console.error('Failed to populate streamers:', error);
           this.showToast('Failed to load streamers', 'error');
