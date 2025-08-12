@@ -748,6 +748,146 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Favorites Sidebar Modal Styles */
+    .favorites-sidebar {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 450px;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 3000;
+      animation: slideInRight 0.3s ease;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .favorites-content {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, 
+        rgba(17, 24, 39, 0.98) 0%, 
+        rgba(30, 41, 59, 0.98) 50%,
+        rgba(17, 24, 39, 0.98) 100%);
+      border-left: 2px solid rgba(148, 163, 184, 0.3);
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+      overflow-y: auto;
+    }
+
+    .favorites-header {
+      position: sticky;
+      top: 0;
+      background: linear-gradient(135deg, #1e3a8a, #312e81);
+      padding: 20px 25px;
+      border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+
+    .favorites-header h3 {
+      color: #ffffff;
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .favorites-close {
+      color: #e2e8f0;
+      font-size: 32px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+
+    .favorites-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ff6b6b;
+      transform: scale(1.1);
+    }
+
+    .favorites-body {
+      padding: 25px;
+      min-height: calc(100vh - 90px);
+    }
+
+    .favorites-body .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+    }
+
+    .favorites-body .empty-state .empty-text {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #e2e8f0;
+    }
+
+    .favorites-body .empty-state .empty-hint {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .favorites-body .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .favorites-body .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(148, 163, 184, 0.2);
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    .favorites-body .loading-text {
+      color: #94a3b8;
+      font-size: 16px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .favorites-sidebar {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .favorites-sidebar {
+        width: 100%;
+      }
+      
+      .favorites-header h3 {
+        font-size: 20px;
+      }
+    }
+
     .modal-header {
       background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4));
       padding: 1.5rem;
@@ -1070,6 +1210,19 @@
         <span class="close" onclick="closeClipModal()">&times;</span>
       </div>
       <div class="modal-body" id="clipModalBody">
+        <!-- Content will be dynamically loaded -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Favorites Sidebar Modal -->
+  <div id="favoritesModal" class="favorites-sidebar" style="display: none;">
+    <div class="favorites-content">
+      <div class="favorites-header">
+        <h3 id="favoritesTitle">⭐ My Favorites</h3>
+        <span class="favorites-close" onclick="closeFavoritesModal()">&times;</span>
+      </div>
+      <div class="favorites-body" id="favoritesBody">
         <!-- Content will be dynamically loaded -->
       </div>
     </div>
@@ -1756,45 +1909,55 @@
         event.preventDefault();
       }
       
-      console.log('Opening Favorites modal...');
-      document.getElementById('clipModalTitle').textContent = 'My Favorites';
-      document.getElementById('clipModalBody').innerHTML = `
-        <div class="loading-state">
-          <div class="loading-spinner"></div>
-          <div class="loading-text">Loading favorites...</div>
-        </div>
-      `;
-      document.getElementById('clipModal').style.display = 'block';
-      
-      // Fetch user favorites
-      console.log('Fetching favorites...');
-      fetch('/api/favorites')
-        .then(response => {
-          console.log('Favorites response:', response.status, response.ok);
-          return response.json();
-        })
-        .then(data => {
-          console.log('Favorites data:', data);
-          if (data.success && data.favorites && data.favorites.length > 0) {
-            displayFavorites(data.favorites);
-          } else {
-            document.getElementById('clipModalBody').innerHTML = `
-              <div class="empty-state">
-                <div class="empty-text">No favorites found</div>
-                <div class="empty-hint">Add clips to favorites to see them here</div>
+      console.log('Opening Favorites sidebar modal...');
+      const favoritesModal = document.getElementById('favoritesModal');
+      if (favoritesModal) {
+        favoritesModal.style.display = 'block';
+        document.getElementById('favoritesBody').innerHTML = `
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading favorites...</div>
+          </div>
+        `;
+        
+        // Fetch user favorites
+        console.log('Fetching favorites...');
+        fetch('/api/favorites')
+          .then(response => {
+            console.log('Favorites response:', response.status, response.ok);
+            return response.json();
+          })
+          .then(data => {
+            console.log('Favorites data:', data);
+            if (data.success && data.favorites && data.favorites.length > 0) {
+              displayFavoritesInSidebar(data.favorites);
+            } else {
+              document.getElementById('favoritesBody').innerHTML = `
+                <div class="empty-state">
+                  <div class="empty-text">No favorites found</div>
+                  <div class="empty-hint">Add clips to favorites to see them here</div>
+                </div>
+              `;
+            }
+          })
+          .catch(error => {
+            console.error('Failed to fetch favorites:', error);
+            document.getElementById('favoritesBody').innerHTML = `
+              <div class="error-state">
+                <div class="error-message">Failed to load favorites: ${error.message}</div>
+                <button class="retry-btn" onclick="openFavorites()">Retry</button>
               </div>
             `;
-          }
-        })
-        .catch(error => {
-          console.error('Failed to fetch favorites:', error);
-          document.getElementById('clipModalBody').innerHTML = `
-            <div class="error-state">
-              <div class="error-message">Failed to load favorites: ${error.message}</div>
-              <button class="retry-btn" onclick="openFavorites()">Retry</button>
-            </div>
-          `;
-        });
+          });
+      }
+    }
+
+    function closeFavoritesModal() {
+      const modal = document.getElementById('favoritesModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+      console.log('Favorites modal closed');
     }
 
     function createTwitchClip(channel) {
@@ -1913,6 +2076,38 @@
       `).join('');
 
       modalBody.innerHTML = clipsHtml;
+    }
+
+    function displayFavoritesInSidebar(favorites) {
+      const modalBody = document.getElementById('favoritesBody');
+      if (!favorites || favorites.length === 0) {
+        modalBody.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-text">No favorites found</div>
+            <div class="empty-hint">Add clips to favorites to see them here</div>
+          </div>
+        `;
+        return;
+      }
+
+      const favoritesHtml = favorites.map(favorite => `
+        <div class="clip-item">
+          <h4>${favorite.title || 'Untitled Clip'}</h4>
+          <p>Streamer: <strong>${favorite.broadcaster_login || 'Unknown'}</strong></p>
+          <p>Duration: ${favorite.duration || 'N/A'}s</p>
+          <p>Views: ${favorite.view_count || 0}</p>
+          <div class="clip-actions">
+            <button onclick="window.open('${favorite.url}', '_blank')" class="action-btn">
+              📺 Watch
+            </button>
+            <button onclick="removeFavorite('${favorite.id}')" class="action-btn secondary">
+              ❌ Remove
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      modalBody.innerHTML = favoritesHtml;
     }
 
     function displayFavorites(favorites) {
@@ -2139,6 +2334,16 @@
           console.log('Closing clip modal - clicked on backdrop');
           closeClipModal();
         }
+        
+        // Close favorites sidebar if clicking outside of it
+        const favoritesModal = document.getElementById('favoritesModal');
+        if (favoritesModal && favoritesModal.style.display === 'block') {
+          const favoritesContent = favoritesModal.querySelector('.favorites-content');
+          if (!favoritesContent.contains(event.target) && !event.target.closest('.bubble-option')) {
+            closeFavoritesModal();
+          }
+        }
+        
         if (event.target === medalModal) {
           console.log('Closing medal modal - clicked on backdrop');
           closeMedalModal();
