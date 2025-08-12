@@ -327,7 +327,15 @@ function openMedalImport() {
     showMedalImportModal(currentStreamer);
 }
 
-function viewMyClips() {
+async function viewMyClips() {
+    // Check if user is authenticated first
+    const isAuthenticated = await checkTwitchAuthentication();
+    
+    if (!isAuthenticated) {
+        showTwitchAuthModal();
+        return;
+    }
+    
     // Load user's clips in a modal
     showMyClipsModal();
 }
@@ -706,6 +714,179 @@ function injectClipControlsInModal(modalContent) {
 
 
 // Export functions for global access
+// Twitch Authentication Functions
+async function checkTwitchAuthentication() {
+    try {
+        const username = getCurrentUsername();
+        if (!username || username === 'anonymous') {
+            return false;
+        }
+        
+        const response = await fetch(`/api/session/check?username=${username}`);
+        const result = await response.json();
+        
+        if (result.success && result.authorized) {
+            // Store authentication details in localStorage
+            localStorage.setItem('twitch_authenticated', 'true');
+            localStorage.setItem('twitch_username', result.username);
+            localStorage.setItem('twitch_display_name', result.display_name);
+            return true;
+        }
+        
+        return false;
+    } catch (error) {
+        console.error('Authentication check failed:', error);
+        return false;
+    }
+}
+
+function showTwitchAuthModal() {
+    // Remove any existing modal
+    document.querySelector('.twitch-auth-modal')?.remove();
+    
+    const modal = document.createElement('div');
+    modal.className = 'twitch-auth-modal modal';
+    modal.style.display = 'block';
+    modal.innerHTML = `
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>🔐 Twitch Authentication Required</h3>
+                <span class="close" onclick="closeTwitchAuthModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="auth-message">
+                    <h4>Connect your Twitch account</h4>
+                    <p>To view and manage your clips, you need to connect your Twitch account.</p>
+                    <p>This will give the app permission to:</p>
+                    <ul>
+                        <li>✅ View your created clips</li>
+                        <li>✅ Create new clips from live streams</li>
+                        <li>✅ Link clips to streamers you're watching</li>
+                    </ul>
+                    <p><strong>Your account details are never stored permanently.</strong></p>
+                </div>
+                
+                <div class="auth-actions">
+                    <button id="twitchLoginBtn" class="action-btn primary" onclick="startTwitchAuth()">
+                        <span class="btn-text">🎮 Connect with Twitch</span>
+                        <span class="btn-loading" style="display: none;">Connecting...</span>
+                    </button>
+                    <button onclick="closeTwitchAuthModal()" class="action-btn secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+async function startTwitchAuth() {
+    const btn = document.getElementById('twitchLoginBtn');
+    const btnText = btn.querySelector('.btn-text');
+    const btnLoading = btn.querySelector('.btn-loading');
+    
+    // Show loading state
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline';
+    btn.disabled = true;
+    
+    try {
+        // Get OAuth URL from backend
+        const response = await fetch('/api/session/start', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Open OAuth popup
+            const popup = window.open(
+                result.oauth_url, 
+                'twitchAuth', 
+                'width=600,height=700,scrollbars=yes,resizable=yes'
+            );
+            
+            // Listen for OAuth success message
+            const handleAuthMessage = (event) => {
+                if (event.data.type === 'twitch_oauth_success') {
+                    // Store authentication details
+                    localStorage.setItem('twitch_authenticated', 'true');
+                    localStorage.setItem('twitch_username', event.data.username);
+                    localStorage.setItem('twitch_display_name', event.data.display_name);
+                    localStorage.setItem('username', event.data.username); // For existing functions
+                    
+                    // Close auth modal and show success
+                    closeTwitchAuthModal();
+                    showAuthSuccess(event.data.display_name);
+                    
+                    // Clean up listener
+                    window.removeEventListener('message', handleAuthMessage);
+                    
+                    // Now show My Clips
+                    setTimeout(() => {
+                        showMyClipsModal();
+                    }, 2000);
+                }
+            };
+            
+            window.addEventListener('message', handleAuthMessage);
+            
+            // Check if popup was closed manually
+            const checkClosed = setInterval(() => {
+                if (popup.closed) {
+                    clearInterval(checkClosed);
+                    window.removeEventListener('message', handleAuthMessage);
+                    
+                    // Reset button state
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+                    btn.disabled = false;
+                }
+            }, 1000);
+            
+        } else {
+            showError(result.error || 'Failed to start authentication');
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
+            btn.disabled = false;
+        }
+        
+    } catch (error) {
+        showError('Failed to connect to authentication service');
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+        btn.disabled = false;
+    }
+}
+
+function showAuthSuccess(displayName) {
+    removeExistingNotifications();
+    
+    const notification = document.createElement('div');
+    notification.className = 'auth-success-notification';
+    notification.innerHTML = `
+        <div class="clip-notification success-style">
+            <h4>✅ Connected to Twitch!</h4>
+            <p>Welcome, <strong>${displayName}</strong>!</p>
+            <p>You can now view and create clips.</p>
+            <button class="close-btn" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function closeTwitchAuthModal() {
+    document.querySelector('.twitch-auth-modal')?.remove();
+}
+
+// Export functions for global access
 window.createClipForCurrentStream = createClipForCurrentStream;
 window.openMedalImport = openMedalImport;
 window.viewMyClips = viewMyClips;
@@ -713,3 +894,5 @@ window.closeMedalModal = closeMedalModal;
 window.closeMyClipsModal = closeMyClipsModal;
 window.closeStreamerClipsModal = closeStreamerClipsModal;
 window.injectClipControlsInModal = injectClipControlsInModal;
+window.closeTwitchAuthModal = closeTwitchAuthModal;
+window.startTwitchAuth = startTwitchAuth;
