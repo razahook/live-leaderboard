@@ -1821,7 +1821,32 @@
         event.preventDefault();
       }
       
-      const channel = app.streams.get(app.selectedIndex);
+      // Try to get channel from selected index first
+      let channel = app.streams.get(app.selectedIndex);
+      
+      // If no explicit selection, try to get from dropdowns (same logic as getCurrentStreamFocus)
+      if (!channel) {
+        const streamSelects = ['stream1', 'stream2', 'stream3'];
+        for (const selectId of streamSelects) {
+          const select = document.getElementById(selectId);
+          if (select && select.value && select.value !== '' && select.value !== 'none') {
+            channel = select.value;
+            break;
+          }
+        }
+      }
+      
+      // If still no channel, try to get from loaded streams
+      if (!channel) {
+        // Check if any stream is loaded in the streams map
+        for (const [index, streamChannel] of app.streams) {
+          if (streamChannel && streamChannel !== '' && streamChannel !== 'none') {
+            channel = streamChannel;
+            break;
+          }
+        }
+      }
+      
       if (!channel) {
         app.showToast('Please select a stream first', 'error');
         return;
