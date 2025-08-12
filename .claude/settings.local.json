@@ -45,7 +45,11 @@
       "mcp__playwright__browser_take_screenshot",
       "mcp__context7__resolve-library-id",
       "mcp__sequential-thinking__sequentialthinking",
-      "mcp__playwright__browser_wait_for"
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_resize",
+      "mcp__supabase__list_tables",
+      "mcp__context7__get-library-docs",
+      "mcp__playwright__browser_snapshot"
     ],
     "deny": []
   }

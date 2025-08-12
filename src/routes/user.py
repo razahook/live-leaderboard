@@ -1,12 +1,21 @@
 from flask import Blueprint, jsonify, request
-from models.user import User, db
 import re
-from sqlalchemy.exc import IntegrityError
 from functools import wraps
 import time
 from collections import defaultdict
 
-# Import rate limiting from main (simple version)
+# Handle database imports gracefully for Vercel
+try:
+    from models.user import User, db
+    from sqlalchemy.exc import IntegrityError
+    DB_AVAILABLE = True
+except ImportError as e:
+    print(f"Database models not available in user routes: {e}")
+    DB_AVAILABLE = False
+    User = None
+    db = None
+    IntegrityError = Exception
+# Simple rate limiting
 rate_limits = defaultdict(list)
 
 def rate_limit(max_requests=60, window=60):

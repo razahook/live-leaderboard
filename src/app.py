@@ -263,15 +263,17 @@ def api_status():
         'database_available': DB_AVAILABLE
     })
 
-# Health check endpoint
-@app.route('/api/health')
-def health_check():
-    """Simple health check"""
+# App diagnostic endpoint (different from blueprint health check)
+@app.route('/api/diagnostics')
+def app_diagnostics():
+    """App-level diagnostics with blueprint information"""
     return jsonify({
         'status': 'healthy',
         'message': 'Apex Legends Leaderboard API is running',
         'timestamp': time.time(),
-        'blueprints_loaded': [name for name, _ in imported_blueprints]
+        'blueprints_loaded': [name for name, _ in imported_blueprints],
+        'total_blueprints': len(imported_blueprints),
+        'environment': 'serverless' if os.environ.get('VERCEL') else 'development'
     })
 
 # Create database tables (only if database is available)
