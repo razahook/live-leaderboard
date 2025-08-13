@@ -1687,6 +1687,35 @@
       console.log('='.repeat(50));
       console.log('📍 Domain:', window.location.hostname);
       console.log('🔗 Full URL:', window.location.href);
+      
+      // Check if we have a pending clip creation after authentication
+      const pendingClipChannel = sessionStorage.getItem('pending_clip_channel');
+      if (pendingClipChannel) {
+        sessionStorage.removeItem('pending_clip_channel');
+        console.log('Found pending clip creation for:', pendingClipChannel);
+        
+        // Wait a moment for the page to fully load
+        setTimeout(() => {
+          // Load the stream first
+          const streamSelect = document.getElementById('stream1');
+          if (streamSelect) {
+            // Check if the channel exists in the dropdown
+            const option = Array.from(streamSelect.options).find(opt => opt.value === pendingClipChannel);
+            if (option) {
+              streamSelect.value = pendingClipChannel;
+              streamSelect.dispatchEvent(new Event('change'));
+              
+              // Wait for stream to load, then try creating the clip again
+              setTimeout(() => {
+                app.showToast('Retrying clip creation after authentication...', 'info');
+                createTwitchClip(pendingClipChannel);
+              }, 3000);
+            } else {
+              app.showToast(`Stream ${pendingClipChannel} is no longer available`, 'error');
+            }
+          }
+        }, 1000);
+      }
       console.log('🕐 Timestamp:', new Date().toISOString());
       console.log('='.repeat(50));
       
@@ -2049,19 +2078,37 @@
       })
       .then(response => {
         console.log('Clip creation response:', response.status, response.ok);
-        return response.json();
+        return response.json().then(data => ({ status: response.status, data }));
       })
-      .then(data => {
+      .then(({ status, data }) => {
         console.log('Clip creation data:', data);
+        
+        // Handle authentication required
+        if (status === 401 && data.error_type === 'auth_required') {
+          closeClipModal();
+          app.showToast('Authentication required. Redirecting to Twitch login...', 'info');
+          
+          // Store the channel for after authentication
+          sessionStorage.setItem('pending_clip_channel', channel);
+          
+          // Redirect to Twitch OAuth
+          setTimeout(() => {
+            window.location.href = data.auth_url || '/api/session/start';
+          }, 1500);
+          return;
+        }
+        
         if (data.success) {
           app.showToast(`Clip created successfully!`, 'success');
           closeClipModal();
           // Optionally open the clip
-          if (data.clip_url) {
+          if (data.data && data.data.url) {
+            window.open(data.data.url, '_blank');
+          } else if (data.clip_url) {
             window.open(data.clip_url, '_blank');
           }
         } else {
-          app.showToast(`Failed to create clip: ${data.message}`, 'error');
+          app.showToast(`Failed to create clip: ${data.message || data.error}`, 'error');
         }
       })
       .catch(error => {
