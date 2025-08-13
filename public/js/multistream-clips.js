@@ -752,34 +752,40 @@ function injectClipControlsInModal(modalContent) {
 // Twitch Authentication Functions
 async function checkTwitchAuthentication() {
     try {
-        // Check if we have a valid OAuth token with clips:edit scope
-        const authToken = getUserToken();
         const username = getCurrentUsername();
         
-        if (!authToken || !username || username === 'anonymous') {
+        if (!username || username === 'anonymous') {
             return false;
         }
         
-        // Verify the token is valid and has required scopes via backend
+        // First check if we already have local tokens
+        const authToken = getUserToken();
+        if (authToken) {
+            console.log('✅ Found local auth token for:', username);
+            return true;
+        }
+        
+        // If no local token, check with backend for stored tokens (Supabase or in-memory)
         const response = await fetch(`/api/session/check?username=${encodeURIComponent(username)}`);
         const result = await response.json();
         
         if (result.success && result.authorized) {
-            // Store authentication details in localStorage
+            // Store authentication details in localStorage for future use
             localStorage.setItem('twitch_authenticated', 'true');
             localStorage.setItem('twitch_username', result.username);
             localStorage.setItem('twitch_display_name', result.display_name);
             
-            // Ensure we have the auth token stored
+            // Store the auth token if provided
             if (result.access_token) {
                 localStorage.setItem('auth_token', result.access_token);
                 sessionStorage.setItem('auth_token', result.access_token);
             }
             
-            console.log('✅ Twitch OAuth authentication confirmed for:', result.username);
+            console.log('✅ Twitch authentication confirmed via backend for:', result.username);
             return true;
         }
         
+        console.log('❌ No valid authentication found for:', username);
         return false;
     } catch (error) {
         console.error('Authentication check failed:', error);
