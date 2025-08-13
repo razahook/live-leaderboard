@@ -1291,12 +1291,60 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <script>
     class ModernStreamViewer {
       constructor() {
         this.streams = new Map();
         this.selectedIndex = null;
+        this.supabase = null;
+        this.currentUser = null;
         this.init();
+      }
+
+      async initSupabaseAuth() {
+        try {
+          // Fetch Supabase config from environment
+          const envResponse = await fetch('/api/env');
+          if (envResponse.ok) {
+            const envData = await envResponse.json();
+            if (envData.success && envData.data.NEXT_PUBLIC_SUPABASE_URL && envData.data.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+              console.log('📡 Initializing Supabase client...');
+              this.supabase = window.supabase.createClient(
+                envData.data.NEXT_PUBLIC_SUPABASE_URL, 
+                envData.data.NEXT_PUBLIC_SUPABASE_ANON_KEY
+              );
+              
+              // Check for existing session
+              const { data: { session }, error } = await this.supabase.auth.getSession();
+              if (session && !error) {
+                this.currentUser = session.user;
+                console.log('✅ Found existing Supabase auth session:', this.currentUser.email);
+                
+                // Check if user has Twitch identity
+                const twitchIdentity = this.currentUser.identities?.find(id => id.provider === 'twitch');
+                if (twitchIdentity) {
+                  console.log('🎮 User has Twitch identity:', twitchIdentity.identity_data?.preferred_username);
+                  
+                  // Store the Twitch username for clip functionality
+                  const twitchUsername = twitchIdentity.identity_data?.preferred_username;
+                  const twitchDisplayName = twitchIdentity.identity_data?.full_name || twitchUsername;
+                  
+                  sessionStorage.setItem('twitch_username', twitchUsername);
+                  sessionStorage.setItem('twitch_display_name', twitchDisplayName);
+                  sessionStorage.setItem('auth_source', 'supabase');
+                  
+                  console.log('💾 Stored Twitch credentials from Supabase auth');
+                }
+              } else {
+                console.log('❌ No existing Supabase session found');
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('⚠️ Failed to initialize Supabase auth:', error);
+        }
       }
 
       async init() {
@@ -1305,6 +1353,9 @@
         console.debug('Current URL:', window.location.href);
         console.debug('Current hostname:', window.location.hostname);
         console.debug('User Agent:', navigator.userAgent);
+        
+        // Initialize Supabase and check for existing authentication
+        await this.initSupabaseAuth();
         
         this.setupEventListeners();
         await this.populateStreamers();
