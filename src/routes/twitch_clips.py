@@ -83,6 +83,7 @@ def _resolve_streamer_id(supabase_client, twitch_login: str):
 
 def _save_clip_metadata(clip_id: str, username: str, edit_url: str, url: str, embed_url: str, creator_login: str = None, created_by_user_id: str = None):
     """Persist clip metadata to database. Best-effort, non-blocking."""
+    print(f"💾 Saving clip metadata: clip_id={clip_id}, creator_login={creator_login}, created_by_user_id={created_by_user_id}")
     try:
         # Try Supabase first
         sb = get_supabase()
@@ -364,31 +365,53 @@ def create_clip(username):
                 
                 # Save clip metadata to database
                 try:
-                    # Determine creator login from the authenticated user who made the request
-                    creator_login = request.args.get('as')  # From frontend
+                    # Determine creator login from multiple sources
+                    creator_login = None
+                    
+                    # Priority 1: From URL parameter
+                    creator_login = request.args.get('as')
+                    
+                    # Priority 2: From request header
                     if not creator_login:
-                        # Try to get from any authenticated user token we used
+                        creator_login = request.headers.get('X-Creator-Login')
+                    
+                    # Priority 3: From request body
+                    if not creator_login:
+                        try:
+                            body_data = request.get_json() or {}
+                            creator_login = body_data.get('creator_login')
+                        except:
+                            pass
+                    
+                    # Priority 4: Find which user's token was used for clip creation
+                    if not creator_login:
                         try:
                             from routes.twitch_oauth import user_tokens
-                            # Find which user's token was used (if any)
+                            token_to_match = access_token.split()[-1] if ' ' in access_token else access_token
+                            
+                            # Check in-memory tokens
                             for auth_username, token_data in user_tokens.items():
                                 import time
                                 if time.time() - token_data['created_at'] < token_data['expires_in']:
-                                    if token_data.get('access_token') == access_token.split()[-1] if ' ' in access_token else access_token:
+                                    if token_data.get('access_token') == token_to_match:
                                         creator_login = auth_username
+                                        print(f"🎯 Found creator from in-memory token: {creator_login}")
                                         break
                             
-                            # Also check Supabase for the creator
+                            # Check Supabase tokens if not found in memory
                             if not creator_login:
                                 sb = get_supabase()
                                 if sb is not None:
                                     result = sb.table('user_tokens').select('*').execute()
                                     for token_info in result.data or []:
-                                        if token_info.get('access_token') == access_token:
+                                        if token_info.get('access_token') == token_to_match:
                                             creator_login = token_info.get('username')
+                                            print(f"🎯 Found creator from Supabase token: {creator_login}")
                                             break
                         except Exception as e:
                             print(f"Could not determine creator from token: {e}")
+                    
+                    print(f"🔍 Final creator_login determination: {creator_login}")
                     
                     _save_clip_metadata(
                         clip_id=clip_id,

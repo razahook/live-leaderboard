@@ -83,12 +83,14 @@ async function createClipForStreamer(streamerUsername, userId = null) {
         
         // Create the Twitch clip
         const currentUsername = getCurrentUsername();
+        const authToken = getUserToken();
         const response = await fetch(`/api/stream-clips/create/${streamerUsername}?as=${encodeURIComponent(currentUsername)}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-User-Id': userId,
-                'Authorization': `Bearer ${getUserToken()}` // If using auth
+                'X-Creator-Login': currentUsername, // Add creator login header
+                'Authorization': authToken ? `Bearer ${authToken}` : undefined
             },
             body: JSON.stringify({
                 broadcaster_login: streamerUsername,

@@ -18,7 +18,8 @@
       "mcp__sequential-thinking__sequentialthinking",
       "Bash(vercel ls:*)",
       "mcp__supabase__list_projects",
-      "mcp__playwright__browser_console_messages"
+      "mcp__playwright__browser_console_messages",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
