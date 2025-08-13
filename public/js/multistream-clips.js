@@ -391,7 +391,21 @@ function getCurrentUserId() {
 }
 
 function getCurrentUsername() {
-    return localStorage.getItem('username') || sessionStorage.getItem('username') || 'anonymous';
+    // Try multiple sources for username, prioritizing actual Twitch usernames
+    const twitchUsername = sessionStorage.getItem('twitch_username') || localStorage.getItem('twitch_username');
+    const twitchDisplayName = sessionStorage.getItem('twitch_display_name') || localStorage.getItem('twitch_display_name');
+    const legacyUsername = localStorage.getItem('username') || sessionStorage.getItem('username');
+    
+    // Use Twitch username if available, fallback to display name, then legacy username
+    if (twitchUsername && twitchUsername !== 'undefined') {
+        return twitchUsername;
+    } else if (twitchDisplayName && twitchDisplayName !== 'undefined') {
+        return twitchDisplayName; // razahook1 is the correct value to use
+    } else if (legacyUsername && legacyUsername !== 'undefined') {
+        return legacyUsername;
+    }
+    
+    return 'anonymous';
 }
 
 function getUserToken() {

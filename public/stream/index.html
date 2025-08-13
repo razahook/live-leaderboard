@@ -1325,11 +1325,22 @@
                 // Check if user has Twitch identity
                 const twitchIdentity = this.currentUser.identities?.find(id => id.provider === 'twitch');
                 if (twitchIdentity) {
-                  console.log('🎮 User has Twitch identity:', twitchIdentity.identity_data?.preferred_username);
+                  console.log('🎮 Full Twitch identity data:', JSON.stringify(twitchIdentity.identity_data, null, 2));
                   
-                  // Store the Twitch username for clip functionality
-                  const twitchUsername = twitchIdentity.identity_data?.preferred_username;
-                  const twitchDisplayName = twitchIdentity.identity_data?.full_name || twitchUsername;
+                  // Try multiple fields for username extraction - Twitch identity data varies
+                  const identityData = twitchIdentity.identity_data || {};
+                  const twitchUsername = identityData.preferred_username || 
+                                       identityData.login || 
+                                       identityData.name || 
+                                       identityData.username ||
+                                       identityData.display_name;
+                  const twitchDisplayName = identityData.display_name || 
+                                          identityData.full_name || 
+                                          identityData.name ||
+                                          twitchUsername;
+                  
+                  console.log('🎮 Extracted username:', twitchUsername);
+                  console.log('🎮 Extracted display_name:', twitchDisplayName);
                   
                   sessionStorage.setItem('twitch_username', twitchUsername);
                   sessionStorage.setItem('twitch_display_name', twitchDisplayName);
