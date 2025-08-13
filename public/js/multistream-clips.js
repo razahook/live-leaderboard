@@ -391,18 +391,26 @@ function getCurrentUserId() {
 }
 
 function getCurrentUsername() {
-    // Try multiple sources for username, prioritizing actual Twitch usernames
-    const twitchUsername = sessionStorage.getItem('twitch_username') || localStorage.getItem('twitch_username');
-    const twitchDisplayName = sessionStorage.getItem('twitch_display_name') || localStorage.getItem('twitch_display_name');
-    const legacyUsername = localStorage.getItem('username') || sessionStorage.getItem('username');
+    // Prioritize OAuth-authenticated usernames over Supabase
+    const oauthUsername = localStorage.getItem('twitch_username');
+    if (oauthUsername && oauthUsername !== 'undefined') {
+        return oauthUsername;
+    }
     
-    // Use Twitch username if available, fallback to display name, then legacy username
-    if (twitchUsername && twitchUsername !== 'undefined') {
-        return twitchUsername;
-    } else if (twitchDisplayName && twitchDisplayName !== 'undefined') {
-        return twitchDisplayName; // razahook1 is the correct value to use
-    } else if (legacyUsername && legacyUsername !== 'undefined') {
+    // Fallback to stored username from various sources
+    const legacyUsername = localStorage.getItem('username') || sessionStorage.getItem('username');
+    if (legacyUsername && legacyUsername !== 'undefined') {
         return legacyUsername;
+    }
+    
+    // Last resort: check Supabase data (but prefer OAuth)
+    const supabaseUsername = sessionStorage.getItem('twitch_username');
+    const supabaseDisplayName = sessionStorage.getItem('twitch_display_name');
+    
+    if (supabaseUsername && supabaseUsername !== 'undefined') {
+        return supabaseUsername;
+    } else if (supabaseDisplayName && supabaseDisplayName !== 'undefined') {
+        return supabaseDisplayName;
     }
     
     return 'anonymous';
@@ -744,12 +752,16 @@ function injectClipControlsInModal(modalContent) {
 // Twitch Authentication Functions
 async function checkTwitchAuthentication() {
     try {
+        // Check if we have a valid OAuth token with clips:edit scope
+        const authToken = getUserToken();
         const username = getCurrentUsername();
-        if (!username || username === 'anonymous') {
+        
+        if (!authToken || !username || username === 'anonymous') {
             return false;
         }
         
-        const response = await fetch(`/api/session/check?username=${username}`);
+        // Verify the token is valid and has required scopes via backend
+        const response = await fetch(`/api/session/check?username=${encodeURIComponent(username)}`);
         const result = await response.json();
         
         if (result.success && result.authorized) {
@@ -757,6 +769,14 @@ async function checkTwitchAuthentication() {
             localStorage.setItem('twitch_authenticated', 'true');
             localStorage.setItem('twitch_username', result.username);
             localStorage.setItem('twitch_display_name', result.display_name);
+            
+            // Ensure we have the auth token stored
+            if (result.access_token) {
+                localStorage.setItem('auth_token', result.access_token);
+                sessionStorage.setItem('auth_token', result.access_token);
+            }
+            
+            console.log('✅ Twitch OAuth authentication confirmed for:', result.username);
             return true;
         }
         

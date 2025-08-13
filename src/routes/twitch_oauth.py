@@ -420,8 +420,36 @@ def oauth_status():
                     'authorized': True,
                     'username': token_info['username'],
                     'display_name': token_info['display_name'],
+                    'access_token': token_info['access_token'],
                     'scopes': token_info['scopes']
                 })
+        
+        # Also check Supabase for tokens not in memory
+        try:
+            from routes.supabase_client import get_supabase
+            sb = get_supabase()
+            if sb is not None:
+                result = sb.table('user_tokens').select('*').eq('username', username).limit(1).execute()
+                if result.data:
+                    token_info = result.data[0]
+                    # Check if token is still valid
+                    if time.time() - token_info['created_at'] < token_info['expires_in']:
+                        # Cache in memory for future use in this request
+                        user_tokens[username] = token_info
+                        return jsonify({
+                            'success': True,
+                            'authorized': True,
+                            'username': token_info['username'],
+                            'display_name': token_info['display_name'],
+                            'access_token': token_info['access_token'],
+                            'scopes': token_info.get('scopes', [])
+                        })
+                    else:
+                        print(f"Token for {username} has expired")
+                        # Clean up expired token
+                        sb.table('user_tokens').delete().eq('username', username).execute()
+        except Exception as e:
+            print(f"Error loading token from Supabase for {username}: {e}")
         
         return jsonify({
             'success': True,
