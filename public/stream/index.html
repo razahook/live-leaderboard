@@ -2127,8 +2127,10 @@
         if (data.success) {
           app.showToast(`Clip created successfully!`, 'success');
           closeClipModal();
-          // Optionally open the clip
-          if (data.data && data.data.url) {
+          // Open the clip edit screen for user to title and publish
+          if (data.data && data.data.edit_url) {
+            window.open(data.data.edit_url, '_blank');
+          } else if (data.data && data.data.url) {
             window.open(data.data.url, '_blank');
           } else if (data.clip_url) {
             window.open(data.clip_url, '_blank');
