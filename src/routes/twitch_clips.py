@@ -364,13 +364,39 @@ def create_clip(username):
                 
                 # Save clip metadata to database
                 try:
+                    # Determine creator login from the authenticated user who made the request
+                    creator_login = request.args.get('as')  # From frontend
+                    if not creator_login:
+                        # Try to get from any authenticated user token we used
+                        try:
+                            from routes.twitch_oauth import user_tokens
+                            # Find which user's token was used (if any)
+                            for auth_username, token_data in user_tokens.items():
+                                import time
+                                if time.time() - token_data['created_at'] < token_data['expires_in']:
+                                    if token_data.get('access_token') == access_token.split()[-1] if ' ' in access_token else access_token:
+                                        creator_login = auth_username
+                                        break
+                            
+                            # Also check Supabase for the creator
+                            if not creator_login:
+                                sb = get_supabase()
+                                if sb is not None:
+                                    result = sb.table('user_tokens').select('*').execute()
+                                    for token_info in result.data or []:
+                                        if token_info.get('access_token') == access_token:
+                                            creator_login = token_info.get('username')
+                                            break
+                        except Exception as e:
+                            print(f"Could not determine creator from token: {e}")
+                    
                     _save_clip_metadata(
                         clip_id=clip_id,
                         username=username,
                         edit_url=edit_url,
                         url=f"https://clips.twitch.tv/{clip_id}",
                         embed_url=f"https://clips.twitch.tv/embed?clip={clip_id}",
-                        creator_login=request.args.get('as') or None,
+                        creator_login=creator_login,
                         created_by_user_id=request.headers.get('X-User-Id') or None
                     )
                     print(f"✅ Clip created successfully: {clip_id}")
@@ -516,9 +542,41 @@ def get_my_clips():
                 }
             })
         
-        # Verify user is authenticated
+        # Verify user is authenticated - check both in-memory and Supabase
         from routes.twitch_oauth import user_tokens
-        if username not in user_tokens:
+        token_info = None
+        
+        # First check in-memory cache
+        if username in user_tokens:
+            token_info = user_tokens[username]
+            # Check if token is still valid
+            import time
+            if time.time() - token_info['created_at'] >= token_info['expires_in']:
+                token_info = None
+        
+        # If not in memory or expired, check Supabase
+        if not token_info:
+            try:
+                sb = get_supabase()
+                if sb is not None:
+                    result = sb.table('user_tokens').select('*').eq('username', username).limit(1).execute()
+                    if result.data:
+                        stored_token = result.data[0]
+                        # Check if token is still valid
+                        import time
+                        if time.time() - stored_token['created_at'] < stored_token['expires_in']:
+                            token_info = stored_token
+                            # Cache in memory for future use
+                            user_tokens[username] = token_info
+                        else:
+                            print(f"Token for {username} has expired")
+                            # Clean up expired token
+                            sb.table('user_tokens').delete().eq('username', username).execute()
+            except Exception as e:
+                print(f"Error loading token from Supabase for {username}: {e}")
+        
+        # If still no valid token found
+        if not token_info:
             return jsonify({
                 "success": True,
                 "data": {
@@ -526,20 +584,6 @@ def get_my_clips():
                     "count": 0,
                     "source": "user",
                     "message": "User authentication required"
-                }
-            })
-        
-        # Check if token is still valid
-        token_info = user_tokens[username]
-        import time
-        if time.time() - token_info['created_at'] >= token_info['expires_in']:
-            return jsonify({
-                "success": True,
-                "data": {
-                    "clips": [],
-                    "count": 0,
-                    "source": "user",
-                    "message": "Authentication expired. Please re-authenticate."
                 }
             })
         

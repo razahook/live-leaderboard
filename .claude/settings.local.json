@@ -17,7 +17,8 @@
       "mcp__supabase__execute_sql",
       "mcp__sequential-thinking__sequentialthinking",
       "Bash(vercel ls:*)",
-      "mcp__supabase__list_projects"
+      "mcp__supabase__list_projects",
+      "mcp__playwright__browser_console_messages"
     ],
     "deny": [],
     "ask": []
