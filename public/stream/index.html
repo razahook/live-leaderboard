@@ -1512,10 +1512,31 @@
             tile.classList.remove('loading');
           };
 
-          // Add message listener for CSP errors
+          // Add message listener for CSP errors and OAuth success
           window.addEventListener('message', (event) => {
             if (event.origin.includes('twitch.tv')) {
               console.debug('CSP Debug - Message from Twitch:', event.data);
+            }
+            
+            // Handle OAuth success messages
+            if (event.data && event.data.type === 'twitch_oauth_success') {
+              console.log('OAuth success received:', event.data);
+              // Store user authentication info
+              sessionStorage.setItem('twitch_username', event.data.username);
+              sessionStorage.setItem('twitch_display_name', event.data.display_name);
+              
+              // Show success notification
+              app.showToast(`Welcome, ${event.data.display_name}! You can now create and view clips.`, 'success');
+              
+              // If there's a pending clip retry after authentication
+              const pendingClipChannel = sessionStorage.getItem('pending_clip_channel');
+              if (pendingClipChannel) {
+                console.log('Retrying clip creation for:', pendingClipChannel);
+                sessionStorage.removeItem('pending_clip_channel');
+                setTimeout(() => {
+                  createTwitchClip(pendingClipChannel);
+                }, 2000);
+              }
             }
           });
 
@@ -1960,16 +1981,29 @@
       // Fetch user clips - try multiple endpoints
       console.log('Fetching user clips...');
       
-      // First try the my-clips endpoint
-      fetch('/api/my-clips')
+      // Get stored username from authentication
+      const username = sessionStorage.getItem('twitch_username');
+      if (!username) {
+        document.getElementById('clipModalBody').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-text">Authentication required</div>
+            <div class="empty-hint">Please authenticate with Twitch to view your clips</div>
+            <button class="retry-btn" onclick="window.location.href='/api/session/start'">Connect with Twitch</button>
+          </div>
+        `;
+        return;
+      }
+      
+      // First try the my-clips endpoint with username
+      fetch(`/api/my-clips?username=${encodeURIComponent(username)}`)
         .then(response => {
           console.log('My-clips response:', response.status, response.ok);
           return response.json();
         })
         .then(data => {
           console.log('My-clips data:', data);
-          if (data.success && data.clips && data.clips.length > 0) {
-            displayUserClips(data.clips);
+          if (data.success && data.data && data.data.clips && data.data.clips.length > 0) {
+            displayUserClips(data.data.clips);
           } else {
             // Try saved-clips endpoint as fallback
             console.log('No clips in my-clips, trying saved-clips...');
@@ -1984,8 +2018,8 @@
         })
         .then(data => {
           console.log('Saved-clips data:', data);
-          if (data.success && data.clips && data.clips.length > 0) {
-            displayUserClips(data.clips);
+          if (data.success && data.data && data.data.clips && data.data.clips.length > 0) {
+            displayUserClips(data.data.clips);
           } else {
             document.getElementById('clipModalBody').innerHTML = `
               <div class="empty-state">
