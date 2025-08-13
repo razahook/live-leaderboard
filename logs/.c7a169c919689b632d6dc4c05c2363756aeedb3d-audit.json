@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\john\\Desktop\\apex leaderbaord project\\test\\logs\\.c7a169c919689b632d6dc4c05c2363756aeedb3d-audit.json",
+    "files": [
+        {
+            "date": 1755026169868,
+            "name": "C:\\Users\\john\\Desktop\\apex leaderbaord project\\test\\logs\\mcp-puppeteer-2025-08-12.log",
+            "hash": "6d119966e3d8937510bd488c2b6eda4601b42bf19526cca2b4c54112a909518d"
+        },
+        {
+            "date": 1755076997857,
+            "name": "C:\\Users\\john\\Desktop\\apex leaderbaord project\\test\\logs\\mcp-puppeteer-2025-08-13.log",
+            "hash": "e3802ddabbf7b484085bd55f93ee07303e56ef3e0a75ed79fefbea3603387179"
+        }
+    ],
+    "hashType": "sha256"
+}

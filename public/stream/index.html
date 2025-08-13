@@ -2091,10 +2091,36 @@
           // Store the channel for after authentication
           sessionStorage.setItem('pending_clip_channel', channel);
           
-          // Redirect to Twitch OAuth
-          setTimeout(() => {
-            window.location.href = data.auth_url || '/api/session/start';
-          }, 1500);
+          // Fetch the OAuth URL and redirect
+          const authUrl = data.auth_url || '/api/session/start';
+          
+          // If we got a direct auth URL, navigate to it
+          if (authUrl.startsWith('https://')) {
+            setTimeout(() => {
+              window.location.href = authUrl;
+            }, 1500);
+          } else {
+            // Fetch the OAuth URL from the endpoint
+            fetch(authUrl, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(authData => {
+              if (authData.oauth_url) {
+                window.location.href = authData.oauth_url;
+              } else {
+                app.showToast('Failed to get authentication URL', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Auth redirect failed:', error);
+              app.showToast('Authentication redirect failed', 'error');
+            });
+          }
           return;
         }
         

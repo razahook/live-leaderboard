@@ -154,12 +154,19 @@ def oauth_login():
         
         oauth_url = f"https://id.twitch.tv/oauth2/authorize?{urlencode(oauth_params)}"
         
-        return jsonify({
-            'success': True,
-            'oauth_url': oauth_url,
-            'redirect_uri': redirect_uri,
-            'message': 'Redirect user to this URL to authorize clip creation'
-        })
+        # Check if this is an AJAX request or direct navigation
+        if request.headers.get('Content-Type') == 'application/json' or request.headers.get('Accept') == 'application/json':
+            # Return JSON for AJAX requests
+            return jsonify({
+                'success': True,
+                'oauth_url': oauth_url,
+                'redirect_uri': redirect_uri,
+                'message': 'Redirect user to this URL to authorize clip creation'
+            })
+        else:
+            # Direct redirect for browser navigation
+            from flask import redirect
+            return redirect(oauth_url)
         
     except Exception as e:
         return jsonify({
