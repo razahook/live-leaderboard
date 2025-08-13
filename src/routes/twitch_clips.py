@@ -316,6 +316,11 @@ def create_clip(username):
             json=clip_data
         )
         
+        # Add detailed logging for debugging
+        print(f"🔍 Clip API Response Status: {clip_response.status_code}")
+        print(f"🔍 Clip API Response Headers: {dict(clip_response.headers)}")
+        print(f"🔍 Clip API Response Body: {clip_response.text}")
+        
         if clip_response.status_code == 202:  # Accepted
             clip_result = clip_response.json()
             if clip_result.get('data'):
@@ -369,12 +374,20 @@ def create_clip(username):
                 "message": "User needs to authorize clip creation permissions.",
                 "auth_url": "/api/session/start"
             }), 403
-        
-        return jsonify({
-            "success": False, 
-            "error": f"Failed to create clip: {clip_response.status_code} - {clip_response.text}",
-            "token_type": token_type
-        }), 500
+        else:
+            # Log unexpected responses for debugging
+            print(f"❌ Unexpected clip response status: {clip_response.status_code}")
+            print(f"❌ Response body: {clip_response.text}")
+            return jsonify({
+                "success": False, 
+                "error": f"Failed to create clip: {clip_response.status_code} - {clip_response.text}",
+                "token_type": token_type,
+                "debug_info": {
+                    "status_code": clip_response.status_code,
+                    "response_body": clip_response.text[:500],  # Limit to avoid huge responses
+                    "headers": dict(clip_response.headers)
+                }
+            }), 500
         
     except Exception as e:
         return jsonify({"success": False, "error": f"Error creating clip: {str(e)}"}), 500
