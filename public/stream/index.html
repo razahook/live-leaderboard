@@ -1306,7 +1306,7 @@
       async initSupabaseAuth() {
         try {
           // Fetch Supabase config from environment
-          const envResponse = await fetch('/api/env');
+          const envResponse = await fetch('/api/public-env');
           if (envResponse.ok) {
             const envData = await envResponse.json();
             if (envData.success && envData.data.NEXT_PUBLIC_SUPABASE_URL && envData.data.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
