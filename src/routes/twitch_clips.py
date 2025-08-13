@@ -274,11 +274,15 @@ def create_clip(username):
             # OAuth module not available, fall back to app token
             pass
         
-        # Fall back to app access token if no user token available
+        # Clip creation REQUIRES user token with clips:edit scope - app tokens cannot create clips
         if not access_token:
-            access_token = get_twitch_access_token()
-            if not access_token:
-                return jsonify({"success": False, "error": "Failed to get Twitch access token"}), 500
+            return jsonify({
+                "success": False,
+                "error": "User authentication required",
+                "error_type": "auth_required", 
+                "message": "Creating clips requires user authorization with clips:edit scope. App tokens cannot create clips.",
+                "auth_url": "/api/session/start"
+            }), 401
         
         client_id = os.environ.get('TWITCH_CLIENT_ID')
         if not client_id:
@@ -321,28 +325,34 @@ def create_clip(username):
         print(f"🔍 Clip API Response Headers: {dict(clip_response.headers)}")
         print(f"🔍 Clip API Response Body: {clip_response.text}")
         
-        if clip_response.status_code == 202:  # Accepted
+        if clip_response.status_code == 202:  # Twitch returns 202 Accepted for successful clip creation
             clip_result = clip_response.json()
             if clip_result.get('data'):
                 clip_info = clip_result['data'][0]
                 
-                # Fix malformed edit_url - only use if it's a valid URL
-                edit_url = clip_info.get('edit_url', '')
-                if not edit_url or 'not_logged_in' in edit_url:
-                    edit_url = f"https://clips.twitch.tv/{clip_info['id']}"
+                # Twitch returns the clip ID and edit_url
+                clip_id = clip_info.get('id')
+                edit_url = clip_info.get('edit_url', f"https://clips.twitch.tv/{clip_id}/edit")
                 
-                # Best-effort save
+                if not clip_id:
+                    print(f"❌ No clip ID returned from Twitch: {clip_result}")
+                    return jsonify({
+                        "success": False,
+                        "error": "Clip creation failed - no clip ID returned from Twitch"
+                    }), 500
+                
+                # Save clip metadata to database
                 try:
                     _save_clip_metadata(
-                        clip_id=clip_info['id'],
+                        clip_id=clip_id,
                         username=username,
                         edit_url=edit_url,
-                        url=f"https://clips.twitch.tv/{clip_info['id']}",
-                        embed_url=f"https://clips.twitch.tv/embed?clip={clip_info['id']}",
-                        # Add attribution for who initiated the clip when available
+                        url=f"https://clips.twitch.tv/{clip_id}",
+                        embed_url=f"https://clips.twitch.tv/embed?clip={clip_id}",
                         creator_login=request.args.get('as') or None,
                         created_by_user_id=request.headers.get('X-User-Id') or None
                     )
+                    print(f"✅ Clip created successfully: {clip_id}")
                 except Exception as e:
                     print(f"Failed to save clip metadata: {e}")
 
@@ -350,14 +360,20 @@ def create_clip(username):
                     "success": True,
                     "message": f"Clip created successfully for {username}!",
                     "data": {
-                        "clip_id": clip_info['id'],
+                        "clip_id": clip_id,
                         "edit_url": edit_url,
-                        "url": f"https://clips.twitch.tv/{clip_info['id']}",
-                        "embed_url": f"https://clips.twitch.tv/embed?clip={clip_info['id']}",
+                        "url": f"https://clips.twitch.tv/{clip_id}",
+                        "embed_url": f"https://clips.twitch.tv/embed?clip={clip_id}",
                         "broadcaster": username,
                         "token_type": token_type
                     }
                 })
+            else:
+                print(f"❌ No data in clip creation response: {clip_result}")
+                return jsonify({
+                    "success": False,
+                    "error": "Clip creation failed - no clip data returned from Twitch"
+                }), 500
         elif clip_response.status_code == 401:
             return jsonify({
                 "success": False,
