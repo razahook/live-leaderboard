@@ -254,24 +254,45 @@ def create_clip(username):
         access_token = None
         token_type = "app"
         
-        # Check if we have a user access token for this user or any authorized user
+        # Check if we have any user access token with clips:edit scope
         try:
-            # First try the specific username
+            # First try the specific broadcaster's token
             access_token = get_user_access_token(username)
             if access_token:
                 token_type = "user"
+                print(f"Using {username}'s own token to create clip")
             else:
-                # Try to get any authorized user token (for creating clips of other streamers)
-                from routes.twitch_oauth import user_tokens
-                for auth_username, token_info in user_tokens.items():
-                    import time
-                    if time.time() - token_info['created_at'] < token_info['expires_in']:
-                        access_token = token_info['access_token']
-                        token_type = "user"
-                        print(f"Using {auth_username}'s token to create clip of {username}")
-                        break
+                # Try to get any authorized user token from Supabase
+                try:
+                    from routes.supabase_client import get_supabase
+                    sb = get_supabase()
+                    if sb is not None:
+                        # Get all valid tokens from Supabase
+                        import time
+                        current_time = time.time()
+                        result = sb.table('user_tokens').select('*').execute()
+                        
+                        for token_info in result.data or []:
+                            if current_time - token_info['created_at'] < token_info['expires_in']:
+                                access_token = token_info['access_token']
+                                token_type = "user"
+                                print(f"Using {token_info['username']}'s token to create clip of {username}")
+                                break
+                except Exception as e:
+                    print(f"Error loading tokens from Supabase: {e}")
+                    
+                # Fallback to in-memory tokens
+                if not access_token:
+                    from routes.twitch_oauth import user_tokens
+                    for auth_username, token_info in user_tokens.items():
+                        import time
+                        if time.time() - token_info['created_at'] < token_info['expires_in']:
+                            access_token = token_info['access_token']
+                            token_type = "user"
+                            print(f"Using {auth_username}'s token to create clip of {username}")
+                            break
         except ImportError:
-            # OAuth module not available, fall back to app token
+            # OAuth module not available
             pass
         
         # Clip creation REQUIRES user token with clips:edit scope - app tokens cannot create clips

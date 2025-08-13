@@ -299,18 +299,63 @@ def oauth_callback():
                 username = user_info['login']
                 display_name = user_info['display_name']
                 
-                # Store user token (in production, use database with encryption)
-                user_tokens[username] = {
-                    'access_token': access_token,
-                    'refresh_token': refresh_token,
-                    'expires_in': token_info.get('expires_in', 3600),
-                    'created_at': time.time(),
-                    'username': username,
-                    'display_name': display_name,
-                    'scopes': token_info.get('scope', [])
-                }
-                # Save the new token
-                save_oauth_data(oauth_states, user_tokens)
+                # Store user token in Supabase for persistence across serverless functions
+                try:
+                    from routes.supabase_client import get_supabase
+                    sb = get_supabase()
+                    if sb is not None:
+                        # Store in Supabase user_tokens table
+                        token_data = {
+                            'username': username,
+                            'access_token': access_token,
+                            'refresh_token': refresh_token,
+                            'expires_in': token_info.get('expires_in', 3600),
+                            'created_at': time.time(),
+                            'display_name': display_name,
+                            'scopes': token_info.get('scope', [])
+                        }
+                        # Store user token - for now use a simple approach
+                        try:
+                            # Try to insert or update
+                            result = sb.table('user_tokens').upsert(token_data, on_conflict='username').execute()
+                            print(f"✅ Stored OAuth token for {username} in Supabase")
+                        except Exception as upsert_err:
+                            print(f"Failed to upsert token (table may not exist): {upsert_err}")
+                            # Try simple insert
+                            try:
+                                sb.table('user_tokens').insert(token_data).execute()
+                                print(f"✅ Inserted OAuth token for {username} in Supabase")
+                            except Exception as insert_err:
+                                print(f"Failed to insert token: {insert_err}")
+                                # Fall back to in-memory only
+                                raise
+                    
+                    # Also store in memory for current request
+                    user_tokens[username] = {
+                        'access_token': access_token,
+                        'refresh_token': refresh_token,
+                        'expires_in': token_info.get('expires_in', 3600),
+                        'created_at': time.time(),
+                        'username': username,
+                        'display_name': display_name,
+                        'scopes': token_info.get('scope', [])
+                    }
+                    # Save the new token to cache as fallback
+                    save_oauth_data(oauth_states, user_tokens)
+                    
+                except Exception as e:
+                    print(f"Failed to store OAuth token in Supabase: {e}")
+                    # Fallback to in-memory storage only
+                    user_tokens[username] = {
+                        'access_token': access_token,
+                        'refresh_token': refresh_token,
+                        'expires_in': token_info.get('expires_in', 3600),
+                        'created_at': time.time(),
+                        'username': username,
+                        'display_name': display_name,
+                        'scopes': token_info.get('scope', [])
+                    }
+                    save_oauth_data(oauth_states, user_tokens)
                 
                 # Success page
                 return f"""
@@ -392,9 +437,31 @@ def oauth_status():
 
 def get_user_access_token(username):
     """Get user access token for a specific username"""
+    # First check in-memory cache
     if username in user_tokens:
         token_info = user_tokens[username]
         # Check if token is still valid
         if time.time() - token_info['created_at'] < token_info['expires_in']:
             return token_info['access_token']
+    
+    # If not in memory, check Supabase
+    try:
+        from routes.supabase_client import get_supabase
+        sb = get_supabase()
+        if sb is not None:
+            result = sb.table('user_tokens').select('*').eq('username', username).limit(1).execute()
+            if result.data:
+                token_info = result.data[0]
+                # Check if token is still valid
+                if time.time() - token_info['created_at'] < token_info['expires_in']:
+                    # Cache in memory for future use in this request
+                    user_tokens[username] = token_info
+                    return token_info['access_token']
+                else:
+                    print(f"Token for {username} has expired")
+                    # Clean up expired token
+                    sb.table('user_tokens').delete().eq('username', username).execute()
+    except Exception as e:
+        print(f"Error loading token from Supabase for {username}: {e}")
+    
     return None
