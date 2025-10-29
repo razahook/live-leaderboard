@@ -1798,10 +1798,16 @@
         };
 
         const showStreamPreview = (twitchUser) => {
-            streamPreviewPlayer.innerHTML = ''; 
+            streamPreviewPlayer.innerHTML = '';
+            const parentDomains = [
+                window.location.hostname,
+                "localhost",
+                "127.0.0.1",
+                "live-leaderboard-plum.vercel.app"
+            ];
             new Twitch.Embed(streamPreviewPlayer, {
                 width: "100%", height: "100%", channel: twitchUser,
-                layout: "video", muted: false, autoplay: true, parent: [window.location.hostname],
+                layout: "video", muted: false, autoplay: true, parent: parentDomains,
                 volume: 0.5
             });
             
@@ -4320,8 +4326,17 @@ ${(() => {
                 // Debug: Log the hostname being used
                 console.log('Twitch embed parent hostname:', window.location.hostname);
                 console.log('Full location:', window.location.href);
-                
-                // Create the Twitch embed
+
+                // Create the Twitch embed with all valid parent domains
+                const parentDomains = [
+                    window.location.hostname,
+                    "localhost",
+                    "127.0.0.1",
+                    "live-leaderboard-plum.vercel.app"
+                ];
+
+                console.log(`Creating embed for ${canonicalTwitchUsername} with parent domains:`, parentDomains);
+
                 const embed = new Twitch.Embed(`stream-${index}`, {
                     width: "100%",
                     height: "100%",
@@ -4329,7 +4344,7 @@ ${(() => {
                     layout: "video",
                     muted: true, // Mute to avoid audio conflicts
                     autoplay: true,
-                    parent: [window.location.hostname]
+                    parent: parentDomains
                 });
                 
                 // Remove loading indicator immediately when embed is created
@@ -4342,6 +4357,7 @@ ${(() => {
                 // Also remove loading on embed ready event if available
                 if (embed && embed.addEventListener) {
                     embed.addEventListener('ready', () => {
+                        console.log(`✅ Embed ready for ${canonicalTwitchUsername}`);
                         if (loadingElement) {
                             loadingElement.style.opacity = '0';
                             setTimeout(() => {
@@ -4352,14 +4368,32 @@ ${(() => {
                         }
                         // Ensure internal iframe fills container
                         const iframe = document.querySelector(`#stream-${index} iframe`);
-                        if (iframe) { 
+                        if (iframe) {
                             iframe.style.position = 'absolute';
                             iframe.style.inset = '0';
-                            iframe.style.width = '100%'; 
+                            iframe.style.width = '100%';
                             iframe.style.height = '100%';
                         }
                     });
+
+                    // Add error event listener
+                    embed.addEventListener('error', (event) => {
+                        console.error(`❌ Embed error for ${canonicalTwitchUsername}:`, event);
+                        if (loadingElement) {
+                            loadingElement.innerHTML = `
+                                <div class="text-center p-4">
+                                    <div class="text-red-400 mb-2 font-semibold">Stream failed to load</div>
+                                    <div class="text-gray-400 mb-3 text-sm">Check console for details</div>
+                                    <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors">
+                                        Watch on Twitch
+                                    </a>
+                                </div>
+                            `;
+                        }
+                    });
                 }
+
+                console.log(`✅ Embed created successfully for ${canonicalTwitchUsername}`);
                 
             } catch (error) {
                 console.error(`Failed to load stream for ${streamer}:`, error);
