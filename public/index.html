@@ -480,13 +480,7 @@
                             <span>My Account</span>
                         </button>
                         
-                        <!-- Multi-Stream -->
-                        <button class="nav-item" onclick="window.location.href='/stream'">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                            </svg>
-                            <span>Multi-Stream</span>
-                        </button>
+                        <!-- Multi-Stream - REMOVED -->
                         
                         <!-- Settings -->
                         <button class="nav-item" onclick="showSettingsModal()">
@@ -572,7 +566,6 @@
                                 <input type="checkbox" name="toggle" id="liveOnlyToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-600 appearance-none cursor-pointer transition-transform duration-200 ease-in"/>
                                 <label for="liveOnlyToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
                             </div>
-                            <button onclick="window.location.href='/stream'" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm">Multi-Stream</button>
             <button onclick="showSettingsModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm ml-2">
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -749,12 +742,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                                 </svg>
                                 App Settings
-                            </button>
-                            <button onclick="window.location.href='/stream'" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm">
-                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                </svg>
-                                Multi-Stream
                             </button>
                         </div>
                     </div>
@@ -2571,22 +2558,7 @@
                     window.__edgeFlags = flags;
 
                     // Apply feature flags to UI (e.g., show/hide Multi-Stream entry points)
-                    (function applyFeatureFlags() {
-                        try {
-                            const enabled = !!(flags.feature_flags && flags.feature_flags.multistreamDock);
-                            const msOpeners = document.querySelectorAll('[onclick*="showMultiStreamModal"]');
-                                msOpeners.forEach(el => {
-                                    el.style.display = enabled ? '' : 'none';
-                                    // Force redirect to dedicated page if enabled
-                                    el.addEventListener('click', (e) => {
-                                        e.preventDefault();
-                                        window.location.href = '/stream';
-                                    }, { capture: true });
-                                });
-                        } catch (e) {
-                            console.warn('applyFeatureFlags failed', e);
-                        }
-                    })();
+                    // REMOVED - /stream page disabled
 
                     // Dev flags panel (enable with ?dev=1)
                     (function addDevFlagsPanel(){
