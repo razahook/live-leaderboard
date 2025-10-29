@@ -4308,11 +4308,11 @@ ${(() => {
                     throw new Error('Twitch embed not loaded');
                 }
 
-                // CRITICAL FIX: Remove loading overlay FIRST - it obscures the embed
-                // Twitch requires embed not be obscured by ANY element
+                // Keep loading overlay but make sure it doesn't block the embed
+                // Lower z-index so embed is on top but loading can show through
                 if (loadingElement) {
-                    loadingElement.remove();
-                    console.log('✅ Loading overlay removed before embed creation');
+                    loadingElement.style.zIndex = '5'; // Lower than default to not block embed
+                    loadingElement.style.pointerEvents = 'none'; // Allow clicks through
                 }
 
                 // CRITICAL: Ensure container is visible and has dimensions BEFORE creating embed
@@ -4328,6 +4328,7 @@ ${(() => {
                 embedContainer.style.height = '100%';
                 embedContainer.style.minHeight = '300px';  // Twitch minimum
                 embedContainer.style.minWidth = '400px';   // Twitch minimum
+                embedContainer.style.zIndex = '10'; // Ensure embed is on top
 
                 // Debug: Log the hostname being used
                 console.log('Twitch embed parent hostname:', window.location.hostname);
@@ -4347,6 +4348,9 @@ ${(() => {
 
                 console.log(`Creating embed for ${canonicalTwitchUsername} with parent domains:`, parentDomains);
 
+                let embedLoadTimeout;
+                let embedLoaded = false;
+
                 const embed = new Twitch.Embed(`stream-${index}`, {
                     width: "100%",
                     height: "100%",
@@ -4357,10 +4361,38 @@ ${(() => {
                     parent: parentDomains
                 });
 
-                // Handle embed ready event (loading overlay already removed)
+                // Set a timeout to detect if embed never loads (content classification errors)
+                embedLoadTimeout = setTimeout(() => {
+                    if (!embedLoaded && loadingElement) {
+                        console.warn(`⚠️ Embed timeout for ${canonicalTwitchUsername} - may be offline or restricted`);
+                        loadingElement.style.pointerEvents = 'auto';
+                        loadingElement.style.zIndex = '20';
+                        loadingElement.innerHTML = `
+                            <div class="text-center p-4">
+                                <div class="text-yellow-400 mb-2 font-semibold">⚠️ Stream Unavailable</div>
+                                <div class="text-gray-400 mb-3 text-sm">
+                                    This stream may be offline, restricted, or experiencing issues.
+                                </div>
+                                <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank"
+                                   class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors">
+                                    Watch on Twitch →
+                                </a>
+                            </div>
+                        `;
+                    }
+                }, 8000); // 8 second timeout
+
+                // Handle embed ready event
                 if (embed && embed.addEventListener) {
                     embed.addEventListener('ready', () => {
+                        embedLoaded = true;
+                        clearTimeout(embedLoadTimeout);
                         console.log(`✅ Embed ready for ${canonicalTwitchUsername}`);
+
+                        // Hide loading overlay on success
+                        if (loadingElement) {
+                            loadingElement.style.display = 'none';
+                        }
 
                         // Ensure internal iframe fills container
                         const iframe = document.querySelector(`#stream-${index} iframe`);
@@ -4369,20 +4401,28 @@ ${(() => {
                             iframe.style.inset = '0';
                             iframe.style.width = '100%';
                             iframe.style.height = '100%';
+                            iframe.style.zIndex = '10';
                             console.log('✅ Iframe styled correctly');
                         }
                     });
 
-                    // Add error event listener
+                    // Add error event listener for explicit errors
                     embed.addEventListener('error', (event) => {
+                        embedLoaded = true;
+                        clearTimeout(embedLoadTimeout);
                         console.error(`❌ Embed error for ${canonicalTwitchUsername}:`, event);
                         if (loadingElement) {
+                            loadingElement.style.pointerEvents = 'auto';
+                            loadingElement.style.zIndex = '20';
                             loadingElement.innerHTML = `
                                 <div class="text-center p-4">
-                                    <div class="text-red-400 mb-2 font-semibold">Stream failed to load</div>
-                                    <div class="text-gray-400 mb-3 text-sm">Check console for details</div>
-                                    <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors">
-                                        Watch on Twitch
+                                    <div class="text-red-400 mb-2 font-semibold">❌ Stream Error</div>
+                                    <div class="text-gray-400 mb-3 text-sm">
+                                        Failed to load stream. Check if channel exists and is live.
+                                    </div>
+                                    <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank"
+                                       class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors">
+                                        Watch on Twitch →
                                     </a>
                                 </div>
                             `;
@@ -4391,16 +4431,19 @@ ${(() => {
                 }
 
                 console.log(`✅ Embed created successfully for ${canonicalTwitchUsername}`);
-                
+
             } catch (error) {
                 console.error(`Failed to load stream for ${streamer}:`, error);
                 if (loadingElement) {
+                    loadingElement.style.pointerEvents = 'auto';
+                    loadingElement.style.zIndex = '20';
                     loadingElement.innerHTML = `
                         <div class="text-center p-4">
-                            <div class="text-red-400 mb-2 font-semibold">Failed to load stream</div>
+                            <div class="text-red-400 mb-2 font-semibold">❌ Failed to Load</div>
                             <div class="text-gray-400 mb-3 text-sm">${error.message}</div>
-                            <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
-                                Watch on Twitch
+                            <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank"
+                               class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors">
+                                Watch on Twitch →
                             </a>
                         </div>
                     `;
