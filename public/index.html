@@ -2834,9 +2834,8 @@
             const streamer1 = document.getElementById('streamer1').value;
             const streamer2 = document.getElementById('streamer2').value;
             const streamer3 = document.getElementById('streamer3').value;
-            
+
             console.log('Selected streamers:', { streamer1, streamer2, streamer3 });
-            alert('Loading multistreams - check console for debug info');
             
             const streamers = [streamer1, streamer2, streamer3].filter(s => s);
             console.log('Filtered streamers:', streamers);
@@ -2930,13 +2929,13 @@
                         has_twitch_live_data: !!playerData.twitch_live,
                         is_live: playerData.twitch_live?.is_live
                     });
-                    
-                    // Show a clear alert about live status
+
+                    // Log live status
                     const liveStatus = playerData.twitch_live?.is_live ? 'LIVE' : 'NOT LIVE';
-                    alert(`Player ${index} (${displayName}) - Status: ${liveStatus}, Clips: ${playerData?.hasClips}`);
+                    console.log(`Player ${index} (${displayName}) - Status: ${liveStatus}, Clips: ${playerData?.hasClips}`);
                 } else {
                     console.log('No player data found for', canonicalTwitchUsername);
-                    alert(`Player ${index} (${displayName}) - NO PLAYER DATA FOUND`);
+                    console.warn(`Player ${index} (${displayName}) - NO PLAYER DATA FOUND`);
                 }
                 
                 const rank = playerData?.rank || Math.floor(Math.random() * 500) + 1;
@@ -3136,7 +3135,16 @@ ${(() => {
                 console.log('Twitch embed parent hostname:', window.location.hostname);
                 console.log('Full location:', window.location.href);
                 
-                // Create the Twitch embed
+                // Create the Twitch embed with all valid parent domains
+                const parentDomains = [
+                    window.location.hostname,
+                    "localhost",
+                    "127.0.0.1",
+                    "live-leaderboard-plum.vercel.app"
+                ];
+
+                console.log(`Creating embed for ${canonicalTwitchUsername} with parent domains:`, parentDomains);
+
                 const embed = new Twitch.Embed(`stream-${index}`, {
                     width: "100%",
                     height: "100%",
@@ -3144,7 +3152,7 @@ ${(() => {
                     layout: "video",
                     muted: true, // Mute to avoid audio conflicts
                     autoplay: true,
-                    parent: [window.location.hostname, "localhost", "127.0.0.1"]
+                    parent: parentDomains
                 });
                 
                 // Remove loading indicator immediately when embed is created
@@ -3157,6 +3165,7 @@ ${(() => {
                 // Also remove loading on embed ready event if available
                 if (embed && embed.addEventListener) {
                     embed.addEventListener('ready', () => {
+                        console.log(`✅ Embed ready for ${canonicalTwitchUsername}`);
                         if (loadingElement) {
                             loadingElement.style.opacity = '0';
                             setTimeout(() => {
@@ -3166,10 +3175,28 @@ ${(() => {
                             }, 300);
                         }
                     });
+
+                    // Add error event listener
+                    embed.addEventListener('error', (event) => {
+                        console.error(`❌ Embed error for ${canonicalTwitchUsername}:`, event);
+                        if (loadingElement) {
+                            loadingElement.innerHTML = `
+                                <div class="text-center p-4">
+                                    <div class="text-red-400 mb-2 font-semibold">Stream failed to load</div>
+                                    <div class="text-gray-400 mb-3 text-sm">Check console for details</div>
+                                    <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors">
+                                        Watch on Twitch
+                                    </a>
+                                </div>
+                            `;
+                        }
+                    });
                 }
-                
+
+                console.log(`✅ Embed created successfully for ${canonicalTwitchUsername}`);
+
             } catch (error) {
-                console.error(`Failed to load stream for ${streamer}:`, error);
+                console.error(`❌ Failed to load stream for ${streamer}:`, error);
                 if (loadingElement) {
                     loadingElement.innerHTML = `
                         <div class="text-center p-4">
