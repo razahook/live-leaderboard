@@ -146,7 +146,8 @@
                 </select>
             </div>
 
-            <button onclick="loadStreams()">Load Streams</button>
+            <button onclick="loadStreams()">Load Streams (with autoplay + scroll)</button>
+            <button onclick="loadStreamsNoAutoplay()">Load Streams (no autoplay - click to play)</button>
         </div>
 
         <div class="streams-grid" id="streamsGrid"></div>
@@ -246,9 +247,57 @@
 
             log(`🔗 Parent domains: ${parents.join(', ')}`);
 
-            // Create iframe with Twitch Player
+            // Scroll player into viewport BEFORE creating iframe
+            // This is REQUIRED for autoplay to work per Twitch docs
+            player.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            log(`📜 Scrolled player into viewport`);
+
+            // Wait a moment for scroll to complete
+            setTimeout(() => {
+                // Create iframe with Twitch Player
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&${parentParams}&muted=true&autoplay=true`;
+                iframe.allowFullscreen = true;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+
+                log(`✅ Creating iframe for ${channel} (after viewport scroll)`);
+
+                iframe.onload = () => {
+                    log(`✅ Iframe loaded for ${channel}`);
+                };
+
+                iframe.onerror = (err) => {
+                    log(`❌ Iframe error for ${channel}: ${err}`);
+                };
+
+                player.appendChild(iframe);
+                log(`✅ Iframe appended to DOM for ${channel}`);
+            }, 500); // Wait 500ms for scroll to complete
+        }
+
+        // Alternative version without autoplay (more reliable)
+        function loadStreamNoAutoplay(index, channel) {
+            log(`🎬 Loading stream (no autoplay): ${channel} (index ${index})`);
+
+            const player = document.getElementById(`player-${index}`);
+
+            if (!player) {
+                log(`❌ Player element not found for index ${index}`);
+                return;
+            }
+
+            // Build parent domains
+            const parents = getParentDomains();
+            const parentParams = parents.map(p => `parent=${encodeURIComponent(p)}`).join('&');
+
+            log(`🔗 Parent domains: ${parents.join(', ')}`);
+
+            // Create iframe with Twitch Player - NO AUTOPLAY
             const iframe = document.createElement('iframe');
-            iframe.src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&${parentParams}&muted=true&autoplay=true`;
+            iframe.src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&${parentParams}&muted=true&autoplay=false`;
             iframe.allowFullscreen = true;
             iframe.style.width = '100%';
             iframe.style.height = '100%';
@@ -266,6 +315,49 @@
 
             player.appendChild(iframe);
             log(`✅ Iframe appended to DOM for ${channel}`);
+        }
+
+        function loadStreamsNoAutoplay() {
+            log('=== LOADING STREAMS (NO AUTOPLAY) ===');
+
+            const stream1 = document.getElementById('stream1').value;
+            const stream2 = document.getElementById('stream2').value;
+            const streamers = [stream1, stream2].filter(s => s);
+
+            if (streamers.length === 0) {
+                log('❌ No streamers selected');
+                return;
+            }
+
+            log(`✅ Selected: ${streamers.join(', ')}`);
+
+            const grid = document.getElementById('streamsGrid');
+            grid.innerHTML = '';
+
+            streamers.forEach((channel, index) => {
+                const container = document.createElement('div');
+                container.className = 'stream-container';
+                container.id = `stream-container-${index}`;
+
+                const header = document.createElement('div');
+                header.className = 'stream-header';
+                header.innerHTML = `<h3>${channel} (click play to start)</h3>`;
+
+                const player = document.createElement('div');
+                player.className = 'stream-player';
+                player.id = `player-${index}`;
+
+                container.appendChild(header);
+                container.appendChild(player);
+                grid.appendChild(container);
+
+                log(`📦 Container created for ${channel}`);
+
+                // Small delay to ensure container is in DOM
+                setTimeout(() => {
+                    loadStreamNoAutoplay(index, channel);
+                }, 100 * (index + 1));
+            });
         }
 
         log('✅ Page loaded and ready');
