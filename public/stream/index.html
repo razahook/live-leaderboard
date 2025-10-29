@@ -1616,44 +1616,43 @@
       getParentDomains() {
         const domains = [];
         const host = location.hostname;
-        
+
         console.debug('CSP Debug - Current hostname:', host);
-        
-        // Add the actual current domain
+
+        // ALWAYS include the current domain first
         domains.push(host);
-        
-        // Handle various Vercel deployment patterns
+
+        // ALWAYS include these standard domains regardless of where we're running
+        domains.push('localhost');
+        domains.push('127.0.0.1');
+        domains.push('live-leaderboard-plum.vercel.app');
+        domains.push('live-leaderboard-razahooks-projects.vercel.app');
+
+        // If on Vercel, handle additional deployment patterns
         if (host.includes('vercel.app')) {
-          // Handle production domain
-          domains.push('live-leaderboard-plum.vercel.app');
-          
-          // Handle project-specific domain
-          domains.push('live-leaderboard-razahooks-projects.vercel.app');
-          
-          // Handle git-based preview deployments
+          // Handle git-based preview deployments (e.g., live-leaderboard-git-performance-fixes.vercel.app)
           if (host.includes('git-')) {
             const gitMatch = host.match(/live-leaderboard-git-[^.]+\.vercel\.app/);
             if (gitMatch) {
               domains.push(gitMatch[0]);
             }
           }
-          
-          // Handle PR preview deployments
+
+          // Handle PR preview deployments with random hash (e.g., live-leaderboard-ehm36922w-razahooks-projects.vercel.app)
           const prMatch = host.match(/live-leaderboard-[a-z0-9]+-razahooks-projects\.vercel\.app/);
           if (prMatch) {
             domains.push(prMatch[0]);
           }
+
+          // Handle any other vercel.app subdomain pattern
+          if (host.includes('-razahooks-projects.vercel.app') && !prMatch) {
+            domains.push(host);
+          }
         }
-        
-        // Handle localhost development
-        if (host === 'localhost' || host === '127.0.0.1') {
-          domains.push('localhost');
-          domains.push('127.0.0.1');
-        }
-        
-        // Remove duplicates
-        const uniqueDomains = [...new Set(domains)];
-        
+
+        // Remove duplicates and filter out empty strings
+        const uniqueDomains = [...new Set(domains)].filter(d => d);
+
         console.debug('CSP Debug - Resolved parent domains:', uniqueDomains);
         return uniqueDomains;
       }
