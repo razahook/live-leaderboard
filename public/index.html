@@ -4115,14 +4115,15 @@ ${(() => {
                     
                     <!-- Stream Tab Content -->
                     <div id="stream-content-${index}" class="stream-tab-content w-full bg-gray-900 relative" style="aspect-ratio: 16 / 9; overflow: hidden; min-height: 300px;">
-                        <div id="loading-${index}" class="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900/80 z-10">
+                        <!-- Twitch embed container - MUST be first and unobscured for autoplay -->
+                        <div id="stream-${index}" class="absolute inset-0 w-full h-full" style="z-index: 10;"></div>
+                        <!-- Loading overlay - rendered behind embed to not block Twitch visibility detection -->
+                        <div id="loading-${index}" class="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900/80" style="z-index: 5; pointer-events: none;">
                             <div class="text-center">
                                 <div class="text-gray-300 mb-2 text-sm">Loading ${displayName}...</div>
                                 <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500 mx-auto"></div>
                             </div>
                         </div>
-                        <!-- Twitch embed container -->
-                        <div id="stream-${index}" class="absolute inset-0 w-full h-full"></div>
                     </div>
                     
                     <!-- Clips Tab Content -->
@@ -4308,33 +4309,22 @@ ${(() => {
                     throw new Error('Twitch embed not loaded');
                 }
 
-                // Keep loading overlay but make sure it doesn't block the embed
-                // Lower z-index so embed is on top but loading can show through
-                if (loadingElement) {
-                    loadingElement.style.zIndex = '5'; // Lower than default to not block embed
-                    loadingElement.style.pointerEvents = 'none'; // Allow clicks through
-                }
-
                 // CRITICAL: Ensure container is visible and has dimensions BEFORE creating embed
-                // Twitch requires: min 400x300, fully visible, not obscured
+                // Twitch requires: min 400x300, fully visible, not obscured by ANY element
                 streamElement.style.display = 'block';
                 streamElement.style.visibility = 'visible';
                 streamElement.style.opacity = '1';
                 embedContainer.style.display = 'block';
                 embedContainer.style.visibility = 'visible';
-                embedContainer.style.position = 'absolute';
-                embedContainer.style.inset = '0';
-                embedContainer.style.width = '100%';
-                embedContainer.style.height = '100%';
                 embedContainer.style.minHeight = '300px';  // Twitch minimum
                 embedContainer.style.minWidth = '400px';   // Twitch minimum
-                embedContainer.style.zIndex = '10'; // Ensure embed is on top
 
                 // Debug: Log the hostname being used
                 console.log('Twitch embed parent hostname:', window.location.hostname);
                 console.log('Full location:', window.location.href);
                 console.log('Container dimensions:', embedContainer.offsetWidth, 'x', embedContainer.offsetHeight);
-                console.log('Container computed style:', window.getComputedStyle(embedContainer).visibility);
+                console.log('Container computed style visibility:', window.getComputedStyle(embedContainer).visibility);
+                console.log('Container computed style z-index:', window.getComputedStyle(embedContainer).zIndex);
 
                 // Create the Twitch embed with all valid parent domains
                 const parentDomains = [
@@ -4368,7 +4358,7 @@ ${(() => {
                         loadingElement.style.pointerEvents = 'auto';
                         loadingElement.style.zIndex = '20';
                         loadingElement.innerHTML = `
-                            <div class="text-center p-4">
+                            <div class="text-center p-4 bg-gray-900">
                                 <div class="text-yellow-400 mb-2 font-semibold">⚠️ Stream Unavailable</div>
                                 <div class="text-gray-400 mb-3 text-sm">
                                     This stream may be offline, restricted, or experiencing issues.
@@ -4401,7 +4391,6 @@ ${(() => {
                             iframe.style.inset = '0';
                             iframe.style.width = '100%';
                             iframe.style.height = '100%';
-                            iframe.style.zIndex = '10';
                             console.log('✅ Iframe styled correctly');
                         }
                     });
@@ -4415,7 +4404,7 @@ ${(() => {
                             loadingElement.style.pointerEvents = 'auto';
                             loadingElement.style.zIndex = '20';
                             loadingElement.innerHTML = `
-                                <div class="text-center p-4">
+                                <div class="text-center p-4 bg-gray-900">
                                     <div class="text-red-400 mb-2 font-semibold">❌ Stream Error</div>
                                     <div class="text-gray-400 mb-3 text-sm">
                                         Failed to load stream. Check if channel exists and is live.
@@ -4438,7 +4427,7 @@ ${(() => {
                     loadingElement.style.pointerEvents = 'auto';
                     loadingElement.style.zIndex = '20';
                     loadingElement.innerHTML = `
-                        <div class="text-center p-4">
+                        <div class="text-center p-4 bg-gray-900">
                             <div class="text-red-400 mb-2 font-semibold">❌ Failed to Load</div>
                             <div class="text-gray-400 mb-3 text-sm">${error.message}</div>
                             <a href="https://twitch.tv/${canonicalTwitchUsername}" target="_blank"
