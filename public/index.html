@@ -4328,20 +4328,32 @@ ${(() => {
                     throw new Error('Twitch embed not loaded');
                 }
 
+                // CRITICAL FIX: Remove loading overlay FIRST - it obscures the embed
+                // Twitch requires embed not be obscured by ANY element
+                if (loadingElement) {
+                    loadingElement.remove();
+                    console.log('✅ Loading overlay removed before embed creation');
+                }
+
                 // CRITICAL: Ensure container is visible and has dimensions BEFORE creating embed
-                // This fixes Twitch's "autoplay disabled - style visibility" error
+                // Twitch requires: min 400x300, fully visible, not obscured
                 streamElement.style.display = 'block';
                 streamElement.style.visibility = 'visible';
                 streamElement.style.opacity = '1';
                 embedContainer.style.display = 'block';
                 embedContainer.style.visibility = 'visible';
-                embedContainer.style.minHeight = '400px';
-                embedContainer.style.minWidth = '600px';
+                embedContainer.style.position = 'absolute';
+                embedContainer.style.inset = '0';
+                embedContainer.style.width = '100%';
+                embedContainer.style.height = '100%';
+                embedContainer.style.minHeight = '300px';  // Twitch minimum
+                embedContainer.style.minWidth = '400px';   // Twitch minimum
 
                 // Debug: Log the hostname being used
                 console.log('Twitch embed parent hostname:', window.location.hostname);
                 console.log('Full location:', window.location.href);
                 console.log('Container dimensions:', embedContainer.offsetWidth, 'x', embedContainer.offsetHeight);
+                console.log('Container computed style:', window.getComputedStyle(embedContainer).visibility);
 
                 // Create the Twitch embed with all valid parent domains
                 const parentDomains = [
@@ -4360,30 +4372,16 @@ ${(() => {
                     height: "100%",
                     channel: canonicalTwitchUsername,
                     layout: "video",
-                    muted: true, // Mute to avoid audio conflicts
+                    muted: true,
                     autoplay: true,
                     parent: parentDomains
                 });
-                
-                // Remove loading indicator immediately when embed is created
-                setTimeout(() => {
-                    if (loadingElement) {
-                        loadingElement.remove();
-                    }
-                }, 500); // Very fast removal
-                
-                // Also remove loading on embed ready event if available
+
+                // Handle embed ready event (loading overlay already removed)
                 if (embed && embed.addEventListener) {
                     embed.addEventListener('ready', () => {
                         console.log(`✅ Embed ready for ${canonicalTwitchUsername}`);
-                        if (loadingElement) {
-                            loadingElement.style.opacity = '0';
-                            setTimeout(() => {
-                                if (loadingElement && loadingElement.parentNode) {
-                                    loadingElement.remove();
-                                }
-                            }, 300);
-                        }
+
                         // Ensure internal iframe fills container
                         const iframe = document.querySelector(`#stream-${index} iframe`);
                         if (iframe) {
@@ -4391,6 +4389,7 @@ ${(() => {
                             iframe.style.inset = '0';
                             iframe.style.width = '100%';
                             iframe.style.height = '100%';
+                            console.log('✅ Iframe styled correctly');
                         }
                     });
 

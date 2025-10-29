@@ -1526,31 +1526,37 @@
       async loadStream(index, channel) {
         console.log(`📺 Loading ${channel} to position ${index}`);
         console.debug('CSP Debug - Starting loadStream for:', { index, channel });
-        
+
         const tile = document.getElementById(`stream-tile-${index}`);
         const player = document.getElementById(`player-${index}`);
         const header = tile.querySelector('h3');
         const status = tile.querySelector('.stream-status');
 
-        this.showLoading(index);
+        // CRITICAL FIX: Don't show loading overlay - it obscures the embed
+        // Twitch requires embed not be obscured by ANY element
+        // this.showLoading(index);  // REMOVED - causes visibility error
         tile.classList.add('loading');
 
         try {
           this.clearStream(index);
 
           // CRITICAL: Ensure tile and player are visible BEFORE creating iframe
-          // This fixes Twitch's "autoplay disabled - style visibility" error
+          // Twitch requires: min 400x300, fully visible, not obscured
           tile.style.display = 'block';
           tile.style.visibility = 'visible';
           player.style.display = 'block';
           player.style.visibility = 'visible';
-          player.style.minHeight = '400px';
-          player.style.minWidth = '600px';
+          player.style.position = 'relative';
+          player.style.width = '100%';
+          player.style.height = '100%';
+          player.style.minHeight = '300px';  // Twitch minimum
+          player.style.minWidth = '400px';   // Twitch minimum
 
           // Get all possible parent domains for CSP
           const parentDomains = this.getParentDomains();
           console.debug('CSP Debug - Parent domains:', parentDomains);
           console.debug('CSP Debug - Player dimensions:', player.offsetWidth, 'x', player.offsetHeight);
+          console.debug('CSP Debug - Player computed visibility:', window.getComputedStyle(player).visibility);
 
           // Build the parent parameter string with multiple domains
           const parentParams = parentDomains.map(domain => `&parent=${encodeURIComponent(domain)}`).join('');
@@ -1566,6 +1572,8 @@
           iframe.setAttribute('allowfullscreen', 'true');
           iframe.style.display = 'block';
           iframe.style.visibility = 'visible';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
 
           iframe.onload = () => {
             console.log(`✅ Stream loaded: ${channel}`);
