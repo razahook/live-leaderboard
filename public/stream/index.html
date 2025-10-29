@@ -1538,22 +1538,34 @@
         try {
           this.clearStream(index);
 
+          // CRITICAL: Ensure tile and player are visible BEFORE creating iframe
+          // This fixes Twitch's "autoplay disabled - style visibility" error
+          tile.style.display = 'block';
+          tile.style.visibility = 'visible';
+          player.style.display = 'block';
+          player.style.visibility = 'visible';
+          player.style.minHeight = '400px';
+          player.style.minWidth = '600px';
+
           // Get all possible parent domains for CSP
           const parentDomains = this.getParentDomains();
           console.debug('CSP Debug - Parent domains:', parentDomains);
-          
+          console.debug('CSP Debug - Player dimensions:', player.offsetWidth, 'x', player.offsetHeight);
+
           // Build the parent parameter string with multiple domains
           const parentParams = parentDomains.map(domain => `&parent=${encodeURIComponent(domain)}`).join('');
-          
+
           const iframe = document.createElement('iframe');
           const embedUrl = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}${parentParams}&muted=true&autoplay=true`;
-          
+
           console.debug('CSP Debug - Embed URL:', embedUrl);
           iframe.src = embedUrl;
           iframe.allowfullscreen = true;
           iframe.setAttribute('frameborder', '0');
           iframe.setAttribute('scrolling', 'no');
           iframe.setAttribute('allowfullscreen', 'true');
+          iframe.style.display = 'block';
+          iframe.style.visibility = 'visible';
 
           iframe.onload = () => {
             console.log(`✅ Stream loaded: ${channel}`);

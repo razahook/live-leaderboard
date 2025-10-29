@@ -4183,12 +4183,12 @@ ${(() => {
                 localStorage.setItem(MS_STORAGE_KEY, JSON.stringify(payload));
             } catch {}
 
-            // Load all streams with delays to avoid conflicts and set initial basis once
+            // Load all streams with delays to avoid conflicts and meet Twitch visibility requirements
             streamers.forEach((streamer, index) => {
                 setTimeout(() => {
                     console.log(`Loading stream ${index + 1}: ${streamer} (Twitch username)`);
                     loadStreamEmbed(index, streamer);
-                }, index * 500); // Reduced delay to 500ms
+                }, index * 1500); // Increased delay to 1.5s to avoid rate limits and ensure visibility
             });
 
             // No Split.js when drag is disabled
@@ -4308,26 +4308,40 @@ ${(() => {
         const loadStreamEmbed = (index, streamer) => {
             const streamElement = document.getElementById(`stream-content-${index}`);
             const loadingElement = document.getElementById(`loading-${index}`);
-            if (!streamElement) {
+            const embedContainer = document.getElementById(`stream-${index}`);
+
+            if (!streamElement || !embedContainer) {
                 console.error(`Stream element not found for index ${index}`);
                 return;
             }
+
             const dropdown = document.querySelector(`option[value="${streamer}"]`);
             const displayName = dropdown ? dropdown.dataset.playerName || streamer : streamer;
             const canonicalTwitchUsername = getCanonicalTwitchUsername(streamer, displayName);
-            
+
             console.log(`Attempting to load stream for ${canonicalTwitchUsername} in element stream-${index}`);
             console.log(`Current hostname: ${window.location.hostname}`);
-            
+
             try {
                 // Check if Twitch embed is available
                 if (typeof Twitch === 'undefined' || !Twitch.Embed) {
                     throw new Error('Twitch embed not loaded');
                 }
-                
+
+                // CRITICAL: Ensure container is visible and has dimensions BEFORE creating embed
+                // This fixes Twitch's "autoplay disabled - style visibility" error
+                streamElement.style.display = 'block';
+                streamElement.style.visibility = 'visible';
+                streamElement.style.opacity = '1';
+                embedContainer.style.display = 'block';
+                embedContainer.style.visibility = 'visible';
+                embedContainer.style.minHeight = '400px';
+                embedContainer.style.minWidth = '600px';
+
                 // Debug: Log the hostname being used
                 console.log('Twitch embed parent hostname:', window.location.hostname);
                 console.log('Full location:', window.location.href);
+                console.log('Container dimensions:', embedContainer.offsetWidth, 'x', embedContainer.offsetHeight);
 
                 // Create the Twitch embed with all valid parent domains
                 const parentDomains = [
@@ -5041,10 +5055,18 @@ ${(() => {
             }
         };
 
-        // 1. Automatically load streams on dropdown change
+        // 1. Automatically load streams on dropdown change (with debouncing to avoid rate limits)
+        let multistreamLoadTimeout = null;
         ['streamer1', 'streamer2', 'streamer3'].forEach(id => {
             document.getElementById(id).addEventListener('change', () => {
-                loadMultiStreams();
+                // Clear previous timeout to debounce rapid changes
+                if (multistreamLoadTimeout) {
+                    clearTimeout(multistreamLoadTimeout);
+                }
+                // Wait 500ms after last change before loading streams
+                multistreamLoadTimeout = setTimeout(() => {
+                    loadMultiStreams();
+                }, 500);
             });
         });
         // (pseudo-code, actual code must be inserted in the streamDiv.innerHTML template)
