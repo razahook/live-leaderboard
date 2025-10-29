@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multistream Test - Clean Implementation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #0e0e10;
+            color: white;
+            padding: 20px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        h1 { margin-bottom: 20px; }
+
+        .controls {
+            background: #18181b;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        select, button {
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #3a3a3d;
+            background: #0e0e10;
+            color: white;
+        }
+
+        select {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        button {
+            background: #9147ff;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+
+        button:hover { background: #7c3aed; }
+
+        .streams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+        }
+
+        .stream-container {
+            background: #18181b;
+            border-radius: 8px;
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        .stream-header {
+            padding: 15px;
+            background: #1f1f23;
+            border-bottom: 2px solid #9147ff;
+        }
+
+        .stream-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .stream-player {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            position: relative;
+        }
+
+        .stream-player iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .empty-state {
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .debug-info {
+            background: #18181b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .debug-info pre {
+            color: #aaa;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Clean Multistream Implementation Test</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="stream1">Stream 1:</label>
+                <select id="stream1">
+                    <option value="">Select streamer...</option>
+                    <option value="shroud">Shroud</option>
+                    <option value="summit1g">Summit1g</option>
+                    <option value="timthetatman">TimTheTatman</option>
+                    <option value="pokimane">Pokimane</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="stream2">Stream 2:</label>
+                <select id="stream2">
+                    <option value="">Select streamer...</option>
+                    <option value="shroud">Shroud</option>
+                    <option value="summit1g">Summit1g</option>
+                    <option value="timthetatman">TimTheTatman</option>
+                    <option value="pokimane">Pokimane</option>
+                </select>
+            </div>
+
+            <button onclick="loadStreams()">Load Streams</button>
+        </div>
+
+        <div class="streams-grid" id="streamsGrid"></div>
+
+        <div class="debug-info">
+            <h3 style="margin-bottom: 10px;">Debug Console:</h3>
+            <pre id="debugLog"></pre>
+        </div>
+    </div>
+
+    <script>
+        const debugLog = document.getElementById('debugLog');
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+
+        function getParentDomains() {
+            return [
+                window.location.hostname,
+                'localhost',
+                '127.0.0.1',
+                'live-leaderboard-plum.vercel.app',
+                'live-leaderboard-razahooks-projects.vercel.app',
+                'live-leaderboard-git-claude-multistre-be9fb8-razahooks-projects.vercel.app',
+                'live-leaderboard-l8kpe4bjo-razahooks-projects.vercel.app'
+            ];
+        }
+
+        function loadStreams() {
+            log('=== LOADING STREAMS ===');
+
+            const stream1 = document.getElementById('stream1').value;
+            const stream2 = document.getElementById('stream2').value;
+            const streamers = [stream1, stream2].filter(s => s);
+
+            if (streamers.length === 0) {
+                log('❌ No streamers selected');
+                return;
+            }
+
+            log(`✅ Selected: ${streamers.join(', ')}`);
+
+            const grid = document.getElementById('streamsGrid');
+            grid.innerHTML = '';
+
+            streamers.forEach((channel, index) => {
+                const container = document.createElement('div');
+                container.className = 'stream-container';
+                container.id = `stream-container-${index}`;
+
+                const header = document.createElement('div');
+                header.className = 'stream-header';
+                header.innerHTML = `<h3>${channel}</h3>`;
+
+                const player = document.createElement('div');
+                player.className = 'stream-player';
+                player.id = `player-${index}`;
+
+                container.appendChild(header);
+                container.appendChild(player);
+                grid.appendChild(container);
+
+                log(`📦 Container created for ${channel}`);
+
+                // Small delay to ensure container is in DOM and visible
+                setTimeout(() => {
+                    loadStream(index, channel);
+                }, 100 * (index + 1));
+            });
+        }
+
+        function loadStream(index, channel) {
+            log(`🎬 Loading stream: ${channel} (index ${index})`);
+
+            const player = document.getElementById(`player-${index}`);
+
+            if (!player) {
+                log(`❌ Player element not found for index ${index}`);
+                return;
+            }
+
+            // Check visibility
+            const rect = player.getBoundingClientRect();
+            const isVisible = rect.width > 0 && rect.height > 0;
+            log(`📏 Player dimensions: ${rect.width}x${rect.height} (visible: ${isVisible})`);
+
+            if (!isVisible) {
+                log(`❌ Player not visible! This will cause Twitch error.`);
+            }
+
+            // Build parent domains
+            const parents = getParentDomains();
+            const parentParams = parents.map(p => `parent=${encodeURIComponent(p)}`).join('&');
+
+            log(`🔗 Parent domains: ${parents.join(', ')}`);
+
+            // Create iframe with Twitch Player
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&${parentParams}&muted=true&autoplay=true`;
+            iframe.allowFullscreen = true;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+
+            log(`✅ Creating iframe for ${channel}`);
+
+            iframe.onload = () => {
+                log(`✅ Iframe loaded for ${channel}`);
+            };
+
+            iframe.onerror = (err) => {
+                log(`❌ Iframe error for ${channel}: ${err}`);
+            };
+
+            player.appendChild(iframe);
+            log(`✅ Iframe appended to DOM for ${channel}`);
+        }
+
+        log('✅ Page loaded and ready');
+        log(`Current domain: ${window.location.hostname}`);
+    </script>
+</body>
+</html>
